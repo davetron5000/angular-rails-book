@@ -12,6 +12,10 @@ We'll build the application in four steps:
 3. Walk briskly through a test-driven implementation of viewing a recipe.
 4. Run through the implementation of creating, editing, and deleting recipes.
 
+A basic “CRUD” app isn't going to be the best demonstration of Angular's
+power, but it's easy to understand, especially for Rails developers, and will
+allow us to just focus on getting things set up.
+
 Again, since this isn't a Rails or Angular tutorial, we're going to accelerate
 as we go.  The most difficult and tedious part of using a new technology is
 setup, so let's do that first.

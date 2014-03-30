@@ -8,6 +8,9 @@ body, p, li, td {
   line-height: 1.4;
 }
 
+ol li {
+  line-height: 1.2;
+}
 ol.front-matter {
   list-style: none;
 }
