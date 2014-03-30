@@ -1,6 +1,6 @@
 # The Application We'll Build
 
-To frame all the setup we need to do to get an Angular app running with Rails,
+To frame all the setup needed to get an Angular app running with Rails,
 we'll build a simple application to manage recipes.  The application will
 simply be a store of recipes that can be searched.  A recipe is simply a title
 and a set of instructions.

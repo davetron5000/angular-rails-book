@@ -6,7 +6,7 @@ anything interesting—any real application you might want to create—you need 
 that was designed without a JavaScript framework in mind.  This leaves a gap between understanding your backend and using the
 JavaScript framework.
 
-Rails is a terrific back-end.  Between Active Record, the controller layer and the huge ecosystem built around creating and
+Rails is a terrific back-end.  Between Active Record, the controller layer, and the huge ecosystem built around creating and
 deploying Rails apps, you'd be hard-pressed to find a better back-end for your ambituous AngularJS application.  Of course, Rails
 wasn't designed to work with a front-end JavaScript framework.
 
@@ -80,7 +80,7 @@ Other than that, you'll need:
 * Some sort of database installed.  I'd recommend Postgres, but MySQL should work fine
 * An account on [Heroku], where we'll deploy the app
 
-This was book and the app we'll see were developed on OS X, so some terminal
+This book and the app we'll see were developed on OS X, so some terminal
 commands might be different if you are on Windows.  Please [let me know][contact]
 what those differences are.
 
