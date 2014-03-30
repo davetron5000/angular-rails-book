@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href='styles.css' rel='stylesheet' type='text/css' media='all'>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <meta charset="utf-8">
+  <title>AngularJS with Ruby on Rails: From zero to deployment in less than 10,000 words</title>
+  <script type="text/javascript" src="//use.typekit.net/hiq5jip.js"></script>
+  <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.0/styles/solarized_light.min.css">
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+  <h1><a href="index.html">AngularJS with Ruby on Rails</a></h1>
+      <p class="byline">by David Bryant Copeland</p>
+<a name='creating-a-skeleton-app'></a><h2>Creating a Skeleton App</h2>
+<p>Even the most basic Rails app requires additional configuration beyond simply
+running <code>rails new</code>.  For example, you may have certain gems you know you&#39;ll
+need from the start.</p>
+
+<p>An Angular application will need even more than that, and while the setup we&#39;re
+about to see can (and should) be automated with a <a href="http://technology.stitchfix.com/blog/2014/01/06/rails-app-templates/">rails app template</a>,
+it&#39;s important to see these steps and understand why we&#39;re doing them.</p>
+
+<p>Our goal here is start from scratch and have an application that renders a
+view containing a piece of data provided by Angular.  That will be sufficient
+for us to validate that we&#39;re moving in the right direction.</p>
+
+<p>The basic steps are:</p>
+
+<ol>
+<li>Create an empty Rails app</li>
+<li>Add some basic gems we know we&#39;ll need</li>
+<li>Set up <a href="http://bower.io">Bower</a> to manage our front-end dependencies</li>
+<li>Write just enough code to serve content via Angular</li>
+<li>Deploy to a production server to validate the asset pipeline is working</li>
+</ol>
+<a name='create-an-empty-rails-app'></a><h3>Create an empty Rails app</h3>
+<p>Our app will be called “Receta”, which is Spanish for “recipe”.  We&#39;re going
+to use Postgres as our database (although we won&#39;t be using anything
+Postgres-specific), and we&#39;re going to skip <code>bundle install</code> for now.  Note if you would prefer to use MySQL, it should work fine
+and if you plan on deploying to Heroku, the table we&#39;ll need for this app will work fine on both, so don&#39;t install Postgres
+unless you really want to.</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rails new receta --skip-bundle --quiet --database=postgresql
+&gt; cd receta
+</code></pre></article>
+<p>Now that we have our empty app, let&#39;s add a few basic gems, configure the
+database, and make sure we have a clean base from which to work.</p>
+<a name='adding-basic-gems'></a><h3>Adding Basic Gems</h3>
+<p>We&#39;re going to use RSpec and Capybara here, as well as the Selenium driver for
+browser-based testing, so let&#39;s add those gems to our <code>Gemfile</code>.  </p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/Gemfile b/Gemfile
+index 90bd53a..75cb4c5 100644
+--- a/Gemfile
++++ b/Gemfile
+@@ -21,12 +21,18 @@ gem &#39;coffee-rails&#39;, &#39;~&gt; 4.0.0&#39;
+ # Use jquery as the JavaScript library
+ gem &#39;jquery-rails&#39;
+ 
+-# Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks
+-gem &#39;turbolinks&#39;
+-
+ # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
+ gem &#39;jbuilder&#39;, &#39;~&gt; 1.2&#39;
+ 
++group :test, :development do
++  gem &quot;rspec&quot;
++  gem &quot;rspec-rails&quot;, &quot;~&gt; 2.0&quot;
++  gem &quot;factory_girl_rails&quot;, &quot;~&gt; 4.0&quot;
++  gem &quot;capybara&quot;
++  gem &quot;database_cleaner&quot;
++  gem &quot;selenium-webdriver&quot;
++end
++
+ group :doc do
+   # bundle exec rake doc:rails generates the API under doc/api.
+   gem &#39;sdoc&#39;, require: false
+</code></pre><footer><h1>Gemfile</h1></footer></article>
+<p>Capybara and
+Selenium should be unsurprising choices, as these are common means of doing
+integration/acceptance/browser tests.  When creating a rich client
+application, browser testing is even more important than normal, so we want to make sure
+we easily have the ability to launch a browser and click around.</p>
+
+<p>RSpec is not the default testing framework with Rails, although it <em>is</em> popular.
+It&#39;s not required for Angular development, but I&#39;m recommending it here because
+its API is similar to that of Jasmine, which we&#39;ll be using for testing our front-end code.</p>
+
+<p>This means the “shape” of your front-end tests will mirror those of your back-end tests, which will decrease your mental load as
+switch back and forth.  If you are philosophically opposed to RSpec, you are free to use MiniTest or whatever you want.</p>
+
+<p>We&#39;re also removing Turbolinks, since it&#39;s designed for a different type of
+application than that one you&#39;d make with Angular.</p>
+
+<p>Now, we can install our gems:</p>
+<article class='code-listing'><pre><code class="">&gt; bundle install
+</code></pre></article>
+<p>Once this is done, let&#39;s set up our database so we can run the app.</p>
+<article class='code-listing'><pre><code class="">&gt; vim config/database.yml # set the user/password for your local database
+&gt; rake db:setup
+&gt; rails s
+</code></pre></article>
+<p>Visit <a href="http://localhost:3000">http://localhost:3000</a> to make sure your app is running, then quit the
+server with <code>Ctrl-C</code>.</p>
+
+<p>Now that we have the Rails side of things squared away, let&#39;s set up Bower,
+which we&#39;ll  use to manage our front-end library dependencies.</p>
+<a name='set-up-bower-to-manage-front-end-dependenciies'></a><h3>Set up Bower to Manage Front-End Dependenciies</h3>
+<p>Because Rails doesn&#39;t provide a way to manage front-end assets, such as JavaScript libraries, fonts, or CSS, the community has
+taken to bundling popular packages in RubyGems.  Using the “Engines” feature of Rails, these assets can be placed in the asset
+pipeline by installing a RubyGem.  Rails even does this with JQuery.</p>
+
+<p>We&#39;re not going to rely on RubyGems for our assets.  We&#39;re going to use <a href="http://bower.io">Bower</a>
+to manage them instead.  Bower was created by Twitter specifically to manage front-end assets, and
+almost every imaginable library—including the Angular modules we&#39;ll be using—is available via Bower.</p>
+
+<p>The same cannot be said for RubyGems.  While it&#39;s nice that it&#39;s at least <em>possibile</em> to use
+RubyGems to manage front-end assets, doing so has two problems.  </p>
+
+<p>First, it creates an abstraction between our <code>Gemfile</code> and our
+assets that creates confusion.  What version of JQuery is bundled with Rails?  In the Rails 4.0.3 app we just created, I see
+version 3.1.0 of the <code>jquery-rails</code> gem.  According to the GitHub page for that gem, it bundles JQuery 1.10.2.  This is
+unnecessarily confusing.  Further, some gems don&#39;t even advertise the version of the asset they bundle.  I&#39;ve even seen one that
+bundles an off-release version of a JavaScript library.</p>
+
+<p>The second reason is actually more important, and that&#39;s that not every front-end asset is availbale as a RubyGem.  This means
+that we will need a second system to manage <em>those</em>.  And because we&#39;ll be using a lot more libraries and assets than in a
+“normal” Rails app, we need to keep an eye on the dependencies between these libraries.  With some libraries managed as RubyGems
+and some in another system, we lose that ability.</p>
+
+<p>Bower can do all of this for us, and the <code>bower-rails</code> gem even provides a clean <code>Gemfile</code>-like way to declare our dependencies.</p>
+
+<p>First, let&#39;s add <code>bower-rails</code> to our <code>Gemfile</code>:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/Gemfile b/Gemfile
+index e052e96..75cb4c5 100644
+--- a/Gemfile
++++ b/Gemfile
+@@ -24,8 +24,6 @@ gem &#39;jquery-rails&#39;
+ # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
+ gem &#39;jbuilder&#39;, &#39;~&gt; 1.2&#39;
+ 
+-gem &#39;bower-rails&#39;
+-
+ group :test, :development do
+   gem &quot;rspec&quot;
+   gem &quot;rspec-rails&quot;, &quot;~&gt; 2.0&quot;
+</code></pre><footer><h1>Gemfile</h1></footer></article>
+<p>Now, let&#39;s install it.</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; bundle install
+</code></pre></article>
+<p>Bower works similarly to Bundler, and the Gem we just installed gives us a few
+handy tasks:</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rake -T bower
+rake bower:install        # Install components from bower
+rake bower:install:force  # Install components with -F option
+rake bower:list           # List bower components
+rake bower:resolve        # Resolve assets paths in bower components
+rake bower:update         # Update bower components
+rake bower:update:prune   # Update existing components and uninstalls extraneous components
+</code></pre></article>
+<p>Our dependencies go in a file called <code>Bowerfile</code> that looks very much like a
+<code>Gemfile</code>.  The dependencies we want to bring in first will be Angular and
+Twitter Bootstrap.  Bootstrap isn&#39;t required, but we&#39;re going to use it here
+to keep the CSS we have to write to a minimum while still resulting in a
+pleasant-enough interface.</p>
+<article class='code-listing'><pre><code class="language-">asset &#39;angular&#39;
+asset &#39;bootstrap-sass-official&#39;
+# vim: ft=ruby
+</code></pre><footer><h1>Bowerfile</h1></footer></article>
+<p>Now, we can install our dependencies via the <code>bower:install</code> Rake task:</p>
+<article class='code-listing'><pre><code class="">&gt; rake bower:install
+bower.js files generated
+/usr/local/share/npm/bin/bower install
+bower bootstrap-sass-official#*       not-cached git://github.com/twbs/bootstrap-sass.git#*
+bower bootstrap-sass-official#*          resolve git://github.com/twbs/bootstrap-sass.git#*
+bower angular#*                           cached git://github.com/angular/bower-angular.git#1.2.13
+bower angular#*                         validate 1.2.13 against git://github.com/angular/bower-angular.git#*
+bower bootstrap-sass-official#*         download https://github.com/twbs/bootstrap-sass/archive/v3.1.1.tar.gz
+bower angular#*                              new version for git://github.com/angular/bower-angular.git#*
+bower angular#*                          resolve git://github.com/angular/bower-angular.git#*
+bower angular#*                         download https://github.com/angular/bower-angular/archive/v1.2.14.tar.gz
+bower bootstrap-sass-official#*          extract archive.tar.gz
+bower angular#*                          extract archive.tar.gz
+bower bootstrap-sass-official#*         resolved git://github.com/twbs/bootstrap-sass.git#3.1.1
+bower angular#*                         resolved git://github.com/angular/bower-angular.git#1.2.14
+bower bootstrap-sass-official#*          install bootstrap-sass-official#3.1.1
+bower angular#*                          install angular#1.2.14
+
+bootstrap-sass-official#3.1.1 bower_components/bootstrap-sass-official
+
+angular#1.2.14 bower_components/angular
+</code></pre></article>
+<p>Bower installs dependencies in <code>vendor/assets/bower_components</code>, which you
+should check into your repository.</p>
+<article class='code-listing'><pre><code class="">&gt; git add vendor/assets
+&gt; git commit -m &#39;angular and bootstrap&#39;
+</code></pre></article>
+<p>This location may seem strange, but it allows you to separate Bower-managed
+third-party libraries from non-Bower-managed ones, if you should find the need
+for a library that isn&#39;t available via Bower (although that would be highly
+unusual).  </p>
+
+<p>Since <code>vendor/assets/bower_components</code> <em>isn&#39;t</em> Rails standard, you&#39;ll need to
+add it to the asset path so these files get picked up.  We&#39;ll do this in <code>config/application.rb</code>, like so:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/config/application.rb b/config/application.rb
+index 5f1ac4a..2388009 100644
+--- a/config/application.rb
++++ b/config/application.rb
+@@ -19,5 +19,6 @@ module Receta
+     # The default locale is :en and all translations from config/locales/*.rb,yml are auto loaded.
+     # config.i18n.load_path += Dir[Rails.root.join(&#39;my&#39;, &#39;locales&#39;, &#39;*.{rb,yml}&#39;).to_s]
+     # config.i18n.default_locale = :de
++    config.assets.paths &lt;&lt; Rails.root.join(&quot;vendor&quot;,&quot;assets&quot;,&quot;bower_components&quot;)
+   end
+ end
+</code></pre><footer><h1>config/application.rb</h1></footer></article>
+<p>Lastly, you&#39;ll need to reference these files in <code>application.js</code> and
+<code>application.css</code>, respectively (we&#39;ll also remove the reference to Turbolinks
+while we&#39;re here).</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/application.js b/app/assets/javascripts/application.js
+index d6925fa..29f41b7 100644
+--- a/app/assets/javascripts/application.js
++++ b/app/assets/javascripts/application.js
+@@ -12,5 +12,5 @@
+ //
+ //= require jquery
+ //= require jquery_ujs
+-//= require turbolinks
++//= require angular/angular
+ //= require_tree .
+diff --git a/app/assets/stylesheets/application.css b/app/assets/stylesheets/application.css
+index 3192ec8..2cac3ad 100644
+--- a/app/assets/stylesheets/application.css
++++ b/app/assets/stylesheets/application.css
+@@ -9,5 +9,6 @@
+  * compiled file, but it&#39;s generally better to create a new file per style scope.
+  *
+  *= require_self
++ *= require bootstrap-sass-official/vendor/assets/stylesheets/bootstrap.css
+  *= require_tree .
+  */
+</code></pre><footer><h1>.</h1></footer></article>
+<p>The reason these <code>require</code> lines are so long is due to an “impedence mismatch”
+between Bower and the Rails asset pipeline.  Bower isn&#39;t much more than a
+simple way to download a Git repository, and there isn&#39;t much standardization
+across various front-end components.  </p>
+
+<p>So, even though everything&#39;s installed in <code>vendor/assets/bower_components/ASSET_NAME</code>, 
+what&#39;s underneath could be anything.
+To bring those into our app so they are served by the asset pipeline, we
+have to specify the exact file or files within the package.  This often
+requires hunting around for what was downloaded to find the right path.
+Hopefully, a future version of Rails will provide some help here, but until
+then, Bower is a fairly clean solution.</p>
+
+<p>Now that we have our initial set of front-end dependencies downloaded, let&#39;s
+write <em>just</em> enough code to use them, so we can be sure all the moving parts
+are working together.</p>
+<a name='write-code-to-verify-configuration'></a><h3>Write Code to Verify Configuration</h3>
+<p>We&#39;ll need a basic controller to render a view that will get Angular
+bootstrapped, and we&#39;ll need a tiny bit of JavaScript to create our Angular
+application.</p>
+
+<p>First, we&#39;ll add a new route to <code>routes.rb</code> to send our root route to a
+controller.</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/config/routes.rb b/config/routes.rb
+index e4cd543..d9880a9 100644
+--- a/config/routes.rb
++++ b/config/routes.rb
+@@ -1,4 +1,6 @@
+ Receta::Application.routes.draw do
++  root &#39;home#index&#39;
++
+   # The priority is based upon order of creation: first created -&gt; highest priority.
+   # See how all your routes lay out with &quot;rake routes&quot;.
+ 
+</code></pre><footer><h1>config/routes.rb</h1></footer></article>
+<p>We&#39;ll then create a basic controller called <code>HomeController</code></p>
+<article class='code-listing'><pre><code class="language-ruby">class HomeController &lt; ApplicationController
+  def index
+  end
+end
+</code></pre><footer><h1>app/controllers/home_controller.rb</h1></footer></article>
+<p>We&#39;ll also need a barebones Angular app, which we&#39;ll put in <code>app.coffee</code>:</p>
+<article class='code-listing'><pre><code class="language-">receta = angular.module(&#39;receta&#39;,[
+])
+</code></pre><footer><h1>app/assets/javascripts/app.coffee</h1></footer></article>
+<p>Finally, we&#39;ll create the view that uses some Bootstrap CSS as well as just
+enough Angular to demonstrate that it&#39;s working.  In this case, we&#39;ll create a
+text field that, as we type, will update the heading of our panel.</p>
+<article class='code-listing'><pre><code class="language-">&lt;div class=&quot;container-fluid&quot; ng-app=&quot;receta&quot;&gt;
+  &lt;div class=&quot;panel panel-success&quot;&gt;
+    &lt;div class=&quot;panel-heading&quot;&gt;
+      &lt;h1 ng-if=&quot;name&quot;&gt;Hello, {{name}}&lt;/h1&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;panel-body&quot;&gt;
+      &lt;form class=&quot;form-inline&quot;&gt;
+        &lt;div class=&quot;form-group&quot;&gt;
+          &lt;input class=&quot;form-control&quot; type=&quot;text&quot; placeholder=&quot;Enter your name&quot; autofocus ng-model=&quot;name&quot;&gt;
+        &lt;/div&gt;
+      &lt;/form&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</code></pre><footer><h1>app/views/home/index.html.erb</h1></footer></article>
+<p>Now, when we run our app and visit the root URL, we should see our basic
+Angular app working.</p>
+<article class='code-listing'><pre><code class="">&gt; rails s
+</code></pre></article>
+<p>Before we get too far into development, we need to deploy this to production.  Since
+we&#39;ve been making heavier-than-normal changes to asset-related aspects of our
+app, we should verify now that everything works in production mode.  This way,
+as we do more and more front-end work and bring in more and more libraries
+and assets, we can can have a better idea of what went wrong if something
+<em>does</em> go wrong.</p>
+<a name='deploy'></a><h3>Deploy</h3>
+<p>We&#39;re going to use <a href="http://heroku.com">Heroku</a> to deploy.  Heroku is a cloud-based “platform as a service” vendor that is free and easy to
+use.  We can get a Rails app deployed with a small database for free just be doing a <code>git push</code>.  The Heroku environment is also
+fairly unforgiving.  If our application works on Heroku, it&#39;ll work anywhere.</p>
+
+<p>If you don&#39;t have a Heroku account, sign up for one (it&#39;s free).  You should also install
+the <a href="https://toolbelt.heroku.com/">Heroku Tool Belt</a>, which will allow management of your app
+from the command line.</p>
+
+<p>Once you&#39;re signed up and logged in, create a new application and follow the instructions to add the
+Heroku remote Git repository to your local git configuration.</p>
+
+<p>Before deploying, however, we need to add a few more gems to our <code>Gemfile</code>.
+These are mostly Heroku-specific, although they aren&#39;t hurting anything if you
+don&#39;t want to use Heroku.</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/Gemfile b/Gemfile
+index e052e96..7f82d36 100644
+--- a/Gemfile
++++ b/Gemfile
+@@ -26,6 +26,13 @@ gem &#39;jbuilder&#39;, &#39;~&gt; 1.2&#39;
+ 
+ gem &#39;bower-rails&#39;
+ 
++gem &quot;foreman&quot;
++group :production, :staging do
++  gem &quot;rails_12factor&quot;
++  gem &quot;rails_stdout_logging&quot;
++  gem &quot;rails_serve_static_assets&quot;
++end
++
+ group :test, :development do
+   gem &quot;rspec&quot;
+   gem &quot;rspec-rails&quot;, &quot;~&gt; 2.0&quot;
+</code></pre><footer><h1>Gemfile</h1></footer></article>
+<p>Install those gems, commit <code>Gemfile</code> and <code>Gemfile.lock</code>, and push to the
+Heroku repo</p>
+<article class='code-listing'><pre><code class="">&gt; bundle install
+&gt; git add Gemfile Gemfile.lock
+&gt; git commit -m &#39;heroku deployment&#39;
+&gt; git push heroku master
+</code></pre></article>
+<p>Since this is the first push to a new app, it will take a while. Once it&#39;s done, open your app in your browser.</p>
+<article class='code-listing'><pre><code class="">&gt; heroku open
+</code></pre></article>
+<p>You should see your app and it should work the same way it did locally.</p>
+
+<p>We&#39;ve now completely validated that Bower, along with our configuration, will correctly bring in the assets we need to get
+started, in both development and production.</p>
+
+<p>At this point, we can start to actually build our application.  The first
+thing we&#39;ll do is create the search screen that allows us to find and browse
+recipes.  This will drive the vast majority of the configuration we need to get our app running with Angular.</p>
+<footer>
+  <ol>
+    <li class="previous"><a href="app_overview.html">&larr; 
+        The Application We&#39;ll Build
+    </a></li>
+    <li class="next"><a href="find_and_browse.html">
+        Finding Recipes
+        &rarr;</a></li>
+  </ol>
+  <div class="clearfix"></div>
+  <p class="copyright">
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">AngularJS with Ruby on Rails</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="http://angular-rails.com" property="cc:attributionName" rel="cc:attributionURL">David Bryant Copeland</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License
+    </a>.
+  </p>
+<script src="//static.getclicky.com/js" type="text/javascript"></script>
+<script type="text/javascript">try{ clicky.init(100722319); }catch(e){}</script>
+<noscript><p><img alt="Clicky" width="1" height="1" src="//in.getclicky.com/100722319ns.gif" /></p></noscript>
+</footer>
+</body>
+</html>

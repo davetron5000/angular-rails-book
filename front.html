@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href='styles.css' rel='stylesheet' type='text/css' media='all'>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <meta charset="utf-8">
+  <title>AngularJS with Ruby on Rails: From zero to deployment in less than 10,000 words</title>
+  <script type="text/javascript" src="//use.typekit.net/hiq5jip.js"></script>
+  <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.0/styles/solarized_light.min.css">
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+  <h1><a href="index.html">AngularJS with Ruby on Rails</a></h1>
+      <p class="byline">by David Bryant Copeland</p>
+<a name='intro:-angular-and-rails-in-production'></a><h2>Intro: Angular and Rails in Production</h2>
+<p>The latest wave of JavaScript frameworks present an interesting problem to experienced developers.  On their own, these
+frameworks can only do but so much, since they are designed to run on the client-side, in a browser.  This means that for
+anything interesting—any real application you might want to create—you need a back-end.  That back-end is likely a web framework
+that was designed without a JavaScript framework in mind.  This leaves a gap between understanding your backend and using the
+JavaScript framework.</p>
+
+<p>Rails is a terrific back-end.  Between Active Record, the controller layer, and the huge ecosystem built around creating and
+deploying Rails apps, you&#39;d be hard-pressed to find a better back-end for your ambituous AngularJS application.  Of course, Rails
+wasn&#39;t designed to work with a front-end JavaScript framework.</p>
+
+<p>Angular, of course, wasn&#39;t designed with Rails in mind either, since it is entirely back-end agnostic. Because of this,
+there is no clear path to using Angular in your Rails app.  Further, because Rails wasn&#39;t designed around heavy use of
+JavaScript, there&#39;s no “Rails Way” for managing front-end assets and using them with the asset pipeline.</p>
+
+<p>This mini-book is going to change that.  We&#39;re going to see step-by-step instructions for building a Rails app with Angular, and
+getting it deployed to production.  That means we&#39;ll properly configure the asset pipeline, provide a solution for managing
+front-end assets, and see how to integrate testing the front-end code into your app.</p>
+
+<p>This is not a Rails or Angular tutorial.  If you&#39;d like to learn Angular, I would suggest completing their <a href="http://docs.angularjs.org/tutorial/step_00">tutorial</a>.  Type out
+the code.  Run the code.  Tweak the code.  It only takes an hour or so, and you&#39;ll feel confident you can start using Angular.
+That&#39;s what I did, but I was left with a lot of unanswered questions:</p>
+
+<ul>
+<li>How do I serve Angular assets via the Rails Asset Pipeline?</li>
+<li>How does Angular&#39;s templating system work with Rails?</li>
+<li>How do I connect Angular to my Rails controllers?</li>
+<li>How do I test my Angular code within a Rails app?</li>
+<li>How do I manage all these JavaScript dependencies?</li>
+<li>What challenges will there be in the production environment not present in the development environment?</li>
+</ul>
+
+<p>I was able to find answers by piecing together information from Stack Overflow and various blog posts.  You shouldn&#39;t have to do
+that.</p>
+
+<p>This mini-book is broken up into four major parts:</p>
+
+<ul>
+<li>What the app will do, along with a basic skeleton</li>
+<li>Step-by-step walkthrough of a simple search feature</li>
+<li>A very fast runthrough of CRUD operations</li>
+<li>A brief retrospective about what we&#39;ve learned and the way forward.</li>
+</ul>
+
+<p>We&#39;ll work test first, and keep dependencies at a minimum.  We&#39;ll stick to the Rails “out of box” experience as much as we can.
+But, the point of this is that the Rails “out of box” experience is missing a lot when it comes to creating an Angular-based app.</p>
+
+<p>The technology we&#39;ll be using:</p>
+
+<ul>
+<li>CoffeeScript</li>
+<li>Back-end tests use RSpec</li>
+<li>Front-end tests use Jasmine</li>
+<li>Browser-based acceptance tests using RSpec and Capybara</li>
+<li>Front-end dependencies managed with Bower</li>
+</ul>
+
+<p>We&#39;ll also be using Twitter Bootstrap for our front-end, and Heroku for deployment (neither of these are required or related, but
+we need <em>something</em> and both are free and easy to use).</p>
+
+<p>Finally, we&#39;ll be working test-first as much as possible.</p>
+
+<p>When we&#39;re done, you&#39;ll know exactly what you need to do to get Angular into your Rails app in a way that supports sustained
+development and deployment.  You&#39;ll be able to get to your code more quickly and confidently.</p>
+<a name='what-you&#39;ll-need'></a><h3>What You&#39;ll Need</h3>
+<p>The code in this book is pulled from a <a href="http://github.com/davetron5000/receta">git repository</a> containing the Rails app
+we&#39;ll be building.  The console output we&#39;ll see is generated directly from
+that code, so you should be able to follow along easily.</p>
+
+<p>That being said, it might be better to create the app from scratch and
+actually make the changes in question.  It will get your fingers used to
+typing the commands and get you familiar with the files you&#39;ll need to edit as
+you work.</p>
+
+<p>Other than that, you&#39;ll need:</p>
+
+<ul>
+<li>Ruby 2 or later</li>
+<li>Rails 4.0.x</li>
+<li>Some sort of database installed.  I&#39;d recommend Postgres, but MySQL should work fine</li>
+<li>An account on <a href="http://heroku.com">Heroku</a>, where we&#39;ll deploy the app</li>
+</ul>
+
+<p>This book and the app we&#39;ll see were developed on OS X, so some terminal
+commands might be different if you are on Windows.  Please <a href="http://github.com/davetron5000">let me know</a>
+what those differences are.</p>
+
+<p>With that out of the way, let&#39;s get started!</p>
+<footer>
+  <ol>
+    <li class="next"><a href="app_overview.html">
+        The Application We&#39;ll Build
+        &rarr;</a></li>
+  </ol>
+  <div class="clearfix"></div>
+  <p class="copyright">
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">AngularJS with Ruby on Rails</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="http://angular-rails.com" property="cc:attributionName" rel="cc:attributionURL">David Bryant Copeland</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License
+    </a>.
+  </p>
+<script src="//static.getclicky.com/js" type="text/javascript"></script>
+<script type="text/javascript">try{ clicky.init(100722319); }catch(e){}</script>
+<noscript><p><img alt="Clicky" width="1" height="1" src="//in.getclicky.com/100722319ns.gif" /></p></noscript>
+</footer>
+</body>
+</html>

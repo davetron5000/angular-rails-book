@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href='styles.css' rel='stylesheet' type='text/css' media='all'>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <meta charset="utf-8">
+  <title>AngularJS with Ruby on Rails: From zero to deployment in less than 10,000 words</title>
+  <script type="text/javascript" src="//use.typekit.net/hiq5jip.js"></script>
+  <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.0/styles/solarized_light.min.css">
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+  <h1><a href="index.html">AngularJS with Ruby on Rails</a></h1>
+      <p class="byline">by David Bryant Copeland</p>
+<a name='viewing-a-recipe'></a><h2>Viewing a Recipe</h2>
+<p>Now that we have Angular setup, including a way to manage front-end assets,
+run tests, and deploy our application to production, the hard part is done.  In
+this chapter, let&#39;s use what we&#39;ve set up, along with some TDD, to implement
+the ability to click on a recipe in the results list and view its
+instructions.</p>
+
+<p>In a classic Rails app, we&#39;d have a method called <code>show</code> in our
+<code>RecipesController</code>, which would be routed-to from <code>/recipes/:id</code>.  We&#39;ll do
+something similar in our Angular app, however we won&#39;t add this feature to the
+existing <code>RecipesController.coffee</code>, but a new controller called
+<code>RecipeController</code>.</p>
+
+<p>There&#39;s no advantage to having the existing <code>RecipesController.coffee</code>
+handle the viewing of an individual recipe, other than saving us a bit of
+setup in the test.   My feeling is that when there&#39;s no advantage over adding
+code to an existing class or file, it&#39;s always better to make a new class or
+file.</p>
+
+<p>Generally, what we need to do here is:</p>
+
+<ol>
+<li>Create our Angular controller</li>
+<li>Create our backend Rails controller</li>
+<li>Write a browser-based test for the feature</li>
+<li>Create a view</li>
+</ol>
+<a name='create-our-angular-controller'></a><h3>Create our Angular Controller</h3>
+<p>First, we&#39;ll update our Angular app config to route <code>/recipes/:recipeId</code> to
+the yet-to-be-created <code>RecipeController</code>:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/app.coffee b/app/assets/javascripts/app.coffee
+index 2801320..729bf3d 100644
+--- a/app/assets/javascripts/app.coffee
++++ b/app/assets/javascripts/app.coffee
+@@ -11,6 +11,9 @@ receta.config([ &#39;$routeProvider&#39;,
+       .when(&#39;/&#39;,
+         templateUrl: &quot;index.html&quot;
+         controller: &#39;RecipesController&#39;
++      ).when(&#39;/recipes/:recipeId&#39;,
++        templateUrl: &quot;show.html&quot;
++        controller: &#39;RecipeController&#39;
+       )
+ ])
+ 
+</code></pre><footer><h1>app/assets/javascripts/app.coffee</h1></footer></article>
+<p>Now, let&#39;s create a bare-bones version of our controller:</p>
+<article class='code-listing'><pre><code class="language-">controllers = angular.module(&#39;controllers&#39;)
+controllers.controller(&quot;RecipeController&quot;, [ &#39;$scope&#39;, &#39;$routeParams&#39;, &#39;$resource&#39;,
+  ($scope,$routeParams,$resource)-&gt;
+    Recipe = $resource(&#39;/recipes/:recipeId&#39;, { recipeId: &quot;@id&quot;, format: &#39;json&#39; })
+
+])
+</code></pre><footer><h1>app/assets/javascripts/controllers/RecipeController.coffee</h1></footer></article>
+<p>And the boilerplate needed for our test:</p>
+<article class='code-listing'><pre><code class="language-">describe &quot;RecipeController&quot;, -&gt;
+  scope        = null
+  ctrl         = null
+  routeParams  = null
+  httpBackend  = null
+  recipeId     = 42
+
+  fakeRecipe   =
+    id: recipeId
+    name: &quot;Baked Potatoes&quot;
+    instructions: &quot;Pierce potato with fork, nuke for 20 minutes&quot;
+
+  setupController =(recipeExists=true)-&gt;
+    inject(($location, $routeParams, $rootScope, $httpBackend, $controller)-&gt;
+      scope       = $rootScope.$new()
+      location    = $location
+      httpBackend = $httpBackend
+      routeParams = $routeParams
+      routeParams.recipeId = recipeId
+
+      ctrl        = $controller(&#39;RecipeController&#39;,
+                                $scope: scope)
+    )
+
+  beforeEach(module(&quot;receta&quot;))
+
+  afterEach -&gt;
+    httpBackend.verifyNoOutstandingExpectation()
+    httpBackend.verifyNoOutstandingRequest()
+</code></pre><footer><h1>spec/javascripts/controllers/RecipeController_spec.coffee</h1></footer></article>
+<p>What <code>RecipeController</code> needs to do is:</p>
+
+<ul>
+<li>Load the recipe identified by <code>:recipeId</code> in the URL and set it to some variable in <code>$scope</code></li>
+<li>If the recipe doesn&#39;t exist, handle that error somehow</li>
+</ul>
+
+<p>Lets get the happy path working first:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/spec/javascripts/controllers/RecipeController_spec.coffee b/spec/javascripts/controllers/RecipeController_spec.coffee
+index 8028be2..3444a97 100644
+--- a/spec/javascripts/controllers/RecipeController_spec.coffee
++++ b/spec/javascripts/controllers/RecipeController_spec.coffee
+@@ -18,6 +18,14 @@ describe &quot;RecipeController&quot;, -&gt;
+       routeParams = $routeParams
+       routeParams.recipeId = recipeId
+ 
++      request = new RegExp(&quot;\/recipes/#{recipeId}&quot;)
++      results = if recipeExists
++        [200,fakeRecipe]
++      else
++        [404]
++
++      httpBackend.expectGET(request).respond(results[0],results[1])
++
+       ctrl        = $controller(&#39;RecipeController&#39;,
+                                 $scope: scope)
+     )
+@@ -28,3 +36,15 @@ describe &quot;RecipeController&quot;, -&gt;
+     httpBackend.verifyNoOutstandingExpectation()
+     httpBackend.verifyNoOutstandingRequest()
+ 
++  describe &#39;controller initialization&#39;, -&gt;
++    describe &#39;recipe is found&#39;, -&gt;
++      beforeEach(setupController())
++      it &#39;loads the given recipe&#39;, -&gt;
++        httpBackend.flush()
++        expect(scope.recipe).toEqualData(fakeRecipe)
++    describe &#39;recipe is not found&#39;, -&gt;
++      beforeEach(setupController(false))
++      it &#39;loads the given recipe&#39;, -&gt;
++        httpBackend.flush()
++        expect(scope.recipe).toBe(null)
++        # what else?!
+</code></pre><footer><h1>spec/javascripts/controllers/RecipeController_spec.coffee</h1></footer></article>
+<p>This is similar to what we had in <code>RecipesController_spec.coffee</code>.  Because
+the HTTP call to our backend happens on controller startup, we create a
+function <code>setupController()</code> that handles mocking out the HTTP calls.  It
+takes a single parameter—<code>recipeExists</code>—to allow us to control whether or not
+the backend sends a 404 or a real recipe.</p>
+
+<p>Since none of this is implented yet, our test should fail.  Let&#39;s try it:</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rake teaspoon
+Starting the Teaspoon server...
+Teaspoon running default suite at http://127.0.0.1:58538/teaspoon/default
+FFFF...
+
+Failures:
+
+  1) RecipeController controller initialization recipe is found loads the given recipe
+     Failure/Error: Error: No pending request to flush ! in http://127.0.0.1:58538/assets/angular-mocks/angular-mocks.js?body=1 (line 1438)
+
+  2) RecipeController controller initialization recipe is found loads the given recipe
+     Failure/Error: Error: Unsatisfied requests: GET //recipes/42/ in http://127.0.0.1:58538/assets/angular-mocks/angular-mocks.js?body=1 (line 1471)
+
+  3) RecipeController controller initialization recipe is not found loads the given recipe
+     Failure/Error: Error: No pending request to flush ! in http://127.0.0.1:58538/assets/angular-mocks/angular-mocks.js?body=1 (line 1438)
+
+  4) RecipeController controller initialization recipe is not found loads the given recipe
+     Failure/Error: Error: Unsatisfied requests: GET //recipes/42/ in http://127.0.0.1:58538/assets/angular-mocks/angular-mocks.js?body=1 (line 1471)
+
+Finished in 0.02800 seconds
+7 examples, 4 failures
+
+Failed examples:
+
+teaspoon -s default --filter=&quot;RecipeController controller initialization recipe is found loads the given recipe.&quot;
+teaspoon -s default --filter=&quot;RecipeController controller initialization recipe is found loads the given recipe.&quot;
+teaspoon -s default --filter=&quot;RecipeController controller initialization recipe is not found loads the given recipe.&quot;
+teaspoon -s default --filter=&quot;RecipeController controller initialization recipe is not found loads the given recipe.&quot;
+</code></pre></article>
+<p>Sure enough, our test fails exactly how we&#39;d like: <code>$scope.recipe</code> isn&#39;t
+defined for either case, and no HTTP calls were made, despite our expectation
+that they would be.</p>
+
+<p>Let&#39;s make it pass.  We&#39;ll use Angular&#39;s <code>$resource</code> service to create the
+same resource we did in <code>RecipesController</code>, but use the <code>get</code> method, which
+does what we want.</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/controllers/RecipeController.coffee b/app/assets/javascripts/controllers/RecipeController.coffee
+index 8ca9da2..6c55485 100644
+--- a/app/assets/javascripts/controllers/RecipeController.coffee
++++ b/app/assets/javascripts/controllers/RecipeController.coffee
+@@ -3,4 +3,9 @@ controllers.controller(&quot;RecipeController&quot;, [ &#39;$scope&#39;, &#39;$routeParams&#39;, &#39;$resourc
+   ($scope,$routeParams,$resource)-&gt;
+     Recipe = $resource(&#39;/recipes/:recipeId&#39;, { recipeId: &quot;@id&quot;, format: &#39;json&#39; })
+ 
++    Recipe.get({recipeId: $routeParams.recipeId},
++      ( (recipe)-&gt; $scope.recipe = recipe ),
++      ( (httpResponse)-&gt; $scope.recipe = null)
++    )
++
+ ])
+</code></pre><footer><h1>app/assets/javascripts/controllers/RecipeController.coffee</h1></footer></article>
+<p>Now, we see if this makes our tests pass:</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rake teaspoon
+Starting the Teaspoon server...
+Teaspoon running default suite at http://127.0.0.1:58556/teaspoon/default
+.....
+
+Finished in 0.03000 seconds
+5 examples, 0 failures
+</code></pre></article>
+<p>It does!  </p>
+
+<p>Although our code does technically handle the case of a missing recipe, it
+doesn&#39;t handle it very well.  We&#39;d like to pass onto the user some indication
+that things went wrong.  In Rails, we&#39;d use the flash as a way to provide such
+information.</p>
+
+<p>In Angular, we can certainly create our own flash by just assigning 
+<code>{ error: “Recipe not found”}</code> to <code>$scope.flash</code>.  Instead, lets use a
+pre-made module that will handle flash messages, but also allow us to display
+them in our views.  <code>angular-flash</code> is that component, so let&#39;s install it.</p>
+
+<p>First, we add it to <code>Bowerfile</code>:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/Bowerfile b/Bowerfile
+index 1795c30..e14377e 100644
+--- a/Bowerfile
++++ b/Bowerfile
+@@ -3,4 +3,5 @@ asset &#39;angular-route&#39;
+ asset &#39;angular-resource&#39;
+ asset &#39;angular-mocks&#39;
+ asset &#39;bootstrap-sass-official&#39;
++asset &#39;angular-flash&#39;
+ # vim: ft=ruby
+</code></pre><footer><h1>Bowerfile</h1></footer></article>
+<p>To make sure the asset pipeline picks up this new dependency, we&#39;ll need to
+add it to <code>application.js</code> as well:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/application.js b/app/assets/javascripts/application.js
+index ea7e7dd..199bd8a 100644
+--- a/app/assets/javascripts/application.js
++++ b/app/assets/javascripts/application.js
+@@ -15,4 +15,5 @@
+ //= require angular/angular
+ //= require angular-route/angular-route
+ //= require angular-resource/angular-resource
++//= require angular-flash/dist/angular-flash
+ //= require_tree .
+</code></pre><footer><h1>app/assets/javascripts/application.js</h1></footer></article>
+<p>Note the slightly different path to the file we want–this is the lack of
+standardization across front-end components rearing its ugly head.</p>
+
+<p>Finally, we add it as a module dependency to our app.  <code>angular-flash</code> comes with
+two modules, one for the flash data itself, and another for the view
+components.</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/app.coffee b/app/assets/javascripts/app.coffee
+index 729bf3d..117380d 100644
+--- a/app/assets/javascripts/app.coffee
++++ b/app/assets/javascripts/app.coffee
+@@ -3,6 +3,8 @@ receta = angular.module(&#39;receta&#39;,[
+   &#39;ngRoute&#39;,
+   &#39;ngResource&#39;,
+   &#39;controllers&#39;,
++  &#39;angular-flash.service&#39;,
++  &#39;angular-flash.flash-alert-directive&#39;
+ ])
+ 
+ receta.config([ &#39;$routeProvider&#39;,
+</code></pre><footer><h1>app/assets/javascripts/app.coffee</h1></footer></article>
+<p>We&#39;ll see how the view components work a bit later, but for now, our
+controller can depend on a component called <code>flash</code>.  <code>flash</code> allows us to set
+errors, warnings, informational messages, and success messages.</p>
+
+<p>Back to our test, we want to assert that the flash receives an error message that the
+recipe couldn&#39;t be found.  </p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/spec/javascripts/controllers/RecipeController_spec.coffee b/spec/javascripts/controllers/RecipeController_spec.coffee
+index 3444a97..3455f0d 100644
+--- a/spec/javascripts/controllers/RecipeController_spec.coffee
++++ b/spec/javascripts/controllers/RecipeController_spec.coffee
+@@ -3,6 +3,7 @@ describe &quot;RecipeController&quot;, -&gt;
+   ctrl         = null
+   routeParams  = null
+   httpBackend  = null
++  flash        = null
+   recipeId     = 42
+ 
+   fakeRecipe   =
+@@ -11,12 +12,13 @@ describe &quot;RecipeController&quot;, -&gt;
+     instructions: &quot;Pierce potato with fork, nuke for 20 minutes&quot;
+ 
+   setupController =(recipeExists=true)-&gt;
+-    inject(($location, $routeParams, $rootScope, $httpBackend, $controller)-&gt;
++    inject(($location, $routeParams, $rootScope, $httpBackend, $controller, _flash_)-&gt;
+       scope       = $rootScope.$new()
+       location    = $location
+       httpBackend = $httpBackend
+       routeParams = $routeParams
+       routeParams.recipeId = recipeId
++      flash = _flash_
+ 
+       request = new RegExp(&quot;\/recipes/#{recipeId}&quot;)
+       results = if recipeExists
+@@ -47,4 +49,4 @@ describe &quot;RecipeController&quot;, -&gt;
+       it &#39;loads the given recipe&#39;, -&gt;
+         httpBackend.flush()
+         expect(scope.recipe).toBe(null)
+-        # what else?!
++        expect(flash.error).toBe(&quot;There is no recipe with ID #{recipeId}&quot;)
+</code></pre><footer><h1>spec/javascripts/controllers/RecipeController_spec.coffee</h1></footer></article>
+<p>Notice that we&#39;re taking advantage of Angular&#39;s
+alternate dependency injection naming convention.  We want our test to use an object called
+<code>flash</code> to make assertions, but since this component isn&#39;t provided by
+Angular, it&#39;s name—for dependency injection purposes—is also <code>flash</code>, meaning we&#39;d
+need to use a different name for the flash in our tests.  Angular allows us to
+name the <em>parameter</em> with leading and trailing underscores, e.g. <code>_flash_</code>.
+When we do this, Angular understands that the object <code>flash</code> should be injected. This means
+that the name of the object that “escapes” the closure can be named <code>flash</code>.  Ah, JavaScript!</p>
+
+<p>Now, when we run the test, we should see a simple expectation failure on the message.</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rake teaspoon
+Starting the Teaspoon server...
+Teaspoon running default suite at http://127.0.0.1:58572/teaspoon/default
+.F...
+
+Failures:
+
+  1) RecipeController controller initialization recipe is not found loads the given recipe
+     Failure/Error: Expected undefined to be &#39;There is no recipe with ID 42&#39;.
+
+Finished in 0.02800 seconds
+5 examples, 1 failure
+
+Failed examples:
+
+teaspoon -s default --filter=&quot;RecipeController controller initialization recipe is not found loads the given recipe.&quot;
+</code></pre></article>
+<p>With a clearly failing test, we just need to add the flash as a dependency, and use it.</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/controllers/RecipeController.coffee b/app/assets/javascripts/controllers/RecipeController.coffee
+index 6c55485..3c79735 100644
+--- a/app/assets/javascripts/controllers/RecipeController.coffee
++++ b/app/assets/javascripts/controllers/RecipeController.coffee
+@@ -1,11 +1,14 @@
+ controllers = angular.module(&#39;controllers&#39;)
+-controllers.controller(&quot;RecipeController&quot;, [ &#39;$scope&#39;, &#39;$routeParams&#39;, &#39;$resource&#39;,
+-  ($scope,$routeParams,$resource)-&gt;
++controllers.controller(&quot;RecipeController&quot;, [ &#39;$scope&#39;, &#39;$routeParams&#39;, &#39;$resource&#39;, &#39;flash&#39;,
++  ($scope,$routeParams,$resource,flash)-&gt;
+     Recipe = $resource(&#39;/recipes/:recipeId&#39;, { recipeId: &quot;@id&quot;, format: &#39;json&#39; })
+ 
+     Recipe.get({recipeId: $routeParams.recipeId},
+       ( (recipe)-&gt; $scope.recipe = recipe ),
+-      ( (httpResponse)-&gt; $scope.recipe = null)
++      ( (httpResponse)-&gt;
++        $scope.recipe = null
++        flash.error   = &quot;There is no recipe with ID #{$routeParams.recipeId}&quot;
++      )
+     )
+ 
+ ])
+</code></pre><footer><h1>app/assets/javascripts/controllers/RecipeController.coffee</h1></footer></article>
+<p>We add <code>flash</code> to the list of injected dependencies, and then set the error message in our failure callback.  Sure enough, the test passes:</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rake teaspoon
+Starting the Teaspoon server...
+Teaspoon running default suite at http://127.0.0.1:58588/teaspoon/default
+.....
+
+Finished in 0.02800 seconds
+5 examples, 0 failures
+</code></pre></article>
+<p>Our Angular controller is done!  We still need a view, a browser-based test, and the backend.  Let&#39;s do the Rails backend next.</p>
+<a name='create-our-rails-controller'></a><h3>Create our Rails Controller</h3>
+<p>In the Rails world, it is canonical to have the same code serve both <code>index</code>
+and <code>show</code>, so what we need to do here is implement <code>show</code>.</p>
+
+<p>First, let&#39;s add the new route to <code>config/routes.rb</code>:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/config/routes.rb b/config/routes.rb
+index 7524ef7..612e169 100644
+--- a/config/routes.rb
++++ b/config/routes.rb
+@@ -1,5 +1,5 @@
+ Receta::Application.routes.draw do
+   root &#39;home#index&#39;
+ 
+-  resources :recipes, only: [:index]
++  resources :recipes, only: [:index, :show]
+ end
+</code></pre><footer><h1>config/routes.rb</h1></footer></article>
+<p>We&#39;ll add an empty <code>show</code> method to the controller as well:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/controllers/recipes_controller.rb b/app/controllers/recipes_controller.rb
+index 9eadd20..ac3e415 100644
+--- a/app/controllers/recipes_controller.rb
++++ b/app/controllers/recipes_controller.rb
+@@ -6,4 +6,7 @@ class RecipesController &lt; ApplicationController
+                  []
+                end
+   end
++
++  def show
++  end
+ end
+</code></pre><footer><h1>app/controllers/recipes_controller.rb</h1></footer></article>
+<p>Finally, we&#39;ll write tests for when the recipe exists and for when it doesn&#39;t:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/spec/controllers/recipes_controller_spec.rb b/spec/controllers/recipes_controller_spec.rb
+index 36966e7..20e3ad0 100644
+--- a/spec/controllers/recipes_controller_spec.rb
++++ b/spec/controllers/recipes_controller_spec.rb
+@@ -42,4 +42,30 @@ describe RecipesController do
+     end
+ 
+   end
++
++  describe &quot;show&quot; do
++    before do
++      xhr :get, :show, format: :json, id: recipe_id
++    end
++
++    subject(:results) { JSON.parse(response.body) }
++
++    context &quot;when the recipe exists&quot; do
++      let(:recipe) { 
++        Recipe.create!(name: &#39;Baked Potato w/ Cheese&#39;, 
++               instructions: &quot;Nuke for 20 minutes; top with cheese&quot;) 
++      }
++      let(:recipe_id) { recipe.id }
++
++      it { expect(response.status).to eq(200) }
++      it { expect(results[&quot;id&quot;]).to eq(recipe.id) }
++      it { expect(results[&quot;name&quot;]).to eq(recipe.name) }
++      it { expect(results[&quot;instructions&quot;]).to eq(recipe.instructions) }
++    end
++
++    context &quot;when the recipe doesn&#39;t exit&quot; do
++      let(:recipe_id) { -9999 }
++      it { expect(response.status).to eq(404) }
++    end
++  end
+ end
+</code></pre><footer><h1>spec/controllers/recipes_controller_spec.rb</h1></footer></article>
+<p>This should result in a failing test, which it does:</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rspec spec/controllers/recipes_controller_spec.rb
+.....FFFFF
+
+Failures:
+
+  1) RecipesController show when the recipe exists 
+     Failure/Error: xhr :get, :show, format: :json, id: recipe_id
+     ActionView::MissingTemplate:
+       Missing template recipes/show, application/show with {:locale=&gt;[:en], :formats=&gt;[:json], :handlers=&gt;[:erb, :builder, :raw, :ruby, :jbuilder, :coffee]}. Searched in:
+         * &quot;/Users/davec/Projects/angular-rails-production/git_repos/receta/app/views&quot;
+         * &quot;/Users/davec/.rvm/gems/ruby-2.1.0@angular-rails-production/gems/teaspoon-0.7.9/app/views&quot;
+     # ./spec/controllers/recipes_controller_spec.rb:48:in `block (3 levels) in &lt;top (required)&gt;&#39;
+
+  2) RecipesController show when the recipe exists 
+     Failure/Error: xhr :get, :show, format: :json, id: recipe_id
+     ActionView::MissingTemplate:
+       Missing template recipes/show, application/show with {:locale=&gt;[:en], :formats=&gt;[:json], :handlers=&gt;[:erb, :builder, :raw, :ruby, :jbuilder, :coffee]}. Searched in:
+         * &quot;/Users/davec/Projects/angular-rails-production/git_repos/receta/app/views&quot;
+         * &quot;/Users/davec/.rvm/gems/ruby-2.1.0@angular-rails-production/gems/teaspoon-0.7.9/app/views&quot;
+     # ./spec/controllers/recipes_controller_spec.rb:48:in `block (3 levels) in &lt;top (required)&gt;&#39;
+
+  3) RecipesController show when the recipe exists 
+     Failure/Error: xhr :get, :show, format: :json, id: recipe_id
+     ActionView::MissingTemplate:
+       Missing template recipes/show, application/show with {:locale=&gt;[:en], :formats=&gt;[:json], :handlers=&gt;[:erb, :builder, :raw, :ruby, :jbuilder, :coffee]}. Searched in:
+         * &quot;/Users/davec/Projects/angular-rails-production/git_repos/receta/app/views&quot;
+         * &quot;/Users/davec/.rvm/gems/ruby-2.1.0@angular-rails-production/gems/teaspoon-0.7.9/app/views&quot;
+     # ./spec/controllers/recipes_controller_spec.rb:48:in `block (3 levels) in &lt;top (required)&gt;&#39;
+
+  4) RecipesController show when the recipe exists 
+     Failure/Error: xhr :get, :show, format: :json, id: recipe_id
+     ActionView::MissingTemplate:
+       Missing template recipes/show, application/show with {:locale=&gt;[:en], :formats=&gt;[:json], :handlers=&gt;[:erb, :builder, :raw, :ruby, :jbuilder, :coffee]}. Searched in:
+         * &quot;/Users/davec/Projects/angular-rails-production/git_repos/receta/app/views&quot;
+         * &quot;/Users/davec/.rvm/gems/ruby-2.1.0@angular-rails-production/gems/teaspoon-0.7.9/app/views&quot;
+     # ./spec/controllers/recipes_controller_spec.rb:48:in `block (3 levels) in &lt;top (required)&gt;&#39;
+
+  5) RecipesController show when the recipe doesn&#39;t exit 
+     Failure/Error: xhr :get, :show, format: :json, id: recipe_id
+     ActionView::MissingTemplate:
+       Missing template recipes/show, application/show with {:locale=&gt;[:en], :formats=&gt;[:json], :handlers=&gt;[:erb, :builder, :raw, :ruby, :jbuilder, :coffee]}. Searched in:
+         * &quot;/Users/davec/Projects/angular-rails-production/git_repos/receta/app/views&quot;
+         * &quot;/Users/davec/.rvm/gems/ruby-2.1.0@angular-rails-production/gems/teaspoon-0.7.9/app/views&quot;
+     # ./spec/controllers/recipes_controller_spec.rb:48:in `block (3 levels) in &lt;top (required)&gt;&#39;
+
+Finished in 0.70005 seconds
+10 examples, 5 failures
+
+Failed examples:
+
+rspec ./spec/controllers/recipes_controller_spec.rb:62 # RecipesController show when the recipe exists 
+rspec ./spec/controllers/recipes_controller_spec.rb:60 # RecipesController show when the recipe exists 
+rspec ./spec/controllers/recipes_controller_spec.rb:61 # RecipesController show when the recipe exists 
+rspec ./spec/controllers/recipes_controller_spec.rb:63 # RecipesController show when the recipe exists 
+rspec ./spec/controllers/recipes_controller_spec.rb:68 # RecipesController show when the recipe doesn&#39;t exit 
+
+Randomized with seed 21931
+</code></pre></article>
+<p>To make this pass, we&#39;ll fetch the recipe:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/controllers/recipes_controller.rb b/app/controllers/recipes_controller.rb
+index ac3e415..574f98d 100644
+--- a/app/controllers/recipes_controller.rb
++++ b/app/controllers/recipes_controller.rb
+@@ -8,5 +8,6 @@ class RecipesController &lt; ApplicationController
+   end
+ 
+   def show
++    @recipe = Recipe.find(params[:id])
+   end
+ end
+</code></pre><footer><h1>app/controllers/recipes_controller.rb</h1></footer></article>
+<p>and implement a JBuilder view that uses our existing <code>_recipe.json.jbuilder</code> partial:</p>
+<article class='code-listing'><pre><code class="language-">json.partial! &#39;recipe&#39;, recipe: @recipe
+</code></pre><footer><h1>app/views/recipes/show.json.jbuilder</h1></footer></article>
+<p>To handle the case of a non-existent recipe, we&#39;ll let the
+<code>ActiveRecord::RecordNotFound</code> leak out of our controller, and use
+<code>rescue_from</code> in <code>ApplicationController</code> to handle that.  This way, we never
+have to worry about translating this error into a 404 again.</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/controllers/application_controller.rb b/app/controllers/application_controller.rb
+index d83690e..4b24b0c 100644
+--- a/app/controllers/application_controller.rb
++++ b/app/controllers/application_controller.rb
+@@ -2,4 +2,10 @@ class ApplicationController &lt; ActionController::Base
+   # Prevent CSRF attacks by raising an exception.
+   # For APIs, you may want to use :null_session instead.
+   protect_from_forgery with: :exception
++
++  rescue_from ActiveRecord::RecordNotFound do
++    respond_to do |type|
++      type.all  { render :nothing =&gt; true, :status =&gt; 404 }
++    end
++  end
+ end
+</code></pre><footer><h1>app/controllers/application_controller.rb</h1></footer></article>
+<p>Now, everything passes!</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rspec spec/controllers/recipes_controller_spec.rb
+..........
+
+Finished in 0.54056 seconds
+10 examples, 0 failures
+
+Randomized with seed 34659
+</code></pre></article>
+<p>Let&#39;s bring it all together with a browser-based test.</p>
+<a name='create-a-browser-based-test'></a><h3>Create a Browser-Based Test</h3>
+<p>Our browser-based test will simulate a user using our app, so we&#39;ll first do a
+search, and then navigate to a specific recipe.  We&#39;ll then check that the
+resulting view shows the title <em>and</em> instructions.  We&#39;ll also navigate back
+to our results, assuming the existence of a “back” button.</p>
+<article class='code-listing'><pre><code class="language-ruby">require &#39;spec_helper.rb&#39;
+
+feature &quot;Viewing a recipe&quot;, js: true do
+  before do
+    Recipe.create!(name: &#39;Baked Potato w/ Cheese&#39;, 
+           instructions: &quot;nuke for 20 minutes&quot;)
+
+    Recipe.create!(name: &#39;Baked Brussel Sprouts&#39;,
+           instructions: &#39;Slather in oil, and roast on high heat for 20 minutes&#39;)
+  end
+  scenario &quot;view one recipe&quot; do
+    visit &#39;/&#39;
+    fill_in &quot;keywords&quot;, with: &quot;baked&quot;
+    click_on &quot;Search&quot;
+
+    click_on &quot;Baked Brussel Sprouts&quot;
+
+    expect(page).to have_content(&quot;Baked Brussel Sprouts&quot;)
+    expect(page).to have_content(&quot;Slather in oil&quot;)
+
+    click_on &quot;Back&quot;
+
+    expect(page).to     have_content(&quot;Baked Brussel Sprouts&quot;)
+    expect(page).to_not have_content(&quot;Slather in oil&quot;)
+  end
+end
+</code></pre><footer><h1>spec/features/view_spec.rb</h1></footer></article>
+<p>Running the test fails:</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rspec spec/features/view_spec.rb
+F
+
+Failures:
+
+  1) Viewing a recipe view one recipe
+     Failure/Error: expect(page).to have_content(&quot;Baked Brussel Sprouts&quot;)
+       expected to find text &quot;Baked Brussel Sprouts&quot; in &quot;Find Recipes Keywords Search&quot;
+     # ./spec/features/view_spec.rb:18:in `block (2 levels) in &lt;top (required)&gt;&#39;
+
+Finished in 6.16 seconds
+1 example, 1 failure
+
+Failed examples:
+
+rspec ./spec/features/view_spec.rb:11 # Viewing a recipe view one recipe
+
+Randomized with seed 40717
+</code></pre></article>
+<p>If you recall, we just used an <code>href</code> of <code>#</code> around the recipe name in the
+search results.  Clicking that essentially clears the search and starts over.  </p>
+
+<p>We&#39;ll need to change that <code>a</code> to route us to <code>/recipes/:recipeId</code>, as well
+as actually build out the “show” view.</p>
+
+<p>First, we&#39;ll change the <code>a</code>:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/templates/index.html b/app/assets/javascripts/templates/index.html
+index fd7a6f1..d830331 100644
+--- a/app/assets/javascripts/templates/index.html
++++ b/app/assets/javascripts/templates/index.html
+@@ -18,7 +18,7 @@
+   &lt;ul class=&quot;list-unstyled&quot;&gt;
+     &lt;li ng-repeat=&quot;recipe in recipes&quot;&gt;
+       &lt;section class=&quot;well col-md-6 col-md-offset-3&quot;&gt;
+-        &lt;h1 class=&quot;h3 col-md-6 text-right&quot; style=&quot;margin-top: 0&quot;&gt;&lt;a href=&quot;#&quot;&gt;{{recipe.name}}&lt;/a&gt;&lt;/h1&gt;
++        &lt;h1 class=&quot;h3 col-md-6 text-right&quot; style=&quot;margin-top: 0&quot;&gt;&lt;a href ng-click=&quot;view(recipe.id)&quot; &gt;{{recipe.name}}&lt;/a&gt;&lt;/h1&gt;
+         &lt;div class=&quot;col-md-6&quot;&gt;
+           &lt;button class=&quot;btn btn-info&quot;&gt;Edit&lt;/button&gt;
+           &lt;button class=&quot;btn btn-danger&quot;&gt;Delete&lt;/button&gt;
+</code></pre><footer><h1>app/assets/javascripts/templates/index.html</h1></footer></article>
+<p>Notice that we removed the argument to <code>href</code>, which will keep the browser
+from changing its location and reloading our view.  Instead, we used
+<code>ng-click</code> to trigger the <code>view()</code> method that we&#39;ll now add to
+<code>RecipesController</code>:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/controllers/RecipesController.coffee b/app/assets/javascripts/controllers/RecipesController.coffee
+index b9cc5b3..bfff8fd 100644
+--- a/app/assets/javascripts/controllers/RecipesController.coffee
++++ b/app/assets/javascripts/controllers/RecipesController.coffee
+@@ -8,4 +8,6 @@ controllers.controller(&quot;RecipesController&quot;, [ &#39;$scope&#39;, &#39;$routeParams&#39;, &#39;$locati
+       Recipe.query(keywords: $routeParams.keywords, (results)-&gt; $scope.recipes = results)
+     else
+       $scope.recipes = []
++
++    $scope.view = (recipeId)-&gt; $location.path(&quot;/recipes/#{recipeId}&quot;)
+ ])
+</code></pre><footer><h1>app/assets/javascripts/controllers/RecipesController.coffee</h1></footer></article>
+<p>All that&#39;s left is to create the view in <code>show.html</code>:</p>
+<article class='code-listing'><pre><code class="language-html">&lt;section class=&quot;col-md-6 col-md-offset-3&quot;&gt;
+  &lt;article class=&quot;panel panel-info&quot;&gt;
+    &lt;header class=&quot;panel-heading&quot;&gt;&lt;h1&gt;{{recipe.name}}&lt;/h1&gt;&lt;/header&gt;
+    &lt;p class=&quot;panel-body&quot;&gt;
+      {{recipe.instructions}}
+    &lt;/p&gt;
+  &lt;/article&gt;
+  &lt;button ng-click=&quot;back()&quot; class=&quot;btn btn-default&quot;&gt;
+    &amp;larr; Back
+  &lt;/button&gt;
+&lt;/section&gt;
+</code></pre><footer><h1>app/assets/javascripts/templates/show.html</h1></footer></article>
+<p>We&#39;ll also add a method to make the “Back” button work:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/controllers/RecipeController.coffee b/app/assets/javascripts/controllers/RecipeController.coffee
+index 3c79735..daba393 100644
+--- a/app/assets/javascripts/controllers/RecipeController.coffee
++++ b/app/assets/javascripts/controllers/RecipeController.coffee
+@@ -1,6 +1,6 @@
+ controllers = angular.module(&#39;controllers&#39;)
+-controllers.controller(&quot;RecipeController&quot;, [ &#39;$scope&#39;, &#39;$routeParams&#39;, &#39;$resource&#39;, &#39;flash&#39;,
+-  ($scope,$routeParams,$resource,flash)-&gt;
++controllers.controller(&quot;RecipeController&quot;, [ &#39;$scope&#39;, &#39;$routeParams&#39;, &#39;$resource&#39;, &#39;$location&#39;, &#39;flash&#39;,
++  ($scope,$routeParams,$resource,$location, flash)-&gt;
+     Recipe = $resource(&#39;/recipes/:recipeId&#39;, { recipeId: &quot;@id&quot;, format: &#39;json&#39; })
+ 
+     Recipe.get({recipeId: $routeParams.recipeId},
+@@ -11,4 +11,6 @@ controllers.controller(&quot;RecipeController&quot;, [ &#39;$scope&#39;, &#39;$routeParams&#39;, &#39;$resourc
+       )
+     )
+ 
++    $scope.back = -&gt; $location.path(&quot;/&quot;)
++
+ ])
+</code></pre><footer><h1>app/assets/javascripts/controllers/RecipeController.coffee</h1></footer></article>
+<p>Now, everything works:</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rspec spec/features/view_spec.rb
+.
+
+Finished in 4.92 seconds
+1 example, 0 failures
+
+Randomized with seed 61364
+</code></pre></article>
+<p>We added the back button and function specifically to call out a gap between
+what we get with Angular and what we get with Rails, with respect to view and
+controller implementation.</p>
+
+<p>We&#39;ve already seen that Angular&#39;s router requires more explicit configuration
+than Rails&#39;.  We can also now see that we don&#39;t get convienient methods like
+<code>recipes_path</code> or <code>recipe_path(recipe)</code> to generate routes for us.  There
+doesn&#39;t seem to be a canonical way to do this at this time.</p>
+
+<p>There&#39;s one last thing to do, and that&#39;s integrate the flash message.  </p>
+<a name='integrate-flash-message'></a><h3>Integrate Flash Message</h3>
+<p>Although we hope to not generate links to non-existent
+recipes, it&#39;s still possible it could happen and, unlike a web app where a 404 will send us to a special page, since our Angular
+app is using AJAX requests, we&#39;ll have to do <em>something</em> if we get an error from the backend.  We test-drove setting an error
+message in the flash, so now we just need to show it in our view.</p>
+
+<p>The <code>angular-flash</code> module we installed has two parts. The first, which we&#39;ve already seen, is a place to store flash messages.
+The second is to allow your view to “subscribe” to them, which means that you can arrange for markup to be shown if there is a
+flash message.</p>
+
+<p>Because this is not something a user will ever be intended to see, and is also very simple, we&#39;re not going to write a test for it.  If there were more
+complex logic around the flash, and its message, a test would be more useful, but for this case, it&#39;s not really worth it.</p>
+
+<p>First, we&#39;ll add the necessary markup to <code>show.html</code>:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/templates/show.html b/app/assets/javascripts/templates/show.html
+index 5e846a7..df041fb 100644
+--- a/app/assets/javascripts/templates/show.html
++++ b/app/assets/javascripts/templates/show.html
+@@ -1,3 +1,8 @@
++&lt;aside class=&quot;flash row&quot;&gt;
++  &lt;article flash-alert duration=&quot;0&quot; active-class=&quot;alert&quot; class=&quot;col-md-6 col-md-offset-3 col-sm-12&quot;&gt;
++    {{flash.message}}
++  &lt;/article&gt;
++&lt;/aside&gt;
+ &lt;section class=&quot;col-md-6 col-md-offset-3&quot;&gt;
+   &lt;article class=&quot;panel panel-info&quot;&gt;
+     &lt;header class=&quot;panel-heading&quot;&gt;&lt;h1&gt;{{recipe.name}}&lt;/h1&gt;&lt;/header&gt;
+</code></pre><footer><h1>app/assets/javascripts/templates/show.html</h1></footer></article>
+<p>Our <code>article</code> tag has three special attributes, provided by <code>angular-flash</code>: </p>
+
+<ul>
+<li><code>flash-alert</code> which binds this markup to the contents of the flash</li>
+<li><code>duration</code> which we can use to “fade out” the flash after a time</li>
+<li><code>active-class</code>, a class that will be added to this element when the flash has a value</li>
+</ul>
+
+<p>The second thing we need to do is to configure <code>angular-flash</code> so that it knows about the various alert classes that Bootstrap
+provides.  We do this in the app config in <code>app.coffee</code>:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/app.coffee b/app/assets/javascripts/app.coffee
+index 117380d..00b5df2 100644
+--- a/app/assets/javascripts/app.coffee
++++ b/app/assets/javascripts/app.coffee
+@@ -7,8 +7,14 @@ receta = angular.module(&#39;receta&#39;,[
+   &#39;angular-flash.flash-alert-directive&#39;
+ ])
+ 
+-receta.config([ &#39;$routeProvider&#39;,
+-  ($routeProvider)-&gt;
++receta.config([ &#39;$routeProvider&#39;, &#39;flashProvider&#39;,
++  ($routeProvider,flashProvider)-&gt;
++
++    flashProvider.errorClassnames.push(&quot;alert-danger&quot;)
++    flashProvider.warnClassnames.push(&quot;alert-warning&quot;)
++    flashProvider.infoClassnames.push(&quot;alert-info&quot;)
++    flashProvider.successClassnames.push(&quot;alert-success&quot;)
++
+     $routeProvider
+       .when(&#39;/&#39;,
+         templateUrl: &quot;index.html&quot;
+</code></pre><footer><h1>app/assets/javascripts/app.coffee</h1></footer></article>
+<p>What this configuration means is that if there is, for example, a value in <code>flash.error</code>, <code>angular-flash</code> will add the class
+<code>alert-danger</code> to the flash element.  Since we also configured that element to add <code>alert</code> to <em>any</em> flash message, our markup
+will be styled with the class <code>alert alert-danger</code> which is what Bootstrap needs to show an alert.</p>
+
+<p>Now, let&#39;s navigate to a non-existent recipe and see it in action:</p>
+
+<p><img src='images/FlashMessage.png' alt='Flash Message' title=''></p>
+
+<p>Perfect!</p>
+
+<p>Now that we&#39;ve seen how we can use TDD for all aspects of our feature, let&#39;s
+add the create, update, and destroy features.  We&#39;ll do this very quickly as a
+way to demonstrate what the code looks like.  You probably wouldn&#39;t add all of
+these at the same time in your “real” application.</p>
+<footer>
+  <ol>
+    <li class="previous"><a href="find_and_browse.html">&larr; 
+        Finding Recipes
+    </a></li>
+    <li class="next"><a href="crud_recipe.html">
+        Create, Update, and Delete
+        &rarr;</a></li>
+  </ol>
+  <div class="clearfix"></div>
+  <p class="copyright">
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">AngularJS with Ruby on Rails</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="http://angular-rails.com" property="cc:attributionName" rel="cc:attributionURL">David Bryant Copeland</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License
+    </a>.
+  </p>
+<script src="//static.getclicky.com/js" type="text/javascript"></script>
+<script type="text/javascript">try{ clicky.init(100722319); }catch(e){}</script>
+<noscript><p><img alt="Clicky" width="1" height="1" src="//in.getclicky.com/100722319ns.gif" /></p></noscript>
+</footer>
+</body>
+</html>

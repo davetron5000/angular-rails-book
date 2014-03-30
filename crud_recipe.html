@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href='styles.css' rel='stylesheet' type='text/css' media='all'>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <meta charset="utf-8">
+  <title>AngularJS with Ruby on Rails: From zero to deployment in less than 10,000 words</title>
+  <script type="text/javascript" src="//use.typekit.net/hiq5jip.js"></script>
+  <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.0/styles/solarized_light.min.css">
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+  <h1><a href="index.html">AngularJS with Ruby on Rails</a></h1>
+      <p class="byline">by David Bryant Copeland</p>
+<a name='create,-update,-and-delete'></a><h2>Create, Update, and Delete</h2>
+<p>In the last section, we worked “inside out”, starting with <code>RecipeController</code>
+and integrating everything at the end, driven by a browser-based test.</p>
+
+<p>This time, let&#39;s work “outside in” by starting with a browser test that will mimic user behavior.  We&#39;ll make a test that creates
+a recipe, edits it, and then deletes it, so we can test everything at once.</p>
+<article class='code-listing'><pre><code class="language-ruby">require &#39;spec_helper.rb&#39;
+
+feature &quot;Creating, editing, and deleting a recipe&quot;, js: true do
+  scenario &quot;CRUD a recipe&quot; do
+    visit &#39;/&#39;
+    click_on &quot;New Recipe…&quot;
+
+    fill_in &quot;name&quot;, with: &quot;Baked Brussel Sprouts&quot;
+    fill_in &quot;instructions&quot;, with: &quot;Slather in oil, then bake for 20 minutes&quot;
+
+    click_on &quot;Save&quot;
+
+    expect(page).to have_content(&quot;Baked Brussel Sprouts&quot;)
+    expect(page).to have_content(&quot;Slather in oil&quot;)
+
+    click_on &quot;Edit&quot;
+
+    fill_in &quot;name&quot;, with: &quot;Roasted Brussel Sprouts&quot;
+    fill_in &quot;instructions&quot;, with: &quot;Slather in oil, then roast for 20 minutes&quot;
+
+    click_on &quot;Save&quot;
+
+    expect(page).to have_content(&quot;Roasted Brussel Sprouts&quot;)
+    expect(page).to have_content(&quot;then roast for 20 minutes&quot;)
+
+    visit &quot;/&quot;
+    fill_in &quot;keywords&quot;, with: &quot;Roasted&quot;
+    click_on &quot;Search&quot;
+
+    click_on &quot;Roasted Brussel Sprouts&quot;
+
+    click_on &quot;Delete&quot;
+
+    expect(Recipe.find_by_name(&quot;Roasted Brussel Sprouts&quot;)).to be_nil
+
+  end
+end
+</code></pre><footer><h1>spec/features/edit_spec.rb</h1></footer></article>
+<p>The test, of course, fails:</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rspec spec/features/edit_spec.rb
+F
+
+Failures:
+
+  1) Creating, editing, and deleting a recipe CRUD a recipe
+     Failure/Error: click_on &quot;New Recipe…&quot;
+     Capybara::ElementNotFound:
+       Unable to find link or button &quot;New Recipe…&quot;
+     # ./spec/features/edit_spec.rb:6:in `block (2 levels) in &lt;top (required)&gt;&#39;
+
+Finished in 5.47 seconds
+1 example, 1 failure
+
+Failed examples:
+
+rspec ./spec/features/edit_spec.rb:4 # Creating, editing, and deleting a recipe CRUD a recipe
+
+Randomized with seed 32393
+</code></pre></article>
+<p>To make it work, we&#39;ll need to:</p>
+
+<ul>
+<li>add functionatliy to our back-end controller</li>
+<li>add functionatliy to our Angular controllers</li>
+<li>create views</li>
+</ul>
+<a name='implement-back-end-controller'></a><h3>Implement back-end controller</h3>
+<p>First, we&#39;ll add some tests for our controller to get started:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/spec/controllers/recipes_controller_spec.rb b/spec/controllers/recipes_controller_spec.rb
+index 20e3ad0..a3394b5 100644
+--- a/spec/controllers/recipes_controller_spec.rb
++++ b/spec/controllers/recipes_controller_spec.rb
+@@ -68,4 +68,41 @@ describe RecipesController do
+       it { expect(response.status).to eq(404) }
+     end
+   end
++
++  describe &quot;create&quot; do
++    before do
++      xhr :post, :create, format: :json, recipe: { name: &quot;Toast&quot;, 
++                                           instructions: &quot;Add bread to toaster, push lever&quot; }
++    end
++    it { expect(response.status).to eq(201) }
++    it { expect(Recipe.last.name).to eq(&quot;Toast&quot;) }
++    it { expect(Recipe.last.instructions).to eq(&quot;Add bread to toaster, push lever&quot;) }
++  end
++
++  describe &quot;update&quot; do
++    let(:recipe) { 
++      Recipe.create!(name: &#39;Baked Potato w/ Cheese&#39;, 
++                     instructions: &quot;Nuke for 20 minutes; top with cheese&quot;) 
++    }
++    before do
++      xhr :put, :update, format: :json, id: recipe.id, recipe: { name: &quot;Toast&quot;, 
++                                                 instructions: &quot;Add bread to toaster, push lever&quot; }
++      recipe.reload
++    end
++    it { expect(response.status).to eq(204) }
++    it { expect(recipe.name).to eq(&quot;Toast&quot;) }
++    it { expect(recipe.instructions).to eq(&quot;Add bread to toaster, push lever&quot;) }
++  end
++
++  describe &quot;destroy&quot; do
++    let(:recipe_id) { 
++      Recipe.create!(name: &#39;Baked Potato w/ Cheese&#39;, 
++                     instructions: &quot;Nuke for 20 minutes; top with cheese&quot;).id
++    }
++    before do
++      xhr :delete, :destroy, format: :json, id: recipe_id
++    end
++    it { expect(response.status).to eq(204) }
++    it { expect(Recipe.find_by_id(recipe_id)).to be_nil }
++  end
+ end
+</code></pre><footer><h1>spec/controllers/recipes_controller_spec.rb</h1></footer></article>
+<p>This is nothing but the happy path, mostly to speed us along here.</p>
+
+<p>Now, let&#39;s make these tests pass:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/controllers/recipes_controller.rb b/app/controllers/recipes_controller.rb
+index 574f98d..a0bdda0 100644
+--- a/app/controllers/recipes_controller.rb
++++ b/app/controllers/recipes_controller.rb
+@@ -1,4 +1,6 @@
+ class RecipesController &lt; ApplicationController
++  skip_before_filter :verify_authenticity_token
++
+   def index
+     @recipes = if params[:keywords]
+                  Recipe.where(&#39;name ilike ?&#39;,&quot;%#{params[:keywords]}%&quot;)
+@@ -10,4 +12,22 @@ class RecipesController &lt; ApplicationController
+   def show
+     @recipe = Recipe.find(params[:id])
+   end
++
++  def create
++    @recipe = Recipe.new(params.require(:recipe).permit(:name,:instructions))
++    @recipe.save
++    render &#39;show&#39;, status: 201
++  end
++
++  def update
++    recipe = Recipe.find(params[:id])
++    recipe.update_attributes(params.require(:recipe).permit(:name,:instructions))
++    head :no_content
++  end
++
++  def destroy
++    recipe = Recipe.find(params[:id])
++    recipe.destroy
++    head :no_content
++  end
+ end
+</code></pre><footer><h1>app/controllers/recipes_controller.rb</h1></footer></article>
+<p>You&#39;ll notice that we are skipping the authenticity token verification.  While
+there is a way to insert the one that Rails generates into all HTTP requests,
+this is a one-time use token.  If we make more than one HTTP POST to our
+app we&#39;ll need a new token each time.  There currently isn&#39;t a good way
+to generate one, so we have to skip the check for this.</p>
+
+<p>Back to our test, everything seems to be working:</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rspec spec/controllers/recipes_controller_spec.rb
+..................
+
+Finished in 0.69951 seconds
+18 examples, 0 failures
+
+Randomized with seed 26028
+</code></pre></article>
+<p>With the back-end working, let&#39;s turn our attention to the front end, which will call this code.</p>
+<a name='implement-front-end-controllers'></a><h3>Implement front-end controllers</h3>
+<p>We&#39;ll have <code>RecipeController</code> handle these operations.  It has the <code>Recipe</code> resource we created using Angular&#39;s <code>$resource</code>
+service, so it should be pretty straightforward to add new functions.</p>
+
+<p>First, we&#39;ll create a test for creating, saving, and deleting.  One wrinkle in our design is that for the case of creating a new
+recipe, there won&#39;t be an id in the URL, so we don&#39;t want to fetch anything from the backend.  At this point, it just means we
+need to setup the controller so that there&#39;s no <code>recipeId</code> in the URL, and no expectation of doing a <code>GET</code> to the backend.</p>
+
+<p>Once we&#39;ve changed <code>setupController()</code> accordingly, all we need to do is setup expectations of the HTTP calls to our backend, and
+then call the functions on <code>scope</code> that we&#39;ll need.</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/spec/javascripts/controllers/RecipeController_spec.coffee b/spec/javascripts/controllers/RecipeController_spec.coffee
+index 3455f0d..28e6707 100644
+--- a/spec/javascripts/controllers/RecipeController_spec.coffee
++++ b/spec/javascripts/controllers/RecipeController_spec.coffee
+@@ -4,6 +4,7 @@ describe &quot;RecipeController&quot;, -&gt;
+   routeParams  = null
+   httpBackend  = null
+   flash        = null
++  location     = null
+   recipeId     = 42
+ 
+   fakeRecipe   =
+@@ -11,22 +12,23 @@ describe &quot;RecipeController&quot;, -&gt;
+     name: &quot;Baked Potatoes&quot;
+     instructions: &quot;Pierce potato with fork, nuke for 20 minutes&quot;
+ 
+-  setupController =(recipeExists=true)-&gt;
++  setupController =(recipeExists=true,recipeId=42)-&gt;
+     inject(($location, $routeParams, $rootScope, $httpBackend, $controller, _flash_)-&gt;
+       scope       = $rootScope.$new()
+       location    = $location
+       httpBackend = $httpBackend
+       routeParams = $routeParams
+-      routeParams.recipeId = recipeId
++      routeParams.recipeId = recipeId if recipeId
+       flash = _flash_
+ 
+-      request = new RegExp(&quot;\/recipes/#{recipeId}&quot;)
+-      results = if recipeExists
+-        [200,fakeRecipe]
+-      else
+-        [404]
++      if recipeId
++        request = new RegExp(&quot;\/recipes/#{recipeId}&quot;)
++        results = if recipeExists
++          [200,fakeRecipe]
++        else
++          [404]
+ 
+-      httpBackend.expectGET(request).respond(results[0],results[1])
++        httpBackend.expectGET(request).respond(results[0],results[1])
+ 
+       ctrl        = $controller(&#39;RecipeController&#39;,
+                                 $scope: scope)
+@@ -50,3 +52,51 @@ describe &quot;RecipeController&quot;, -&gt;
+         httpBackend.flush()
+         expect(scope.recipe).toBe(null)
+         expect(flash.error).toBe(&quot;There is no recipe with ID #{recipeId}&quot;)
++
++  describe &#39;create&#39;, -&gt;
++    newRecipe =
++      id: 42
++      name: &#39;Toast&#39;
++      instructions: &#39;put in toaster, push lever, add butter&#39;
++
++    beforeEach -&gt;
++      setupController(false,false)
++      request = new RegExp(&quot;\/recipes&quot;)
++      httpBackend.expectPOST(request).respond(201,newRecipe)
++
++    it &#39;posts to the backend&#39;, -&gt;
++      scope.recipe.name         = newRecipe.name
++      scope.recipe.instructions = newRecipe.instructions
++      scope.save()
++      httpBackend.flush()
++      expect(location.path()).toBe(&quot;/recipes/#{newRecipe.id}&quot;)
++
++  describe &#39;update&#39;, -&gt;
++    updatedRecipe =
++      name: &#39;Toast&#39;
++      instructions: &#39;put in toaster, push lever, add butter&#39;
++
++    beforeEach -&gt;
++      setupController()
++      httpBackend.flush()
++      request = new RegExp(&quot;\/recipes&quot;)
++      httpBackend.expectPUT(request).respond(204)
++
++    it &#39;posts to the backend&#39;, -&gt;
++      scope.recipe.name         = updatedRecipe.name
++      scope.recipe.instructions = updatedRecipe.instructions
++      scope.save()
++      httpBackend.flush()
++      expect(location.path()).toBe(&quot;/recipes/#{scope.recipe.id}&quot;)
++
++  describe &#39;delete&#39; ,-&gt;
++    beforeEach -&gt;
++      setupController()
++      httpBackend.flush()
++      request = new RegExp(&quot;\/recipes/#{scope.recipe.id}&quot;)
++      httpBackend.expectDELETE(request).respond(204)
++
++    it &#39;posts to the backend&#39;, -&gt;
++      scope.delete()
++      httpBackend.flush()
++      expect(location.path()).toBe(&quot;/&quot;)
+</code></pre><footer><h1>spec/javascripts/controllers/RecipeController_spec.coffee</h1></footer></article>
+<p>You&#39;ll notice that <code>save()</code> is handling both creating a new recipe and updating an existing one.  This will make it easier to
+re-use our view for both purposes, since the “Save” button we&#39;ll create can just call <code>save()</code>, allowing the controller to work
+out just how to talk to the back-end.</p>
+
+<p>To make this test pass, we&#39;ll need to:</p>
+
+<ul>
+<li>Check <code>$routeParams</code> for a recipe id and, if we don&#39;t find one, create an empty recipe</li>
+<li>Override Angular&#39;s defaults for saving a resource to use the Rails-standard “PUT”</li>
+<li>Implement <code>save()</code> and <code>delete()</code>.</li>
+<li>Add a few methods to help with navigating</li>
+</ul>
+
+<p>Let&#39;s do it:</p>
+<article class='code-listing'><pre><code class="language-">controllers = angular.module(&#39;controllers&#39;)
+controllers.controller(&quot;RecipeController&quot;, [ &#39;$scope&#39;, &#39;$routeParams&#39;, &#39;$resource&#39;, &#39;$location&#39;, &#39;flash&#39;,
+  ($scope,$routeParams,$resource,$location, flash)-&gt;
+    Recipe = $resource(&#39;/recipes/:recipeId&#39;, { recipeId: &quot;@id&quot;, format: &#39;json&#39; },
+      {
+        &#39;save&#39;:   {method:&#39;PUT&#39;},
+        &#39;create&#39;: {method:&#39;POST&#39;}
+      }
+    )
+
+    if $routeParams.recipeId
+      Recipe.get({recipeId: $routeParams.recipeId},
+        ( (recipe)-&gt; $scope.recipe = recipe ),
+        ( (httpResponse)-&gt;
+          $scope.recipe = null
+          flash.error   = &quot;There is no recipe with ID #{$routeParams.recipeId}&quot;
+        )
+      )
+    else
+      $scope.recipe = {}
+
+    $scope.back   = -&gt; $location.path(&quot;/&quot;)
+    $scope.edit   = -&gt; $location.path(&quot;/recipes/#{$scope.recipe.id}/edit&quot;)
+    $scope.cancel = -&gt;
+      if $scope.recipe.id
+        $location.path(&quot;/recipes/#{$scope.recipe.id}&quot;)
+      else
+        $location.path(&quot;/&quot;)
+
+    $scope.save = -&gt;
+      onError = (_httpResponse)-&gt; flash.error = &quot;Something went wrong&quot;
+      if $scope.recipe.id
+        $scope.recipe.$save(
+          ( ()-&gt; $location.path(&quot;/recipes/#{$scope.recipe.id}&quot;) ),
+          onError)
+      else
+        Recipe.create($scope.recipe,
+          ( (newRecipe)-&gt; $location.path(&quot;/recipes/#{newRecipe.id}&quot;) ),
+          onError
+        )
+
+    $scope.delete = -&gt;
+      $scope.recipe.$delete()
+      $scope.back()
+
+
+])
+</code></pre><footer><h1>app/assets/javascripts/controllers/RecipeController.coffee</h1></footer></article>
+<p>You&#39;ll notice we made a <code>create()</code> method when setting up our <code>Recipe</code> resource.  By default, Angular allows both
+<code>recipe.$save()</code> and <code>Recipe.save(recipe)</code>, the later being what we&#39;d use to create a new recipe.  Since Rails wants a <code>POST</code> for
+create and a <code>PUT</code> for update, we have to change the defaults.</p>
+
+<p>You&#39;ll also notice that we added a few functions for navigation.  <code>edit()</code> takes the user to the edit form, and <code>cancel()</code> takes
+the user back to wherever makes sense based on the current operation.</p>
+
+<p>This implementation also shows a deviation from what we get with Rails.  With Angular, there&#39;s no built-in way to route our code
+based on the which “CRUD” operation is being performed.  We have to examine
+the inputs and figure it out for ourselves.</p>
+
+<p>Now, let&#39;s see if our tests pass:</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rake teaspoon
+Starting the Teaspoon server...
+Teaspoon running default suite at http://127.0.0.1:59124/teaspoon/default
+........
+
+Finished in 0.03100 seconds
+8 examples, 0 failures
+</code></pre></article>
+<p>So far, so good.  The only thing left is to create and wire up the views.</p>
+<a name='hooking-up-the-views'></a><h3>Hooking up the Views</h3>
+<p>As you could see from our test, we&#39;re going to create two new routes: <code>/recipes/new</code> and <code>/recipes/:recipeId/edit</code>, both handled
+by <code>RecipeController</code> and a new view, <code>form.html</code>.</p>
+
+<p>First, let&#39;s set up the routes in <code>app.coffee</code>:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/app.coffee b/app/assets/javascripts/app.coffee
+index 00b5df2..00eb6bb 100644
+--- a/app/assets/javascripts/app.coffee
++++ b/app/assets/javascripts/app.coffee
+@@ -19,9 +19,15 @@ receta.config([ &#39;$routeProvider&#39;, &#39;flashProvider&#39;,
+       .when(&#39;/&#39;,
+         templateUrl: &quot;index.html&quot;
+         controller: &#39;RecipesController&#39;
++      ).when(&#39;/recipes/new&#39;,
++        templateUrl: &quot;form.html&quot;
++        controller: &#39;RecipeController&#39;
+       ).when(&#39;/recipes/:recipeId&#39;,
+         templateUrl: &quot;show.html&quot;
+         controller: &#39;RecipeController&#39;
++      ).when(&#39;/recipes/:recipeId/edit&#39;,
++        templateUrl: &quot;form.html&quot;
++        controller: &#39;RecipeController&#39;
+       )
+ ])
+ 
+</code></pre><footer><h1>app/assets/javascripts/app.coffee</h1></footer></article>
+<p>Next, we&#39;ll create <code>form.html</code>:</p>
+<article class='code-listing'><pre><code class="language-html">&lt;aside class=&quot;flash row&quot;&gt;
+  &lt;article flash-alert duration=&quot;0&quot; active-class=&quot;alert&quot; class=&quot;col-md-6 col-md-offset-3&quot;&gt;
+    {{flash.message}}
+  &lt;/article&gt;
+&lt;/aside&gt;
+&lt;form class=&quot;form-horizontal&quot; role=&quot;form&quot; class=&quot;edit-user&quot;&gt;
+  &lt;div class=&quot;form-group&quot; ng-class=&quot;{&#39;has-warning has-feedback&#39;:errors.name}&quot;&gt;
+    &lt;label 
+      for=&quot;name&quot; 
+      class=&quot;col-md-2 control-label col-md-offset-2&quot;&gt;
+      Name
+    &lt;/label&gt;
+    &lt;div class=&quot;col-md-5&quot;&gt;
+      &lt;input type=&quot;text&quot; name=&quot;name&quot; class=&quot;form-control&quot; placeholder=&quot;e.g. Baked Alaska&quot; ng-model=&quot;recipe.name&quot;&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;form-group&quot; ng-class=&quot;{&#39;has-warning has-feedback&#39;:errors.name}&quot;&gt;
+    &lt;label 
+      for=&quot;instructions&quot; 
+      class=&quot;col-md-2 control-label col-md-offset-2&quot;&gt;
+      Instructions
+    &lt;/label&gt;
+    &lt;div class=&quot;col-md-5&quot;&gt;
+      &lt;textarea name=&quot;instructions&quot; class=&quot;form-control&quot; ng-model=&#39;recipe.instructions&#39; placeholder=&quot;e.g. Flambé for 20 seconds&quot;&gt;
+      &lt;/textarea&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;form-group&quot;&gt;
+    &lt;div class=&quot;col-md-offset-2 col-md-3&quot;&gt;
+      &lt;button class=&quot;btn btn-default&quot; ng-click=&quot;cancel()&quot;&gt; Cancel&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;col-md-4 text-right&quot;&gt;
+      &lt;button class=&quot;btn btn-primary&quot; ng-click=&quot;save()&quot;&gt; Save &lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/section&gt;
+</code></pre><footer><h1>app/assets/javascripts/templates/form.html</h1></footer></article>
+<p>Now, we&#39;ll need to add a link to create a recipe to <code>index.html</code>:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/templates/index.html b/app/assets/javascripts/templates/index.html
+index d830331..36ec3a8 100644
+--- a/app/assets/javascripts/templates/index.html
++++ b/app/assets/javascripts/templates/index.html
+@@ -9,6 +9,7 @@
+     &lt;/div&gt;
+     &lt;div class=&quot;form-group col-md-6 col-md-offset-3 text-center&quot;&gt;
+       &lt;button ng-click=&quot;search(keywords)&quot; class=&quot;btn btn-primary btn-lg&quot;&gt;Search&lt;/button&gt;
++      &lt;button ng-click=&quot;newRecipe()&quot; class=&quot;btn btn-info btn-lg&quot;&gt;New Recipe…&lt;/button&gt;
+     &lt;/div&gt;
+   &lt;/form&gt;
+ &lt;/section&gt;
+@@ -20,8 +21,7 @@
+       &lt;section class=&quot;well col-md-6 col-md-offset-3&quot;&gt;
+         &lt;h1 class=&quot;h3 col-md-6 text-right&quot; style=&quot;margin-top: 0&quot;&gt;&lt;a href ng-click=&quot;view(recipe.id)&quot; &gt;{{recipe.name}}&lt;/a&gt;&lt;/h1&gt;
+         &lt;div class=&quot;col-md-6&quot;&gt;
+-          &lt;button class=&quot;btn btn-info&quot;&gt;Edit&lt;/button&gt;
+-          &lt;button class=&quot;btn btn-danger&quot;&gt;Delete&lt;/button&gt;
++          &lt;button ng-click=&quot;edit(recipe.id)&quot; class=&quot;btn btn-info&quot;&gt;Edit&lt;/button&gt;
+         &lt;/div&gt;
+       &lt;/section&gt;
+     &lt;/li&gt;
+</code></pre><footer><h1>app/assets/javascripts/templates/index.html</h1></footer></article>
+<p>And lastly, we&#39;ll need links to edit and delete a recipe in <code>show.html</code>:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/templates/show.html b/app/assets/javascripts/templates/show.html
+index df041fb..9522b52 100644
+--- a/app/assets/javascripts/templates/show.html
++++ b/app/assets/javascripts/templates/show.html
+@@ -10,7 +10,15 @@
+       {{recipe.instructions}}
+     &lt;/p&gt;
+   &lt;/article&gt;
+-  &lt;button ng-click=&quot;back()&quot; class=&quot;btn btn-default&quot;&gt;
+-    &amp;larr; Back
+-  &lt;/button&gt;
++  &lt;section&gt;
++    &lt;div class=&quot;col-md-3&quot;&gt;
++      &lt;button ng-click=&quot;back()&quot; class=&quot;btn btn-default&quot;&gt;
++        &amp;larr; Back
++      &lt;/button&gt;
++    &lt;/div&gt;
++    &lt;div class=&quot;col-md-9 text-right&quot;&gt;
++      &lt;button ng-click=&quot;edit()&quot; class=&quot;btn btn-info&quot;&gt; Edit &lt;/button&gt;
++      &lt;button ng-click=&quot;delete()&quot; class=&quot;btn btn-danger&quot;&gt; Delete &lt;/button&gt;
++    &lt;/div&gt;
++  &lt;/section&gt;
+ &lt;/section&gt;
+</code></pre><footer><h1>app/assets/javascripts/templates/show.html</h1></footer></article>
+<p>Whew!  Let&#39;s see if it all works by re-running our browser-based test:</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rspec spec/features/edit_spec.rb
+.
+
+Finished in 6.05 seconds
+1 example, 0 failures
+
+Randomized with seed 28171
+</code></pre></article>
+<p>Voila! It works!</p>
+<a name='wrapping-up'></a><h3>Wrapping Up</h3>
+<p>We went quite quickly through this part of the app, mostly to just see what an entire “CRUD” app would look like as well as some
+differences between what Rails gives us and what Angular doesn&#39;t.</p>
+
+<p>It may seem like we&#39;ve written a lot of extra code and tests to do something that would far simpler in Rails.  In a sense, this
+is true, but what Angular lacks in creating CRUD applications, it more than
+makes up for when creating a richer user experience.</p>
+
+<p>The last section is going to be some reflection on what we&#39;ve just learned and
+where we could go from here.</p>
+<footer>
+  <ol>
+    <li class="previous"><a href="view_recipe.html">&larr; 
+        Viewing a Recipe
+    </a></li>
+    <li class="next"><a href="back.html">
+        In Conclusion
+        &rarr;</a></li>
+  </ol>
+  <div class="clearfix"></div>
+  <p class="copyright">
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">AngularJS with Ruby on Rails</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="http://angular-rails.com" property="cc:attributionName" rel="cc:attributionURL">David Bryant Copeland</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License
+    </a>.
+  </p>
+<script src="//static.getclicky.com/js" type="text/javascript"></script>
+<script type="text/javascript">try{ clicky.init(100722319); }catch(e){}</script>
+<noscript><p><img alt="Clicky" width="1" height="1" src="//in.getclicky.com/100722319ns.gif" /></p></noscript>
+</footer>
+</body>
+</html>

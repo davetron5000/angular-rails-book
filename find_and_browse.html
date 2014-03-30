@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href='styles.css' rel='stylesheet' type='text/css' media='all'>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <meta charset="utf-8">
+  <title>AngularJS with Ruby on Rails: From zero to deployment in less than 10,000 words</title>
+  <script type="text/javascript" src="//use.typekit.net/hiq5jip.js"></script>
+  <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.0/styles/solarized_light.min.css">
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+  <h1><a href="index.html">AngularJS with Ruby on Rails</a></h1>
+      <p class="byline">by David Bryant Copeland</p>
+<a name='finding-recipes'></a><h2>Finding Recipes</h2>
+<p>Now that our application is set up with Angular and we have a way to manage
+assets, we can start building an actual feature.  As mentioned earlier, we&#39;re
+going to use tests to drive our work, but since this is the first feature
+we&#39;re doing, it&#39;ll help to have a little bit of code in place before setting
+up testing.</p>
+
+<p>Although TDD is an effective practice, it is difficult to use it
+to drive the <em>creation</em> of an application, especially where new technology is
+concerned.  Doing so creates too many new changes at once, making it difficult
+to diagnose problems - did we mess up our testing configuration, or are there
+deeper problems with the application code under test?</p>
+
+<p>Instead of wrestling with these issues, we&#39;ll take a few baby steps, starting
+with our UI and just a bit of application code.  We can verify this is working manually so that when we set up 
+our testing environment, we can focus on getting that working without <em>also</em> focusing on making
+our application work.</p>
+
+<p>This is what we&#39;re going to do:</p>
+
+<ol>
+<li>Create a basic search UI</li>
+<li>Write a small amount of code to make it work</li>
+<li>Set up our JavaScript testing environment</li>
+<li>Connect the back-end</li>
+</ol>
+<a name='create-a-basic-search-ui'></a><h3>Create a basic search UI</h3>
+<p>Since our application&#39;s views are not generally going to be served by Rails, the majority of our markup will live outside of a
+Rails view.  With Angular, we&#39;ll map routes to views and controllers, like so:</p>
+<article class='code-listing'><pre><code class="language-coffeescript">app.config([ &#39;$routeProvider&#39;,
+  ($routeProvider)-&gt;
+    $routeProvider
+      .when(&#39;/&#39;,
+        templateUrl: “index.html”
+        controller: &#39;SomeController&#39;
+      )
+      .when(&#39;/recipes/new&#39;,
+        templateUrl: “new.html”
+        controller: &#39;SomeOtherController&#39;
+      )
+])
+</code></pre></article>
+<p>This presents us with somewhat of a problem.  Angular is going to use the value of <code>templateUrl</code> to try to fetch the file we&#39;ve
+specified via AJAX.  This might actually work in development, but will certainly fail in production (and in subtle ways).
+This is because the asset pipeline works different in production mode.</p>
+
+<p>In production mode, the asset pipeline will control the path <em>and name</em> of assets it&#39;s serving.  Specifically, it will generate a
+hash for each asset and include that hash in the name.  That means that if Angular requests <code>/assets/index.html</code>, it will get a
+404, because the file&#39;s actual name will be something like <code>/assets/9834f200909a098a0a9a-index.html</code>.  More subtly,
+<code>/assets/index.html</code> would work in Rails 3, but no longer works in Rails 4.</p>
+
+<p>My initial search to solve this problem led me to a blog post that recommended using ERB, so that <code>app.coffee</code> could have access
+to the <code>asset_path</code> helper, which accounts for the location and naming, like so:</p>
+<article class='code-listing'><pre><code class="language-coffeescript"># This is app/assets/javascripts/app.coffee.erb
+
+#= depend_on_asset index.html
+#= depend_on_asset new.html
+app.config([ &#39;$routeProvider&#39;,
+  ($routeProvider)-&gt;
+    $routeProvider
+      .when(&#39;/&#39;,
+        templateUrl: “&lt;%= asset_path(&#39;index.html&#39;) %&gt;”
+        controller: &#39;SomeController&#39;
+      )
+      .when(&#39;/recipes/new&#39;,
+        templateUrl: “&lt;%= asset_path(&#39;new.html&#39;) %&gt;”
+        controller: &#39;SomeOtherController&#39;
+      )
+])
+</code></pre></article>
+<p>As of Rails 4.0.3 there is a bug with Sprockets that prevents this from
+working—Sprockets won&#39;t see that your templates have changed and <code>app.js</code>
+won&#39;t be recompiled to reference the updated templates.</p>
+
+<p>Even if that bug goes away, this solution still isn&#39;t great.  If you serve
+your assets from a content delivery network (CDN) the browser will be unable
+to access the templates at all.</p>
+
+<p>The reason is that Angular will request those assets at runtime, from the
+browser, and since your application isn&#39;t being served from your CDN, the
+browser, as a security measure, will refuse to allow Angular to read those
+assets.</p>
+
+<p>One solution to <strong>that</strong> problem is to configure Cross Origin
+Resource-Sharing (CORS), but this can be tricky to set up (or impossible, depending on your CDN).  It is also very difficult to
+debug if it&#39;s not working properly.</p>
+
+<p>What we&#39;d like to do is skip all of this entirely.  Angular caches templates after it requests them the first, so we really just
+need to pre-populate that cache.  This way, Angular won&#39;t need to request <em>any</em> assets, thus eliminating both the asset pipeline
+problem as well as the same-origin security policy.</p>
+
+<p>Fortunately, the gem <code>angular-rails-templates</code> exists to do just that.</p>
+
+<p>Let&#39;s add it to our <code>Gemfile</code>:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/Gemfile b/Gemfile
+index 7f82d36..58c9a73 100644
+--- a/Gemfile
++++ b/Gemfile
+@@ -25,6 +25,7 @@ gem &#39;jquery-rails&#39;
+ gem &#39;jbuilder&#39;, &#39;~&gt; 1.2&#39;
+ 
+ gem &#39;bower-rails&#39;
++gem &#39;angular-rails-templates&#39;
+ 
+ gem &quot;foreman&quot;
+ group :production, :staging do
+</code></pre><footer><h1>Gemfile</h1></footer></article>
+<p>Running <code>bundle install</code> will download the gem for us.</p>
+
+<p>In addition to this gem, we&#39;re also going to need the <code>angular-route</code> module, which enables the routing we saw above.  We&#39;ll add
+it to our <code>Bowerfile</code> first:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/Bowerfile b/Bowerfile
+index 5a05c1f..e540c13 100644
+--- a/Bowerfile
++++ b/Bowerfile
+@@ -1,3 +1,4 @@
+ asset &#39;angular&#39;
++asset &#39;angular-route&#39;
+ asset &#39;bootstrap-sass-official&#39;
+ # vim: ft=ruby
+</code></pre><footer><h1>Bowerfile</h1></footer></article>
+<p>Once we run <code>rake bower:install</code> to download <code>angular-route</code>, we&#39;ll need to reference it from our <code>application.js</code> file so it&#39;s
+available to the app:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/application.js b/app/assets/javascripts/application.js
+index 29f41b7..0c9339a 100644
+--- a/app/assets/javascripts/application.js
++++ b/app/assets/javascripts/application.js
+@@ -13,4 +13,5 @@
+ //= require jquery
+ //= require jquery_ujs
+ //= require angular/angular
++//= require angular-route/angular-route
+ //= require_tree .
+</code></pre><footer><h1>app/assets/javascripts/application.js</h1></footer></article>
+<p>Now, let&#39;s write just enough Angular code to serve up a template, so we can work out the UI.  The first thing to do is to replace
+<code>app/views/home/index.html.erb</code> with the markup needed to “boot” Angular when the view is rendered by Rails:</p>
+<article class='code-listing'><pre><code class="language-">&lt;div ng-app=&quot;receta&quot;&gt;
+  &lt;div class=&quot;view-container&quot;&gt;
+    &lt;div ng-view class=&quot;view-frame animate-view&quot;&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</code></pre><footer><h1>app/views/home/index.html.erb</h1></footer></article>
+<p>The use of <code>ng-app</code> tells Angular which application should be loaded, and the <code>ng-view</code> directive tells it where to render views.  The
+<code>view-container</code> div, along with the <code>view-frame</code> and <code>animate-view</code> classes can be used to add view transition animations if we
+want, but we can ignore them for now.</p>
+
+<p>Next, we need to implement the <code>receta</code> Angular app so it renders a view.  Since we need the <code>angular-routes</code> module as well as
+the Angular module provided by <code>angular-rails-templates</code>, our app definition will need to include them as dependencies.  We&#39;re
+also going to put our controllers in their own module, so the <code>controllers</code> module will be a third dependency.</p>
+
+<p>Our entire <code>app/assets/javascripts/app.coffee</code> now looks like so:</p>
+<article class='code-listing'><pre><code class="language-">receta = angular.module(&#39;receta&#39;,[
+  &#39;templates&#39;,
+  &#39;ngRoute&#39;,
+  &#39;controllers&#39;,
+])
+
+receta.config([ &#39;$routeProvider&#39;,
+  ($routeProvider)-&gt;
+    $routeProvider
+      .when(&#39;/&#39;,
+        templateUrl: &quot;index.html&quot;
+        controller: &#39;RecipesController&#39;
+      )
+])
+
+controllers = angular.module(&#39;controllers&#39;,[])
+controllers.controller(&quot;RecipesController&quot;, [ &#39;$scope&#39;,
+  ($scope)-&gt;
+])
+</code></pre><footer><h1>app/assets/javascripts/app.coffee</h1></footer></article>
+<p>The last thing to do is to create <code>index.html</code>.  <code>angular-rails-templates</code> will look for templates in
+<code>app/assets/javascripts/templates</code> by default, so we&#39;ll put the file there. It
+will initially just have static markup that demonstrates our UI.</p>
+<article class='code-listing'><pre><code class="language-html">&lt;header class=&quot;row&quot;&gt;
+  &lt;h1 class=&quot;text-center col-md-6 col-md-offset-3&quot;&gt;Find Recipes&lt;/h1&gt;
+&lt;/header&gt;
+&lt;section class=&quot;row&quot;&gt;
+  &lt;form&gt;
+    &lt;div class=&quot;form-group col-md-6 col-md-offset-3&quot;&gt;
+      &lt;label for=&quot;keywords&quot; class=&quot;sr-only&quot;&gt;Keywords&lt;/label&gt;
+      &lt;input type=&quot;text&quot; autofocus class=&quot;form-control&quot; placeholder=&quot;Recipe name, e.g. Baked Potato&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;form-group col-md-6 col-md-offset-3 text-center&quot;&gt;
+      &lt;button class=&quot;btn btn-primary btn-lg&quot;&gt;Search&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/form&gt;
+&lt;/section&gt;
+&lt;hr&gt;
+&lt;section class=&quot;row&quot;&gt;
+  &lt;h1 class=&quot;text-center h2&quot;&gt;Results&lt;/h1&gt;
+  &lt;section class=&quot;well col-md-6 col-md-offset-3&quot;&gt;
+    &lt;h1 class=&quot;h3 col-md-6 text-right&quot; style=&quot;margin-top: 0&quot;&gt;&lt;a href=&quot;#&quot;&gt;Baked Potato w/ Cheese&lt;/a&gt;&lt;/h1&gt;
+    &lt;div class=&quot;col-md-6&quot;&gt;
+      &lt;button class=&quot;btn btn-info&quot;&gt;Edit&lt;/button&gt;
+      &lt;button class=&quot;btn btn-danger&quot;&gt;Delete&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+  &lt;section class=&quot;well col-md-6 col-md-offset-3&quot;&gt;
+    &lt;h1 class=&quot;h3 col-md-6 text-right&quot; style=&quot;margin-top: 0&quot;&gt;&lt;a href=&quot;#&quot;&gt;Garlic Mashed Potatoes&lt;/a&gt;&lt;/h1&gt;
+    &lt;div class=&quot;col-md-6&quot;&gt;
+      &lt;button class=&quot;btn btn-info&quot;&gt;Edit&lt;/button&gt;
+      &lt;button class=&quot;btn btn-danger&quot;&gt;Delete&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+  &lt;section class=&quot;well col-md-6 col-md-offset-3&quot;&gt;
+    &lt;h1 class=&quot;h3 col-md-6 text-right&quot; style=&quot;margin-top: 0&quot;&gt;&lt;a href=&quot;#&quot;&gt;Potatos Au Gratin&lt;/a&gt;&lt;/h1&gt;
+    &lt;div class=&quot;col-md-6&quot;&gt;
+      &lt;button class=&quot;btn btn-info&quot;&gt;Edit&lt;/button&gt;
+      &lt;button class=&quot;btn btn-danger&quot;&gt;Delete&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+&lt;/section&gt;
+</code></pre><footer><h1>app/assets/javascripts/templates/index.html</h1></footer></article>
+<p>Once we start our app, we&#39;ll see the view rendered, which should look like so:</p>
+
+<p><img src='images/SearchUI.png' alt='Search UI' title=''></p>
+
+<p>Now, let&#39;s get the front-end working.</p>
+<a name='write-code-to-make-it-work'></a><h3>Write code to make it work</h3>
+<p>Normally, we&#39;d start by writing a test, but since this is our very first feature, let&#39;s write the production code first so we
+don&#39;t have to be distracted by setting up the testing framework and its requisite configuration.</p>
+
+<p>Our controller is going to serve two purposes initially.  First, it needs to respond to the “Search” button and conduct the
+search.  Second, it needs to provide search results to be rendered.</p>
+
+<p>Since we don&#39;t have a back-end yet, we&#39;ll use canned data to get started.  Further, since we know that the back-end will
+ultimately be conducting the search, we aren&#39;t going to design our controller and view around Angular filters.  Instead, we&#39;ll
+simply expose the attribute <code>recipes</code> that will contain whatever the search results happen to be.</p>
+
+<p>Finally, we&#39;ll design the controller to look for a url parameter called “keywords” and, if present, use that to conduct a search,
+as opposed to doing the search in the <code>search()</code> action.  The <code>search()</code> action will simply route the application to <code>/</code> with
+the keywords in the query string.  This allows our search results to be bookmarkable, which a very nice thing to do for our users.</p>
+
+<p>Let&#39;s look at our controller code.</p>
+<article class='code-listing'><pre><code class="language-">receta = angular.module(&#39;receta&#39;,[
+  &#39;templates&#39;,
+  &#39;ngRoute&#39;,
+  &#39;controllers&#39;,
+])
+
+receta.config([ &#39;$routeProvider&#39;,
+  ($routeProvider)-&gt;
+    $routeProvider
+      .when(&#39;/&#39;,
+        templateUrl: &quot;index.html&quot;
+        controller: &#39;RecipesController&#39;
+      )
+])
+
+recipes = [
+  {
+    id: 1
+    name: &#39;Baked Potato w/ Cheese&#39;
+  },
+  {
+    id: 2
+    name: &#39;Garlic Mashed Potatoes&#39;,
+  },
+  {
+    id: 3
+    name: &#39;Potatoes Au Gratin&#39;,
+  },
+  {
+    id: 4
+    name: &#39;Baked Brussel Sprouts&#39;,
+  },
+]
+controllers = angular.module(&#39;controllers&#39;,[])
+controllers.controller(&quot;RecipesController&quot;, [ &#39;$scope&#39;, &#39;$routeParams&#39;, &#39;$location&#39;,
+  ($scope,$routeParams,$location)-&gt;
+    $scope.search = (keywords)-&gt;  $location.path(&quot;/&quot;).search(&#39;keywords&#39;,keywords)
+
+    if $routeParams.keywords
+      keywords = $routeParams.keywords.toLowerCase()
+      $scope.recipes = recipes.filter (recipe)-&gt; recipe.name.toLowerCase().indexOf(keywords) != -1
+    else
+      $scope.recipes = []
+])
+</code></pre><footer><h1>app/assets/javascripts/app.coffee</h1></footer></article>
+<p>First, we put in a canned list of recipes to search through.  Next, we&#39;ve filled out the controller with the basics of
+implementing the search.  Since we need access to the query string, as well as the ability to change the current route/url, we&#39;ll
+add <code>$routeParams</code> and <code>$location</code> to our controller&#39;s dependencies.</p>
+
+<p>Note the form of Angular dependency-injection we&#39;re using.  If we used name-based injection, like so</p>
+<article class='code-listing'><pre><code class="language-coffeescript">controllers.controller(&#39;RecipesController&#39;,
+  ($scope,$routeParams,$location)-&gt;
+</code></pre></article>
+<p>The function&#39;s argument names would be lost during minification.  Meaning, everything would work great in development and not
+work at all in production.
+It&#39;s a bit more verbose to do it with the string array, but
+it&#39;s guaranteed to work through the asset pipeline and any minification or obfuscation that happens to the JavaScript.</p>
+
+<p>The controller itself isn&#39;t terribly exciting.  Our <code>search()</code> function simply re-routes to ourself with the keywords in the
+query string, and the controller&#39;s body does a simple substring lookup of our canned data (this line will ultimately change to
+talk to the backend).</p>
+
+<p>Now, let&#39;s look at our view.  We need to bind the value of the search field to a model, and use that value as the argument to
+search, which we must trigger from the “Search” button.  We also will remove our duplicated markup in favor of markup for one
+result, wrapped in an <code>ng-repeat</code> directive.</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/templates/index.html b/app/assets/javascripts/templates/index.html
+index 329b807..fd7a6f1 100644
+--- a/app/assets/javascripts/templates/index.html
++++ b/app/assets/javascripts/templates/index.html
+@@ -5,35 +5,25 @@
+   &lt;form&gt;
+     &lt;div class=&quot;form-group col-md-6 col-md-offset-3&quot;&gt;
+       &lt;label for=&quot;keywords&quot; class=&quot;sr-only&quot;&gt;Keywords&lt;/label&gt;
+-      &lt;input type=&quot;text&quot; autofocus class=&quot;form-control&quot; placeholder=&quot;Recipe name, e.g. Baked Potato&quot;&gt;
++      &lt;input ng-model=&quot;keywords&quot; name=&quot;keywords&quot; type=&quot;text&quot; autofocus class=&quot;form-control&quot; placeholder=&quot;Recipe name, e.g. Baked Potato&quot;&gt;
+     &lt;/div&gt;
+     &lt;div class=&quot;form-group col-md-6 col-md-offset-3 text-center&quot;&gt;
+-      &lt;button class=&quot;btn btn-primary btn-lg&quot;&gt;Search&lt;/button&gt;
++      &lt;button ng-click=&quot;search(keywords)&quot; class=&quot;btn btn-primary btn-lg&quot;&gt;Search&lt;/button&gt;
+     &lt;/div&gt;
+   &lt;/form&gt;
+ &lt;/section&gt;
+ &lt;hr&gt;
+-&lt;section class=&quot;row&quot;&gt;
++&lt;section class=&quot;row&quot; ng-if=&quot;recipes&quot;&gt;
+   &lt;h1 class=&quot;text-center h2&quot;&gt;Results&lt;/h1&gt;
+-  &lt;section class=&quot;well col-md-6 col-md-offset-3&quot;&gt;
+-    &lt;h1 class=&quot;h3 col-md-6 text-right&quot; style=&quot;margin-top: 0&quot;&gt;&lt;a href=&quot;#&quot;&gt;Baked Potato w/ Cheese&lt;/a&gt;&lt;/h1&gt;
+-    &lt;div class=&quot;col-md-6&quot;&gt;
+-      &lt;button class=&quot;btn btn-info&quot;&gt;Edit&lt;/button&gt;
+-      &lt;button class=&quot;btn btn-danger&quot;&gt;Delete&lt;/button&gt;
+-    &lt;/div&gt;
+-  &lt;/section&gt;
+-  &lt;section class=&quot;well col-md-6 col-md-offset-3&quot;&gt;
+-    &lt;h1 class=&quot;h3 col-md-6 text-right&quot; style=&quot;margin-top: 0&quot;&gt;&lt;a href=&quot;#&quot;&gt;Garlic Mashed Potatoes&lt;/a&gt;&lt;/h1&gt;
+-    &lt;div class=&quot;col-md-6&quot;&gt;
+-      &lt;button class=&quot;btn btn-info&quot;&gt;Edit&lt;/button&gt;
+-      &lt;button class=&quot;btn btn-danger&quot;&gt;Delete&lt;/button&gt;
+-    &lt;/div&gt;
+-  &lt;/section&gt;
+-  &lt;section class=&quot;well col-md-6 col-md-offset-3&quot;&gt;
+-    &lt;h1 class=&quot;h3 col-md-6 text-right&quot; style=&quot;margin-top: 0&quot;&gt;&lt;a href=&quot;#&quot;&gt;Potatos Au Gratin&lt;/a&gt;&lt;/h1&gt;
+-    &lt;div class=&quot;col-md-6&quot;&gt;
+-      &lt;button class=&quot;btn btn-info&quot;&gt;Edit&lt;/button&gt;
+-      &lt;button class=&quot;btn btn-danger&quot;&gt;Delete&lt;/button&gt;
+-    &lt;/div&gt;
+-  &lt;/section&gt;
++  &lt;ul class=&quot;list-unstyled&quot;&gt;
++    &lt;li ng-repeat=&quot;recipe in recipes&quot;&gt;
++      &lt;section class=&quot;well col-md-6 col-md-offset-3&quot;&gt;
++        &lt;h1 class=&quot;h3 col-md-6 text-right&quot; style=&quot;margin-top: 0&quot;&gt;&lt;a href=&quot;#&quot;&gt;{{recipe.name}}&lt;/a&gt;&lt;/h1&gt;
++        &lt;div class=&quot;col-md-6&quot;&gt;
++          &lt;button class=&quot;btn btn-info&quot;&gt;Edit&lt;/button&gt;
++          &lt;button class=&quot;btn btn-danger&quot;&gt;Delete&lt;/button&gt;
++        &lt;/div&gt;
++      &lt;/section&gt;
++    &lt;/li&gt;
++  &lt;/ul&gt;
+ &lt;/section&gt;
+</code></pre><footer><h1>app/assets/javascripts/templates/index.html</h1></footer></article>
+<p>Note that we&#39;re also using <code>ng-if</code> to hide the results section entirely if there aren&#39;t any results.</p>
+
+<p>Now when we reload the page, our search works!</p>
+
+<p><img src='images/SearchUIWorking.png' alt='Search UI Working' title=''></p>
+
+<p>Before we move on, let&#39;s deploy to production to make sure that all of our configuration around the Angular templates is working
+when the asset pipeline is in production mode.</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; git push heroku master
+&gt; heroku open
+</code></pre></article>
+<p>Once your browser opens, you should see the app working the same as it did in your environment–our configuration is good.</p>
+
+<p>Before we write too much more code, we need to get some tests in place.  First, we&#39;ll create a browser-based acceptance test to verify that
+the search feature works.  That test won&#39;t be coupled to how the app is implemented, so we can use it to validate that we&#39;ve hooked up the backend correctly.  We&#39;ll use unit tests of our Angular controller to drive that development.</p>
+<a name='set-up-testing'></a><h3>Set up testing</h3>
+<p>To conduct our browser-based tests, we&#39;ll use Capybara and Selenium.  First, we&#39;ll need to create <code>spec/spec_helper.rb</code> to setup
+and configure our back-end and browser-based tests.</p>
+<article class='code-listing'><pre><code class="language-ruby"># This file is copied to spec/ when you run &#39;rails generate rspec:install&#39;
+ENV[&quot;RAILS_ENV&quot;] ||= &#39;test&#39;
+require File.expand_path(&quot;../../config/environment&quot;, __FILE__)
+require &#39;rspec/rails&#39;
+require &#39;rspec/autorun&#39;
+require &#39;capybara/rails&#39;
+
+Dir[Rails.root.join(&quot;spec/support/**/*.rb&quot;)].each { |f| require f }
+
+ActiveRecord::Migration.check_pending! if defined?(ActiveRecord::Migration)
+
+RSpec.configure do |config|
+  config.use_transactional_fixtures = true
+  
+  config.expect_with :rspec do |c|
+    c.syntax = :expect
+  end
+
+  config.before(:suite) do
+    DatabaseCleaner.clean_with :truncation
+    DatabaseCleaner.clean_with :transaction
+  end
+
+  config.after(:each) do
+    ActionMailer::Base.deliveries.clear
+  end
+
+  config.around(:each, type: :feature, js: true) do |ex|
+    DatabaseCleaner.strategy = :truncation
+    DatabaseCleaner.start
+    self.use_transactional_fixtures = false
+    ex.run
+    self.use_transactional_fixtures = true
+    DatabaseCleaner.clean
+  end
+
+  config.treat_symbols_as_metadata_keys_with_true_values = true
+  config.infer_base_class_for_anonymous_controllers = false
+  config.order = &quot;random&quot;
+end
+</code></pre><footer><h1>spec/spec_helper.rb</h1></footer></article>
+<p>There&#39;s nothing particularly special in here, just what RSpec would normally set up for you.  The only different bit is toward
+the end, where we change how the database is managed for browser-based tests.  Normally, tests run in a database transaction
+that&#39;s rolled back after the test completes.  For the browser-based tests, that won&#39;t work because the browser is running in a
+different process and can&#39;t see the effects of database changes that are in an uncommitted transaction.</p>
+
+<p>With that set up, we&#39;ll create a simple feature spec to test the search:</p>
+<article class='code-listing'><pre><code class="language-ruby">require &#39;spec_helper.rb&#39;
+
+feature &quot;Looking up recipes&quot;, js: true do
+  scenario &quot;finding recipes&quot; do
+    visit &#39;/&#39;
+    fill_in &quot;keywords&quot;, with: &quot;baked&quot;
+    click_on &quot;Search&quot;
+
+    expect(page).to have_content(&quot;Baked Potato&quot;)
+    expect(page).to have_content(&quot;Baked Brussel Sprouts&quot;)
+  end
+end
+</code></pre><footer><h1>spec/features/search_spec.rb</h1></footer></article>
+<p>Since our test relies on the canned data that we hard-coded, it passes.</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rake spec
+/Users/davec/.rvm/rubies/ruby-2.1.0/bin/ruby -S rspec ./spec/features/search_spec.rb
+.
+
+Finished in 5.74 seconds
+1 example, 0 failures
+
+Randomized with seed 13155
+</code></pre></article>
+<p>With this in place, we can now connect our front-end to the back-end, set up the same canned data from within our feature spec, and
+expect the exact same results.</p>
+<a name='connect-the-back-end'></a><h3>Connect the back-end</h3>
+<p>We have three main steps to connect our Angular controller to our backend:</p>
+
+<ol>
+<li>Implement the search on the backend to return results in JSON</li>
+<li>Have our Angular controller make an AJAX request to our backend</li>
+<li>Have our feature spec insert the same test data that our Angular controller is currently hard-coding</li>
+</ol>
+<a name='implement-the-search'></a><h4>Implement the search</h4>
+<p>Since this isn&#39;t a Rails tutorial, we&#39;re going to go pretty fast here.  We&#39;re going to need a <code>Recipe</code> model, a
+<code>RecipesController</code>, and a JSON view of the search results.</p>
+
+<p>A Recipe is just going to be a name and some text, so we&#39;ll use the Rails generator to get us going.  We&#39;re going to skip
+fixtures (and FactoryGirl) for now.</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rails g model Recipe name:string instructions:text --no-fixture  --no-fixture-replacement
+      invoke  active_record
+      create    db/migrate/20140309184135_create_recipes.rb
+      create    app/models/recipe.rb
+      invoke    rspec
+      create      spec/models/recipe_spec.rb
+&gt; rake db:migrate
+&gt; rake db:migrate RAILS_ENV=test
+</code></pre></article>
+<p>Our <code>Recipe</code> model doesn&#39;t have any functionality, so we&#39;ll leave the auto-generated test alone.  What we need now is a
+controller.  Let&#39;s use the rails generator again to create the necessary files.</p>
+
+<p>Since there won&#39;t be an HTML view, there&#39;s no reason to have view specs, helpers, or assets, so we&#39;ll skip those when we run <code>rails g</code></p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rails g controller recipes index --no-view-specs --no-helper --no-assets
+</code></pre></article>
+<p>The generator creates a silly
+entry in our <code>routes.rb</code> file, so we&#39;ll replace it with a more resource-oriented configuration:</p>
+<article class='code-listing'><pre><code class="language-ruby">Receta::Application.routes.draw do
+  root &#39;home#index&#39;
+
+  resources :recipes, only: [:index]
+end
+</code></pre><footer><h1>config/routes.rb</h1></footer></article>
+<p>To implement the <code>index</code> method, we need two tests - one that should expect results and one that won&#39;t.  We&#39;ll also need to
+tell our spec to render the views, so that we can parse the JSON that&#39;s returned and make sure it looks good.</p>
+<article class='code-listing'><pre><code class="language-ruby">require &#39;spec_helper&#39;
+
+describe RecipesController do
+  render_views
+  describe &quot;index&quot; do
+    before do
+      Recipe.create!(name: &#39;Baked Potato w/ Cheese&#39;)
+      Recipe.create!(name: &#39;Garlic Mashed Potatoes&#39;)
+      Recipe.create!(name: &#39;Potatoes Au Gratin&#39;)
+      Recipe.create!(name: &#39;Baked Brussel Sprouts&#39;)
+
+      xhr :get, :index, format: :json, keywords: keywords
+    end
+
+    subject(:results) { JSON.parse(response.body) }
+
+    def extract_name
+      -&gt;(object) { object[&quot;name&quot;] }
+    end
+
+    context &quot;when the search finds results&quot; do
+      let(:keywords) { &#39;baked&#39; }
+      it &#39;should 200&#39; do
+        expect(response.status).to eq(200)
+      end
+      it &#39;should return two results&#39; do
+        expect(results.size).to eq(2)
+      end
+      it &quot;should include &#39;Baked Potato w/ Cheese&#39;&quot; do
+        expect(results.map(&amp;extract_name)).to include(&#39;Baked Potato w/ Cheese&#39;)
+      end
+      it &quot;should include &#39;Baked Brussel Sprouts&#39;&quot; do
+        expect(results.map(&amp;extract_name)).to include(&#39;Baked Brussel Sprouts&#39;)
+      end
+    end
+
+    context &quot;when the search doesn&#39;t find results&quot; do
+      let(:keywords) { &#39;foo&#39; }
+      it &#39;should return no results&#39; do
+        expect(results.size).to eq(0)
+      end
+    end
+
+  end
+end
+</code></pre><footer><h1>spec/controllers/recipes_controller_spec.rb</h1></footer></article>
+<p>We&#39;ll then make the test pass by doing the search in the controller, and create the appropriate JSON views.  First, the
+controller:</p>
+<article class='code-listing'><pre><code class="language-ruby">class RecipesController &lt; ApplicationController
+  def index
+    @recipes = if params[:keywords]
+                 Recipe.where(&#39;name ilike ?&#39;,&quot;%#{params[:keywords]}%&quot;)
+               else
+                 []
+               end
+  end
+end
+</code></pre><footer><h1>app/controllers/recipes_controller.rb</h1></footer></article>
+<p>We&#39;re not explicitly looking for any particular format.  Since we&#39;ll be requesting JSON, Rails will try to find a view that can
+serve up JSON.  To do that, we&#39;ll create a view using <a href="https://github.com/rails/jbuilder">JBuilder</a>.  Even though it might be a bit more code than allowing Rails to
+convert the <code>Recipe</code> to JSON using its built-in serializers, I find using JBuilder creates a nice separation point between the
+front-end and back-end.  This gives us flexibility to write idiomatic code on both sides, even when those idioms diverge (for
+example, Angular code tends to favor camel-case, whereas Ruby tends to favor snake-case).</p>
+
+<p>First, we&#39;ll create <code>app/views/index.json.jbuilder</code>:</p>
+<article class='code-listing'><pre><code class="language-">json.array! @recipes, partial: &#39;recipe&#39;, as: :recipe
+</code></pre><footer><h1>app/views/recipes/index.json.jbuilder</h1></footer></article>
+<p>All this does is defer each recipe to a partial, which is in <code>app/views/_recipe.json.jbuidler</code> and looks like so:</p>
+<article class='code-listing'><pre><code class="language-">json.(recipe, :id, :name, :instructions)
+</code></pre><footer><h1>app/views/recipes/_recipe.json.jbuilder</h1></footer></article>
+<p>With all this in place, our test passes:</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rake db:migrate RAILS_ENV=test ; rspec spec/controllers/recipes_controller_spec.rb
+==  CreateRecipes: migrating ==================================================
+-- create_table(:recipes)
+   -&gt; 0.0045s
+==  CreateRecipes: migrated (0.0046s) =========================================
+
+.....
+
+Finished in 0.41174 seconds
+5 examples, 0 failures
+
+Randomized with seed 52820
+</code></pre></article>
+<p>Now that we have our back-end implemented, let&#39;s hook it up by having our Angular controller call it.</p>
+<a name='have-angular-controller-call-the-back-end'></a><h4>Have Angular Controller Call the Back-End</h4>
+<p>Since this is the first real code we&#39;re writing in Angular, this is where we&#39;ll set up our unit testing.  We&#39;re going to use
+<code>teaspoon</code>, which is a test runner for JavaScript that uses the asset pipeline, Jasmine, and PhantomJS.  We&#39;ll add teaspoon and
+PhantomJS to our <code>Gemfile</code>:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/Gemfile b/Gemfile
+index b0b283e..5c52ef1 100644
+--- a/Gemfile
++++ b/Gemfile
+@@ -25,6 +25,8 @@ group :test, :development do
+   gem &quot;capybara&quot;
+   gem &quot;database_cleaner&quot;
+   gem &quot;selenium-webdriver&quot;
++  gem &#39;teaspoon&#39;
++  gem &#39;phantomjs&#39;
+ end
+ 
+ group :doc do
+</code></pre><footer><h1>Gemfile</h1></footer></article>
+<p>Once we run <code>bundle install</code>, we need to bootstrap teaspoon, which can be done with the Rails generator it includes:</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rails generate teaspoon:install --coffee
+</code></pre></article>
+<p>We&#39;re also going to need two more Angular modules. We need <code>angular-mocks</code> to help with testing and <code>angular-resource</code> to
+implement the AJAX calls.  First, we add them to <code>Bowerfile</code>:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/Bowerfile b/Bowerfile
+index e540c13..1795c30 100644
+--- a/Bowerfile
++++ b/Bowerfile
+@@ -1,4 +1,6 @@
+ asset &#39;angular&#39;
+ asset &#39;angular-route&#39;
++asset &#39;angular-resource&#39;
++asset &#39;angular-mocks&#39;
+ asset &#39;bootstrap-sass-official&#39;
+ # vim: ft=ruby
+</code></pre><footer><h1>Bowerfile</h1></footer></article>
+<p>Once we run <code>rake bower:install</code> to download them, we need to add <code>angular-resource</code> to <code>application.js</code>:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/application.js b/app/assets/javascripts/application.js
+index 0c9339a..ea7e7dd 100644
+--- a/app/assets/javascripts/application.js
++++ b/app/assets/javascripts/application.js
+@@ -14,4 +14,5 @@
+ //= require jquery_ujs
+ //= require angular/angular
+ //= require angular-route/angular-route
++//= require angular-resource/angular-resource
+ //= require_tree .
+</code></pre><footer><h1>app/assets/javascripts/application.js</h1></footer></article>
+<p>Since <code>angular-mocks</code> is only needed for tests, we <em>won&#39;t</em> put it in <code>application.js</code>.  Teaspoon allows Sprockets directives in
+our test files, and it generated <code>spec/javascripts/spec_helper.coffee</code> for us, which is included in all tests.  We&#39;ll add this
+line to the file:</p>
+<article class='code-listing'><pre><code class="language-coffeescript">#= angular-mocks/angular-mocks
+</code></pre></article>
+<p>The last step in setting up our front-end testing is to write a basic spec that uses our controller.  The boilerplate for this
+test is somewhat substantial compared to a Rails controller test.  This is a function both of JavaScript as a language and the
+way Angular is designed.</p>
+
+<p>Since all Angular modules are functions that are given their dependencies, when we test those modules, we&#39;ll want to intercept
+those dependencies so we can use them in our tests.  Although we could create mocks for many of our controllers dependencies, 
+Angular provides mock implementationsn for us, and will pass those, by
+default, to our controller.  </p>
+
+<p>If we need to examine them in a test (for example to assert that our
+controller set the location to a particular path) we&#39;ll need to get a
+reference to those mock instances.  At the very least, we need access to <code>$scope</code>, which is
+how our controller provides data to the views (think of it as the <code>assigns</code> of
+an Angular controller test).</p>
+
+<p>To do this, we&#39;ll create a function called <code>setupController()</code> that uses the
+Angular-provided method <code>$inject</code>, which will allow us access to the mock
+dependencies.  We&#39;ll call this method in a <code>beforeEach</code> so our controller is
+always ready to go before each test.</p>
+<article class='code-listing'><pre><code class="language-">describe &quot;RecipesController&quot;, -&gt;
+  scope        = null
+  ctrl         = null
+  location     = null
+  routeParams  = null
+  resource     = null
+
+  setupController =(keywords)-&gt;
+    inject(($location, $routeParams, $rootScope, $resource, $controller)-&gt;
+      scope       = $rootScope.$new()
+      location    = $location
+      resource    = $resource
+      routeParams = $routeParams
+      routeParams.keywords = keywords
+
+      ctrl        = $controller(&#39;RecipesController&#39;,
+                                $scope: scope
+                                $location: location)
+    )
+
+  beforeEach(module(&quot;receta&quot;))
+  beforeEach(setupController())
+
+  it &#39;defaults to no recipes&#39;, -&gt;
+    expect(scope.recipes).toEqualData([])
+</code></pre><footer><h1>spec/javascripts/controllers/RecipesController_spec.coffee</h1></footer></article>
+<p>We need to declare our variables at the top so their references can “escape”
+the closure created by <code>$inject</code>.  Also note that the reason we&#39;re making a
+function, and not just putting this code at a top-level <code>beforeEach</code> is that
+different tests will need to manipulate the <code>routeParams</code>, and that can only
+be done during injection.</p>
+
+<p>By the time our test runs, the controller will be up and running as if the user had just visited the page.  In this case,
+<code>recipes</code> will be empty, so we assert that.  Notice that we can&#39;t use <code>expect(scope.recipes).toBe([])</code> because <code>toBe</code> creates a
+very strong requirement that the result and the expected value are identical objects.  Instead, we&#39;re using <code>toEqualData</code>, which
+is a matcher we&#39;ve created in <code>spec_helper.coffee</code>:</p>
+<article class='code-listing'><pre><code class="language-">#= require support/bind-poly
+#= require application
+#= require angular-mocks/angular-mocks
+beforeEach -&gt;
+  this.addMatchers
+    toEqualData: (expected)-&gt; return angular.equals(this.actual, expected)
+</code></pre><footer><h1>spec/javascripts/spec_helper.coffee</h1></footer></article>
+<p>This does a “value” match, which will make our lives much easier when
+asserting equality between objects.</p>
+
+<p>Let&#39;s run our JavaScript tests to validate our setup.</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rake teaspoon
+Starting the Teaspoon server...
+Teaspoon running default suite at http://127.0.0.1:58328/teaspoon/default
+.
+
+Finished in 0.01100 seconds
+1 example, 0 failures
+</code></pre></article>
+<p>Everything works!  Now, we just need a test that our controller calls the backend.</p>
+
+<p>Our controller will need three tests:</p>
+
+<ul>
+<li>Check that on initialization with no keywords, <code>recipes</code> is empty (i.e. the test we already have)</li>
+<li>Check that on initialization <em>with</em> keywords, we call the backend and populate <code>recipes</code> with the results</li>
+<li>Verify that clicking <code>search()</code> redirects us back to ourselves with the correct query string</li>
+</ul>
+
+<p>In order to test that we call the backend, we&#39;ll ask Angular to give us access to the mock HTTP backend it uses during tests.  We
+can use that mock instance to mock a real back-end response.</p>
+
+<p>Because the initialization of our controller will make this call, we&#39;ll need to set up our mock expectations inside
+<code>setupController()</code>.  We&#39;ll add a second parameter—<code>results</code>—and arrange for <code>$httpBackend</code> to return it when the right AJAX request is made.</p>
+<article class='code-listing'><pre><code class="language-coffeescript">setupController = (keywords,results)-&gt;
+  inject(($location, $routeParams, $rootScope, $resource, $httpBackend, $controller)-&gt;
+    scope       = $rootScope.$new()
+    location    = $location
+    resource    = $resource
+    httpBackend = $httpBackend
+    routeParams = $routeParams
+    routeParams.keywords = keywords
+
+    if results
+      request = new RegExp(&#39;\/recipes.*keywords=#{keywords}&#39;)
+      httpBackend.expectGET(request).respond(results)
+
+    ctrl        = $controller(&#39;RecipesController&#39;,
+                              $scope: scope
+                              $location: location)
+  )
+</code></pre></article>
+<p>We also need to tell <code>httpBackend</code> to verify that there are no unmet expectations nor are there unexpected requests:</p>
+<article class='code-listing'><pre><code class="language-coffeescript">  afterEach -&gt;
+    httpBackend.verifyNoOutstandingExpectation()
+    httpBackend.verifyNoOutstandingRequest()
+</code></pre></article>
+<p>Finally, we write our tests.  We&#39;ll set up two contexts, “controller initialization” and “search()”.  In “controller
+initialization”, we have two tests.  The first is the one we already have:</p>
+<article class='code-listing'><pre><code class="language-coffeescript">describe &#39;controller initialization&#39;, -&gt;
+  describe &#39;when no keywords present&#39;, -&gt;
+    beforeEach(setupController())
+
+    it &#39;defaults to no recipes&#39;, -&gt;
+      expect(scope.recipes).toEqualData([])
+</code></pre></article>
+<p>The second is our back-end test.  We&#39;ll call <code>setupController()</code> with the keywords we want in the <code>routeParams</code> and the list of
+recipes to return from the back-end:</p>
+<article class='code-listing'><pre><code class="language-coffeescript">  describe &#39;with keywords&#39;, -&gt;
+    keywords = &#39;foo&#39;
+    recipes = [
+      {
+        id: 2
+        name: &#39;Baked Potatoes&#39;
+      },
+      {
+        id: 4
+        name: &#39;Potatoes Au Gratin&#39;
+      }
+    ]
+    beforeEach -&gt;
+      setupController(keywords,recipes)
+      httpBackend.flush()
+
+    it &#39;calls the back-end&#39;, -&gt;
+      expect(scope.recipes).toEqualData(recipes)
+</code></pre></article>
+<p>The call to <code>httpBackend.flush()</code> resolves all aysnchronous promises.  We&#39;ll expect this to set the controller&#39;s <code>recipes</code> to the
+recipes we passed to <code>setupController()</code>.</p>
+
+<p>Finally, we test that <code>search()</code> sets the URL correctly:</p>
+<article class='code-listing'><pre><code class="language-coffeescript">describe &#39;search()&#39;, -&gt;
+  beforeEach -&gt;
+    setupController()
+
+  it &#39;redirects to itself with a keyword param&#39;, -&gt;
+    keywords = &#39;foo&#39;
+    scope.search(keywords)
+    expect(location.path()).toBe(&#39;/&#39;)
+    expect(location.search()).toEqualData({keywords: keywords})
+</code></pre></article>
+<p>(note that <code>location.search()</code> has nothing to do with our controller method called <code>search()</code>.  <code>location.search()</code> represents the query string as a JavaScript object)</p>
+
+<p>Let&#39;s run the test and watch it fail:</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rake teaspoon
+Starting the Teaspoon server...
+Teaspoon running default suite at http://127.0.0.1:58414/teaspoon/default
+.FFF.
+
+Failures:
+
+  1) RecipesController controller initialization with keywords calls the back-end
+     Failure/Error: Error: No pending request to flush ! in http://127.0.0.1:58414/assets/angular-mocks/angular-mocks.js?body=1 (line 1438)
+
+  2) RecipesController controller initialization with keywords calls the back-end
+     Failure/Error: Expected [  ] to equal data [ { id : 2, name : &#39;Baked Potatoes&#39; }, { id : 4, name : &#39;Potatoes Au Gratin&#39; } ].
+
+  3) RecipesController controller initialization with keywords calls the back-end
+     Failure/Error: Error: Unsatisfied requests: GET //recipes.*keywords=foo/ in http://127.0.0.1:58414/assets/angular-mocks/angular-mocks.js?body=1 (line 1471)
+
+Finished in 0.02200 seconds
+5 examples, 3 failures
+
+Failed examples:
+
+teaspoon -s default --filter=&quot;RecipesController controller initialization with keywords calls the back-end.&quot;
+teaspoon -s default --filter=&quot;RecipesController controller initialization with keywords calls the back-end.&quot;
+teaspoon -s default --filter=&quot;RecipesController controller initialization with keywords calls the back-end.&quot;
+</code></pre></article>
+<p>The test is failing just how we&#39;d expect: there are no HTTP requests to flush, <code>recipes</code> is empty, and there is an unmet expected HTTP request.  Now, let&#39;s fix it.</p>
+
+<p>The <code>angular-resource</code> module makes this very simple.  We create a resource for our recipes, and then call the <code>query()</code> method
+(generated for us by Angular).</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/app.coffee b/app/assets/javascripts/app.coffee
+index a40251d..406abde 100644
+--- a/app/assets/javascripts/app.coffee
++++ b/app/assets/javascripts/app.coffee
+@@ -36,10 +36,10 @@ controllers = angular.module(&#39;controllers&#39;,[])
+ controllers.controller(&quot;RecipesController&quot;, [ &#39;$scope&#39;, &#39;$routeParams&#39;, &#39;$location&#39;, &#39;$resource&#39;,
+   ($scope,$routeParams,$location,$resource)-&gt;
+     $scope.search = (keywords)-&gt;  $location.path(&quot;/&quot;).search(&#39;keywords&#39;,keywords)
++    Recipe = $resource(&#39;/recipes/:recipeId&#39;, { recipeId: &quot;@id&quot;, format: &#39;json&#39; })
+ 
+     if $routeParams.keywords
+-      keywords = $routeParams.keywords.toLowerCase()
+-      $scope.recipes = recipes.filter (recipe)-&gt; recipe.name.toLowerCase().indexOf(keywords) != -1
++      Recipe.query(keywords: $routeParams.keywords, (results)-&gt; $scope.recipes = results)
+     else
+       $scope.recipes = []
+ ])
+</code></pre><footer><h1>app/assets/javascripts/app.coffee</h1></footer></article>
+<p>Now, let&#39;s re-run our tests:</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rake teaspoon
+Starting the Teaspoon server...
+Teaspoon running default suite at http://127.0.0.1:58441/teaspoon/default
+...
+
+Finished in 0.02000 seconds
+3 examples, 0 failures
+</code></pre></article>
+<p>Everything&#39;s passing!  At this point, our front-end will call through to our
+Rails controller, parse the JSON it gets, and display the right results.  Our
+browser-based test can assert this for us, provided it sets up the database
+the same way we initially faked the data in our Angular controller.</p>
+<a name='re-run-our-feature-spec'></a><h4>Re-run our feature spec</h4>
+<p>We can now remove <code>recipes</code> from <code>app.coffee</code> since we&#39;re talking to the real back-end.  The only problem is that <code>search_spec.rb</code>
+is relying on that data being there to verify the feature is working. All we have to do is populate the database with the same
+data.  We&#39;ll create it in a <code>before</code> block.</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/spec/features/search_spec.rb b/spec/features/search_spec.rb
+index 777ad4b..be68162 100644
+--- a/spec/features/search_spec.rb
++++ b/spec/features/search_spec.rb
+@@ -1,6 +1,12 @@
+ require &#39;spec_helper.rb&#39;
+ 
+ feature &quot;Looking up recipes&quot;, js: true do
++  before do
++    Recipe.create!(name: &#39;Baked Potato w/ Cheese&#39;)
++    Recipe.create!(name: &#39;Garlic Mashed Potatoes&#39;)
++    Recipe.create!(name: &#39;Potatoes Au Gratin&#39;)
++    Recipe.create!(name: &#39;Baked Brussel Sprouts&#39;)
++  end
+   scenario &quot;finding recipes&quot; do
+     visit &#39;/&#39;
+     fill_in &quot;keywords&quot;, with: &quot;baked&quot;
+</code></pre><footer><h1>spec/features/search_spec.rb</h1></footer></article>
+<p>Now, if everything&#39;s working, our test should still pass.</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rspec spec/features/search_spec.rb
+.
+
+Finished in 3.22 seconds
+1 example, 0 failures
+
+Randomized with seed 40348
+</code></pre></article>
+<p>It&#39;s passing!  We&#39;ve now successfully test-driven our first feature with Angular!  </p>
+
+<p>But, the TDD cycle isn&#39;t complete.  We&#39;ve gone from a failing test (red) to a passing one (green), but we haven&#39;t refactored, yet.</p>
+
+<p>The code we&#39;ve written is minimal, however the implementation of <code>RecipesController</code> doesn&#39;t belong in <code>app.coffee</code>.  We&#39;d like
+our front-end code to be organized like our back-end code, with different modules in different files.  </p>
+
+<p>Let&#39;s extract the implementation of <code>RecipesController</code> out of
+<code>app.coffee</code> and into <code>app/assets/javascripts/controllers/RecipesController.coffee</code>.  If we do that, and our test passes, it&#39;s a
+good refactor.</p>
+
+<p>First, we&#39;ll remove the controller from <code>app.coffee</code>, but notice that we leave in the module declaration:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/app.coffee b/app/assets/javascripts/app.coffee
+index 4da78d3..2801320 100644
+--- a/app/assets/javascripts/app.coffee
++++ b/app/assets/javascripts/app.coffee
+@@ -15,13 +15,3 @@ receta.config([ &#39;$routeProvider&#39;,
+ ])
+ 
+ controllers = angular.module(&#39;controllers&#39;,[])
+-controllers.controller(&quot;RecipesController&quot;, [ &#39;$scope&#39;, &#39;$routeParams&#39;, &#39;$location&#39;, &#39;$resource&#39;,
+-  ($scope,$routeParams,$location,$resource)-&gt;
+-    $scope.search = (keywords)-&gt;  $location.path(&quot;/&quot;).search(&#39;keywords&#39;,keywords)
+-    Recipe = $resource(&#39;/recipes/:recipeId&#39;, { recipeId: &quot;@id&quot;, format: &#39;json&#39; })
+-
+-    if $routeParams.keywords
+-      Recipe.query(keywords: $routeParams.keywords, (results)-&gt; $scope.recipes = results)
+-    else
+-      $scope.recipes = []
+-])
+</code></pre><footer><h1>app/assets/javascripts/app.coffee</h1></footer></article>
+<p>We&#39;ll place the controller code in <code>app/assets/javascripts/controllers/RecipesController.coffee</code>, and notice that we have <em>repeated</em> the module declaration (or so it seems):</p>
+<article class='code-listing'><pre><code class="language-">controllers = angular.module(&#39;controllers&#39;)
+controllers.controller(&quot;RecipesController&quot;, [ &#39;$scope&#39;, &#39;$routeParams&#39;, &#39;$location&#39;, &#39;$resource&#39;,
+  ($scope,$routeParams,$location,$resource)-&gt;
+    $scope.search = (keywords)-&gt;  $location.path(&quot;/&quot;).search(&#39;keywords&#39;,keywords)
+    Recipe = $resource(&#39;/recipes/:recipeId&#39;, { recipeId: &quot;@id&quot;, format: &#39;json&#39; })
+
+    if $routeParams.keywords
+      Recipe.query(keywords: $routeParams.keywords, (results)-&gt; $scope.recipes = results)
+    else
+      $scope.recipes = []
+])
+</code></pre><footer><h1>app/assets/javascripts/controllers/RecipesController.coffee</h1></footer></article>
+<p>Because the asset pipeline wraps
+all CoffeeScript files in self-executing functions, our controller file won&#39;t have access to the <code>controllers</code> module we declared
+in <code>app.coffee</code>.  We can still get access to it by calling <code>angular.module</code> in the controller file.  Since it will be evaluated <em>after</em> <code>app.coffee</code>, we can be sure the module itself exists inside the bowels of Angular. The important
+difference is that in our controller file, we omit the second parameter.  This is how Angular knows we just want access to the
+previously-declared module and aren&#39;t trying to declare a new module that has
+the same name (which, incidentally, generates a runtime error).</p>
+
+<p>If all went well, our tests should still be passing.  First, we run our unit tests:</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rake teaspoon
+Starting the Teaspoon server...
+Teaspoon running default suite at http://127.0.0.1:58520/teaspoon/default
+...
+
+Finished in 0.02400 seconds
+3 examples, 0 failures
+</code></pre></article>
+<p>Now, run our feature test:</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; rspec spec/features/search_spec.rb
+.
+
+Finished in 3.22 seconds
+1 example, 0 failures
+
+Randomized with seed 40348
+</code></pre></article>
+<p>Wonderful!  We now have a repeatable process for test-driving our Angular-and-Rails-powered web application.</p>
+
+<p>In the next chapter, we&#39;ll use what we&#39;ve set up to test-drive the “view” feature.</p>
+<footer>
+  <ol>
+    <li class="previous"><a href="bootstrap.html">&larr; 
+        Creating a Skeleton App
+    </a></li>
+    <li class="next"><a href="view_recipe.html">
+        Viewing a Recipe
+        &rarr;</a></li>
+  </ol>
+  <div class="clearfix"></div>
+  <p class="copyright">
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">AngularJS with Ruby on Rails</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="http://angular-rails.com" property="cc:attributionName" rel="cc:attributionURL">David Bryant Copeland</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License
+    </a>.
+  </p>
+<script src="//static.getclicky.com/js" type="text/javascript"></script>
+<script type="text/javascript">try{ clicky.init(100722319); }catch(e){}</script>
+<noscript><p><img alt="Clicky" width="1" height="1" src="//in.getclicky.com/100722319ns.gif" /></p></noscript>
+</footer>
+</body>
+</html>
