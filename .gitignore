@@ -1,5 +1,5 @@
-src/git_repos
-src/book
-src/cache
+git_repos
+book
+cache
 *.sw?
 .DS_Store
