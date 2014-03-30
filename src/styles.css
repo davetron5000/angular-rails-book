@@ -1,0 +1,139 @@
+body {
+  width: 634px;
+  margin: 0 auto;
+}
+body, p, li, td {
+  font-family: 'Avenir';
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+ol.front-matter {
+  list-style: none;
+}
+ol.main-matter {
+  list-style: decimal;
+}
+ol.back-matter {
+  list-style: none;
+}
+
+li.section {
+  font-size: 75%;
+}
+p {
+  text-align: justify;
+}
+
+p.byline {
+  text-align: left;
+  font-size: 80%;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+h1 {
+  font-weight: 500;
+  margin-bottom: 0;
+}
+
+h1 a {
+  text-decoration: none;
+  color: black;
+}
+h2, h3, h4, h5, h5 {
+  font-family: 'Baskerville';
+}
+
+h2 {
+  border-bottom: solid thin black;
+}
+
+h2.subtitle {
+  border-bottom: none;
+  font-family: "Avenir";
+  font-weight: normal;
+  font-size: 1.2em;
+  font-style: italic;
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+pre,code {
+  font-family: "Source Code Pro";
+}
+
+code {
+  border: solid thin #777;
+  background: #ddd;
+  padding-left: 4px;
+  padding-right: 4px;
+  border-radius: 5px;
+}
+
+pre {
+  margin: 0;
+}
+pre code {
+  border-radius: 9px;
+  padding: 0;
+  font-size: 14px;
+  border: none;
+  overflow: scroll;
+}
+
+article.code-listing footer h1{
+  font-size: 12px;
+  font-family: "Source Code Pro";
+  border-bottom: none;
+  margin: 0;
+  padding: 0;
+  text-align: right;
+}
+
+article.code-listing {
+  border-radius: 9px;
+  padding: 9px;
+}
+
+pre code[class~='language-shell'] {
+  background: black;
+  color: white;
+}
+
+img {
+  width: 100%;
+  display: block;
+  position: relative;
+	background-color: #fff;
+	-webkit-box-shadow: 0 0 4px rgba(0, 0, 0, 0.2), inset 0 0 50px rgba(0, 0, 0, 0.1);
+	-moz-box-shadow: 0 0 4px rgba(0, 0, 0, 0.2), inset 0 0 50px rgba(0, 0, 0, 0.1);
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.2), inset 0 0 50px rgba(0, 0, 0, 0.1);
+}
+
+footer ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+footer ol li.previous {
+  float: left;
+}
+footer ol li.next {
+  float: right;
+}
+footer ol li {
+  display: inline;
+}
+
+footer .clearfix {
+  clear: both;
+}
+
+footer .copyright img {
+  width: auto;
+}
+
+footer .copyright {
+  font-size: 80%;
+}
