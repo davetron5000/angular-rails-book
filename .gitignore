@@ -1,4 +1,5 @@
 src/git_repos
+src/book
 src/cache
 *.sw?
 .DS_Store
