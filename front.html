@@ -7,6 +7,34 @@
   <title>AngularJS with Ruby on Rails: From zero to deployment in less than 10,000 words</title>
   <script type="text/javascript" src="//use.typekit.net/hiq5jip.js"></script>
   <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <script>
+    // Mobile Safari in standalone mode - don't shell out to Mobile Safari
+    // Courtesy https://gist.github.com/kylebarrow/1042026
+    if(("standalone" in window.navigator) && window.navigator.standalone){
+
+      var noddy, remotes = false;
+
+      document.addEventListener('click', function(event) {
+
+        noddy = event.target;
+
+        // Bubble up until we hit link or top HTML element. Warning: BODY element is not compulsory so better to stop on HTML
+        while(noddy.nodeName !== "A" && noddy.nodeName !== "HTML") {
+          noddy = noddy.parentNode;
+        }
+
+        if('href' in noddy && noddy.href.indexOf('http') !== -1 && (noddy.href.indexOf(document.location.host) !== -1 || remotes)) {
+          event.preventDefault();
+          document.location.href = noddy.href;
+        }
+
+      },false);
+    }
+  </script>
+  
   <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.0/styles/solarized_light.min.css">
   <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.0/highlight.min.js"></script>
   <script>hljs.initHighlightingOnLoad();</script>

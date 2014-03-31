@@ -2,6 +2,15 @@ body {
   width: 634px;
   margin: 0 auto;
 }
+@media only screen and (min-device-width : 320px) and (max-device-width : 568px) {
+  body {
+    width: 90%;
+  }
+  body, p, li, td {
+    font-size: 22px;
+  }
+}
+
 body, p, li, td {
   font-family: 'freight-sans-pro', sans-serif;
   font-size: 18px;
