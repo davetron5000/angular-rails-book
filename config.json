@@ -17,7 +17,11 @@
     "view_recipe.md",
     "crud_recipe.md"
   ],
-  "back_matter": "back.md",
+  "back_matter": [
+    "back.md",
+    "contributing.md",
+    "colophon.md"
+  ],
   "rendering": {
     "git_repos_basedir": "git_repos",
     "stylesheets": "styles.css",
@@ -30,5 +34,7 @@
   },
   "clicky": {
     "id": 100722319
-  }
+  },
+  "favicon": true,
+  "apple-mobile-web": true
 }
