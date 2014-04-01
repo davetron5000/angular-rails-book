@@ -43,15 +43,12 @@
   <h1><a href="index.html">AngularJS with Ruby on Rails</a></h1>
       <p class="byline">by David Bryant Copeland</p>
 <a name='intro:-angular-and-rails-in-production'></a><h2>Intro: Angular and Rails in Production</h2>
-<p>The latest wave of JavaScript frameworks present an interesting problem to experienced developers.  On their own, these
+<p>The latest wave of JavaScript frameworks present an interesting problem to experienced Rails developers.  On their own, these
 frameworks can only do but so much, since they are designed to run on the client-side, in a browser.  This means that for
-anything interesting—any real application you might want to create—you need a back-end.  That back-end is likely a web framework
-that was designed without a JavaScript framework in mind.  This leaves a gap between understanding your backend and using the
-JavaScript framework.</p>
+anything interesting—any real application you might want to create—you need a back-end.  </p>
 
-<p>Rails is a terrific back-end.  Between Active Record, the controller layer, and the huge ecosystem built around creating and
-deploying Rails apps, you&#39;d be hard-pressed to find a better back-end for your ambituous AngularJS application.  Of course, Rails
-wasn&#39;t designed to work with a front-end JavaScript framework.</p>
+<p>Rails is a terrific back-end, however it wasn&#39;t designed with a JavaScript framework like AngularJS in mind.  This means that
+there isn&#39;t a clear “Rails Way” of managing the code needed to use it.</p>
 
 <p>Angular, of course, wasn&#39;t designed with Rails in mind either, since it is entirely back-end agnostic. Because of this,
 there is no clear path to using Angular in your Rails app.  Further, because Rails wasn&#39;t designed around heavy use of
@@ -86,10 +83,9 @@ that.</p>
 <li>A brief retrospective about what we&#39;ve learned and the way forward.</li>
 </ul>
 
-<p>We&#39;ll work test first, and keep dependencies at a minimum.  We&#39;ll stick to the Rails “out of box” experience as much as we can.
-But, the point of this is that the Rails “out of box” experience is missing a lot when it comes to creating an Angular-based app.</p>
+<p>We&#39;ll work test first, and keep dependencies at a minimum.  Although we&#39;ll try to stick to the Rails “out of box” experience as much as we can, the point of this is that there is no good “out of box” experience when using AngularJS.</p>
 
-<p>The technology we&#39;ll be using:</p>
+<p>The technologies we&#39;ll be using:</p>
 
 <ul>
 <li>CoffeeScript</li>
@@ -121,7 +117,7 @@ you work.</p>
 <ul>
 <li>Ruby 2 or later</li>
 <li>Rails 4.0.x</li>
-<li>Some sort of database installed.  I&#39;d recommend Postgres, but MySQL should work fine</li>
+<li>Some sort of database installed (I&#39;d recommend Postgres, but MySQL should work fine)</li>
 <li>An account on <a href="http://heroku.com">Heroku</a>, where we&#39;ll deploy the app</li>
 </ul>
 
@@ -132,6 +128,9 @@ what those differences are.</p>
 <p>With that out of the way, let&#39;s get started!</p>
 <footer>
   <ol>
+    <li class="previous"><a href="about.html">&larr; 
+        About the Author
+    </a></li>
     <li class="next"><a href="app_overview.html">
         The Application We&#39;ll Build
         &rarr;</a></li>
