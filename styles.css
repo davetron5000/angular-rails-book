@@ -1,20 +1,22 @@
 body {
   width: 634px;
   margin: 0 auto;
-}
-@media only screen and (min-device-width : 320px) and (max-device-width : 568px) {
-  body {
-    width: 90%;
-  }
-  body, p, li, td {
-    font-size: 22px;
-  }
+  overflow-x: hidden;
 }
 
 body, p, li, td {
   font-family: 'freight-sans-pro', sans-serif;
   font-size: 18px;
   line-height: 1.4;
+}
+
+@media all and (max-width : 700px) {
+  body {
+    width: 90%;
+  }
+  body, p, li, td {
+    font-size: 22px;
+  }
 }
 
 ol li {
@@ -35,8 +37,6 @@ li.chapter {
 }
 li.section {
   font-size: 100%;
-}
-p {
 }
 
 p.byline {
@@ -82,6 +82,15 @@ pre,code {
   font-family: "anonymous-pro", monospace;
 }
 
+@media all and (max-width : 700px) {
+  code {
+    word-wrap: break-word;
+  }
+  article.code-listing code {
+    word-wrap: normal;
+  }
+}
+
 code {
   border: solid thin #777;
   background: #ddd;
@@ -93,12 +102,11 @@ code {
 pre {
   margin: 0;
 }
-pre code {
+
+article.code-listing {
   border-radius: 9px;
-  padding: 0;
-  font-size: 14px;
-  border: none;
-  overflow: scroll;
+  padding: 9px;
+  overflow-x: hidden;
 }
 
 article.code-listing footer h1{
@@ -110,9 +118,12 @@ article.code-listing footer h1{
   text-align: right;
 }
 
-article.code-listing {
+pre code {
   border-radius: 9px;
-  padding: 9px;
+  padding: 0;
+  font-size: 14px;
+  border: none;
+  overflow-x: scroll;
 }
 
 pre code[class~='language-shell'] {
@@ -126,8 +137,8 @@ img {
   position: relative;
 	background-color: #fff;
 	-webkit-box-shadow: 0 0 4px rgba(0, 0, 0, 0.2), inset 0 0 50px rgba(0, 0, 0, 0.1);
-	-moz-box-shadow: 0 0 4px rgba(0, 0, 0, 0.2), inset 0 0 50px rgba(0, 0, 0, 0.1);
-	box-shadow: 0 0 5px rgba(0, 0, 0, 0.2), inset 0 0 50px rgba(0, 0, 0, 0.1);
+	   -moz-box-shadow: 0 0 4px rgba(0, 0, 0, 0.2), inset 0 0 50px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 0 5px rgba(0, 0, 0, 0.2), inset 0 0 50px rgba(0, 0, 0, 0.1);
 }
 
 footer ol {
@@ -135,24 +146,21 @@ footer ol {
   padding: 0;
   margin: 0;
 }
+footer ol li {
+  display: inline;
+}
 footer ol li.previous {
   float: left;
 }
 footer ol li.next {
   float: right;
 }
-footer ol li {
-  display: inline;
-}
-
 footer .clearfix {
   clear: both;
 }
-
-footer .copyright img {
-  width: auto;
-}
-
 footer .copyright {
   font-size: 80%;
+}
+footer .copyright img {
+  width: auto;
 }

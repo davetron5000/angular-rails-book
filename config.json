@@ -8,6 +8,7 @@
     "typeDescription": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License"
   },
   "front_matter": [
+    "about.md",
     "front.md"
   ],
   "main_matter": [
