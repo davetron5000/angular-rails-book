@@ -1,4 +1,4 @@
-# Finding Recipes
+# Building the First Feature
 
 Now that our application is set up with Angular and we have a way to manage
 assets, we can start building an actual feature.  As mentioned earlier, we're
@@ -24,7 +24,7 @@ This is what we're going to do:
 3. Set up our JavaScript testing environment
 4. Connect the back-end
 
-## Create a basic search UI
+## Basic UI
 
 Since our application's views are not generally going to be served by Rails, the majority of our markup will live outside of a
 Rails view.  With Angular, we'll map routes to views and controllers, like so:
@@ -143,7 +143,7 @@ Once we start our app, we'll see the view rendered, which should look like so:
 
 Now, let's get the front-end working.
 
-## Write code to make it work
+## Code to make it work
 
 Normally, we'd start by writing a test, but since this is our very first feature, let's write the production code first so we
 don't have to be distracted by setting up the testing framework and its requisite configuration.
@@ -208,7 +208,7 @@ Once your browser opens, you should see the app working the same as it did in yo
 Before we write too much more code, we need to get some tests in place.  First, we'll create a browser-based acceptance test to verify that
 the search feature works.  That test won't be coupled to how the app is implemented, so we can use it to validate that we've hooked up the backend correctly.  We'll use unit tests of our Angular controller to drive that development.
 
-## Set up testing
+## Tests
 
 To conduct our browser-based tests, we'll use Capybara and Selenium.  First, we'll need to create `spec/spec_helper.rb` to setup
 and configure our back-end and browser-based tests.
@@ -231,7 +231,7 @@ Since our test relies on the canned data that we hard-coded, it passes.
 With this in place, we can now connect our front-end to the back-end, set up the same canned data from within our feature spec, and
 expect the exact same results.
 
-## Connect the back-end
+## Back-end
 
 We have three main steps to connect our Angular controller to our backend:
 
@@ -304,7 +304,7 @@ With all this in place, our test passes:
 
 Now that we have our back-end implemented, let's hook it up by having our Angular controller call it.
 
-### Have Angular Controller Call the Back-End
+### Have angular controller call the back-end
 
 Since this is the first real code we're writing in Angular, this is where we'll set up our unit testing.  We're going to use
 `teaspoon`, which is a test runner for JavaScript that uses the asset pipeline, Jasmine, and PhantomJS.  We'll add teaspoon and

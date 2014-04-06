@@ -3,3 +3,4 @@ book
 cache
 *.sw?
 .DS_Store
+.sass-cache/

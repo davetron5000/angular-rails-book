@@ -1,4 +1,4 @@
-# Create, Update, and Delete
+# Running Through Remaining Features
 
 In the last section, we worked “inside out”, starting with `RecipeController`
 and integrating everything at the end, driven by a browser-based test.
@@ -18,7 +18,7 @@ To make it work, we'll need to:
 * add functionatliy to our Angular controllers
 * create views
 
-## Implement back-end controller
+## Rails controller
 
 First, we'll add some tests for our controller to get started:
 
@@ -42,7 +42,7 @@ Back to our test, everything seems to be working:
 
 With the back-end working, let's turn our attention to the front end, which will call this code.
 
-## Implement front-end controllers
+## Angular controllers
 
 We'll have `RecipeController` handle these operations.  It has the `Recipe` resource we created using Angular's `$resource`
 service, so it should be pretty straightforward to add new functions.
@@ -88,7 +88,7 @@ Now, let's see if our tests pass:
 
 So far, so good.  The only thing left is to create and wire up the views.
 
-## Hooking up the Views
+## Views
 
 As you could see from our test, we're going to create two new routes: `/recipes/new` and `/recipes/:recipeId/edit`, both handled
 by `RecipeController` and a new view, `form.html`.

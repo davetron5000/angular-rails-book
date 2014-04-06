@@ -1,4 +1,4 @@
-# Viewing a Recipe
+# Test-Driving the Next Feature
 
 Now that we have Angular setup, including a way to manage front-end assets,
 run tests, and deploy our application to production, the hard part is done.  In
@@ -25,7 +25,7 @@ Generally, what we need to do here is:
 3. Write a browser-based test for the feature
 4. Create a view
 
-## Create our Angular Controller
+## Angular controller
 
 First, we'll update our Angular app config to route `/recipes/:recipeId` to
 the yet-to-be-created `RecipeController`:
@@ -135,9 +135,9 @@ We add `flash` to the list of injected dependencies, and then set the error mess
 
 Our Angular controller is done!  We still need a view, a browser-based test, and the backend.  Let's do the Rails backend next.
 
-## Create our Rails Controller
+## Rails controller
 
-In the Rails world, it is canonical to have the same code serve both `index`
+In the Rails world, it is canonical to have the same controller have the code for both `index`
 and `show`, so what we need to do here is implement `show`.
 
 First, let's add the new route to `config/routes.rb`:
@@ -178,7 +178,7 @@ Now, everything passes!
 
 Let's bring it all together with a browser-based test.
 
-## Create a Browser-Based Test
+## Browser-based test
 
 Our browser-based test will simulate a user using our app, so we'll first do a
 search, and then navigate to a specific recipe.  We'll then check that the
@@ -231,7 +231,7 @@ doesn't seem to be a canonical way to do this at this time.
 
 There's one last thing to do, and that's integrate the flash message.  
 
-## Integrate Flash Message
+## Flash message
 
 Although we hope to not generate links to non-existent
 recipes, it's still possible it could happen and, unlike a web app where a 404 will send us to a special page, since our Angular

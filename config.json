@@ -1,6 +1,6 @@
 {
   "title": "AngularJS with Ruby on Rails",
-  "subtitle": "From zero to deployment in less than 10,000 words",
+  "subtitle": "Zero to deployment in less than 10,000 words",
   "author": "David Bryant Copeland",
   "url": "http://angular-rails.com",
   "license": {
@@ -8,11 +8,10 @@
     "typeDescription": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License"
   },
   "front_matter": [
-    "about.md",
-    "front.md"
+    "front.md",
+    "app_overview.md"
   ],
   "main_matter": [
-    "app_overview.md",
     "bootstrap.md",
     "find_and_browse.md",
     "view_recipe.md",
@@ -20,6 +19,7 @@
   ],
   "back_matter": [
     "back.md",
+    "about.md",
     "contributing.md",
     "colophon.md"
   ],

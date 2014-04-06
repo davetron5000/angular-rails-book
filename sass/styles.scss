@@ -1,0 +1,53 @@
+@import "colors";
+@import "typography";
+@import "skin";
+
+// TOC Overrides
+.toc ol li ol li {
+  line-height: $line-height * 0.85;
+}
+
+ol.front-matter {
+  list-style: upper-roman;
+  margin-bottom: 0;
+  ol {
+    list-style: lower-roman;
+  }
+}
+ol.main-matter {
+  margin-top: 0;
+  margin-bottom: 0;
+  list-style: decimal;
+}
+ol.back-matter {
+  margin-top: 0;
+  list-style: upper-alpha;
+}
+
+li.chapter { font-size: $f6; }
+li.section { font-size: $f7; }
+
+// Navigation footer
+footer ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+footer ol li {
+  display: inline;
+}
+footer ol li.previous {
+  float: left;
+}
+footer ol li.next {
+  float: right;
+}
+footer .clearfix {
+  clear: both;
+}
+footer .copyright {
+  font-size: $f8;
+}
+footer .copyright img {
+  width: auto;
+}

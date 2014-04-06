@@ -1,0 +1,76 @@
+body {
+  background: $background;
+  background: -webkit-linear-gradient(top, $background-gradient, $background);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+header {
+  color: $paper;
+  background: $ink;
+  background: -webkit-linear-gradient(top, $ink,#242424);
+  background-repeat: no-repeat;
+  h1 a, h1 a:visited {
+    color: $paper;
+  }
+}
+
+.page {
+  background: $paper;
+  color: $ink;
+	-webkit-box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+	   -moz-box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+a, a:visited {
+  color: $ink;
+}
+
+a:hover {
+  color: lighten($ink,5%);
+}
+
+.toc a,.toc a:visited {
+  text-decoration: none;
+}
+.toc a:hover {
+  text-decoration: underline;
+}
+code {
+  border: solid thin #777;
+  background: #ddd;
+  padding: $sz5;
+  padding-right: $sz5;
+  border-radius: $sz5;
+}
+
+pre code {
+  border-radius: $sz4;
+  border: solid thin #657b83;
+}
+
+@media all and (max-width : 700px) {
+  pre code {
+    border-radius: $sz5;
+  }
+}
+
+pre code[class~='language-shell'] {
+  background: black;
+  background: -webkit-linear-gradient(top, #000, #121);
+  background-repeat: no-repeat;
+  color: white;
+  border: none;
+}
+
+img {
+  width: 100%;
+  display: block;
+  position: relative;
+	background-color: #fff;
+	-webkit-box-shadow: 0 0 4px rgba(0, 0, 0, 0.2), inset 0 0 50px rgba(0, 0, 0, 0.1);
+	   -moz-box-shadow: 0 0 4px rgba(0, 0, 0, 0.2), inset 0 0 50px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 0 5px rgba(0, 0, 0, 0.2), inset 0 0 50px rgba(0, 0, 0, 0.1);
+}
+

@@ -24,7 +24,7 @@ The basic steps are:
 
 [bower]: http://bower.io
 
-## Create an empty Rails app
+## An empty Rails app
 
 Our app will be called “Receta”, which is Spanish for “recipe”.  We're going
 to use Postgres as our database (although we won't be using anything
@@ -40,7 +40,7 @@ unless you really want to.
 Now that we have our empty app, let's add a few basic gems, configure the
 database, and make sure we have a clean base from which to work.
 
-## Adding Basic Gems
+## Basic gems
 
 We're going to use RSpec and Capybara here, as well as the Selenium driver for
 browser-based testing, so let's add those gems to our `Gemfile`.  
@@ -79,7 +79,7 @@ server with `Ctrl-C`.
 Now that we have the Rails side of things squared away, let's set up Bower,
 which we'll  use to manage our front-end library dependencies.
 
-## Set up Bower to Manage Front-End Dependenciies
+## Front-end dependency management with Bower
 
 Because Rails doesn't provide a way to manage front-end assets, such as JavaScript libraries, fonts, or CSS, the community has
 taken to bundling popular packages in RubyGems.  Using the “Engines” feature of Rails, these assets can be placed in the asset
@@ -193,7 +193,7 @@ Now that we have our initial set of front-end dependencies downloaded, let's
 write *just* enough code to use them, so we can be sure all the moving parts
 are working together.
 
-## Write Code to Verify Configuration
+## Tiniest Angular app ever
 
 We'll need a basic controller to render a view that will get Angular
 bootstrapped, and we'll need a tiny bit of JavaScript to create our Angular
@@ -230,7 +230,7 @@ as we do more and more front-end work and bring in more and more libraries
 and assets, we can can have a better idea of what went wrong if something
 *does* go wrong.
 
-## Deploy
+## Production deployment
 
 We're going to use [Heroku][heroku] to deploy.  Heroku is a cloud-based “platform as a service” vendor that is free and easy to
 use.  We can get a Rails app deployed with a small database for free just be doing a `git push`.  The Heroku environment is also
