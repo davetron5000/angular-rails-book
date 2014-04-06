@@ -4,7 +4,7 @@
   <link href='styles.css' rel='stylesheet' type='text/css' media='all'>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
   <meta charset="utf-8">
-  <title>AngularJS with Ruby on Rails: From zero to deployment in less than 10,000 words</title>
+  <title>AngularJS with Ruby on Rails: Zero to deployment in less than 10,000 words</title>
   <script type="text/javascript" src="//use.typekit.net/hiq5jip.js"></script>
   <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
   <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -39,9 +39,11 @@
   <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.0/highlight.min.js"></script>
   <script>hljs.initHighlightingOnLoad();</script>
 </head>
-<body>
-  <h1><a href="index.html">AngularJS with Ruby on Rails</a></h1>
-      <p class="byline">by David Bryant Copeland</p>
+<body><div class="page">
+  <header>
+    <h1><a href="index.html">AngularJS with Ruby on Rails</a></h1>
+        <p class="byline">by David Bryant Copeland</p>
+  </header>
 <a name='creating-a-skeleton-app'></a><h2>Creating a Skeleton App</h2>
 <p>Even the most basic Rails app requires additional configuration beyond simply
 running <code>rails new</code>.  For example, you may have certain gems you know you&#39;ll
@@ -64,7 +66,7 @@ for us to validate that we&#39;re moving in the right direction.</p>
 <li>Write just enough code to serve content via Angular</li>
 <li>Deploy to a production server to validate the asset pipeline is working</li>
 </ol>
-<a name='create-an-empty-rails-app'></a><h3>Create an empty Rails app</h3>
+<a name='an-empty-rails-app'></a><h3>An empty Rails app</h3>
 <p>Our app will be called “Receta”, which is Spanish for “recipe”.  We&#39;re going
 to use Postgres as our database (although we won&#39;t be using anything
 Postgres-specific), and we&#39;re going to skip <code>bundle install</code> for now.  Note if you would prefer to use MySQL, it should work fine
@@ -75,7 +77,7 @@ unless you really want to.</p>
 </code></pre></article>
 <p>Now that we have our empty app, let&#39;s add a few basic gems, configure the
 database, and make sure we have a clean base from which to work.</p>
-<a name='adding-basic-gems'></a><h3>Adding Basic Gems</h3>
+<a name='basic-gems'></a><h3>Basic gems</h3>
 <p>We&#39;re going to use RSpec and Capybara here, as well as the Selenium driver for
 browser-based testing, so let&#39;s add those gems to our <code>Gemfile</code>.  </p>
 <article class='code-listing'><pre><code class="language-diff">diff --git a/Gemfile b/Gemfile
@@ -134,7 +136,7 @@ server with <code>Ctrl-C</code>.</p>
 
 <p>Now that we have the Rails side of things squared away, let&#39;s set up Bower,
 which we&#39;ll  use to manage our front-end library dependencies.</p>
-<a name='set-up-bower-to-manage-front-end-dependenciies'></a><h3>Set up Bower to Manage Front-End Dependenciies</h3>
+<a name='front-end-dependency-management-with-bower'></a><h3>Front-end dependency management with Bower</h3>
 <p>Because Rails doesn&#39;t provide a way to manage front-end assets, such as JavaScript libraries, fonts, or CSS, the community has
 taken to bundling popular packages in RubyGems.  Using the “Engines” feature of Rails, these assets can be placed in the asset
 pipeline by installing a RubyGem.  Rails even does this with JQuery.</p>
@@ -285,7 +287,7 @@ then, Bower is a fairly clean solution.</p>
 <p>Now that we have our initial set of front-end dependencies downloaded, let&#39;s
 write <em>just</em> enough code to use them, so we can be sure all the moving parts
 are working together.</p>
-<a name='write-code-to-verify-configuration'></a><h3>Write Code to Verify Configuration</h3>
+<a name='tiniest-angular-app-ever'></a><h3>Tiniest Angular app ever</h3>
 <p>We&#39;ll need a basic controller to render a view that will get Angular
 bootstrapped, and we&#39;ll need a tiny bit of JavaScript to create our Angular
 application.</p>
@@ -342,7 +344,7 @@ app, we should verify now that everything works in production mode.  This way,
 as we do more and more front-end work and bring in more and more libraries
 and assets, we can can have a better idea of what went wrong if something
 <em>does</em> go wrong.</p>
-<a name='deploy'></a><h3>Deploy</h3>
+<a name='production-deployment'></a><h3>Production deployment</h3>
 <p>We&#39;re going to use <a href="http://heroku.com">Heroku</a> to deploy.  Heroku is a cloud-based “platform as a service” vendor that is free and easy to
 use.  We can get a Rails app deployed with a small database for free just be doing a <code>git push</code>.  The Heroku environment is also
 fairly unforgiving.  If our application works on Heroku, it&#39;ll work anywhere.</p>
@@ -400,7 +402,7 @@ recipes.  This will drive the vast majority of the configuration we need to get 
         The Application We&#39;ll Build
     </a></li>
     <li class="next"><a href="find_and_browse.html">
-        Finding Recipes
+        Building the First Feature
         &rarr;</a></li>
   </ol>
   <div class="clearfix"></div>
@@ -412,5 +414,5 @@ recipes.  This will drive the vast majority of the configuration we need to get 
 <script type="text/javascript">try{ clicky.init(100722319); }catch(e){}</script>
 <noscript><p><img alt="Clicky" width="1" height="1" src="//in.getclicky.com/100722319ns.gif" /></p></noscript>
 </footer>
-</body>
+</div></body>
 </html>

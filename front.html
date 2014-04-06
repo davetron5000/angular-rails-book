@@ -4,7 +4,7 @@
   <link href='styles.css' rel='stylesheet' type='text/css' media='all'>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
   <meta charset="utf-8">
-  <title>AngularJS with Ruby on Rails: From zero to deployment in less than 10,000 words</title>
+  <title>AngularJS with Ruby on Rails: Zero to deployment in less than 10,000 words</title>
   <script type="text/javascript" src="//use.typekit.net/hiq5jip.js"></script>
   <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
   <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -39,28 +39,27 @@
   <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.0/highlight.min.js"></script>
   <script>hljs.initHighlightingOnLoad();</script>
 </head>
-<body>
-  <h1><a href="index.html">AngularJS with Ruby on Rails</a></h1>
-      <p class="byline">by David Bryant Copeland</p>
-<a name='intro:-angular-and-rails-in-production'></a><h2>Intro: Angular and Rails in Production</h2>
+<body><div class="page">
+  <header>
+    <h1><a href="index.html">AngularJS with Ruby on Rails</a></h1>
+        <p class="byline">by David Bryant Copeland</p>
+  </header>
+<a name='angularjs,-rails,-and-production'></a><h2>AngularJS, Rails, and Production</h2>
 <p>The latest wave of JavaScript frameworks present an interesting problem to experienced Rails developers.  On their own, these
-frameworks can only do but so much, since they are designed to run on the client-side, in a browser.  This means that for
-anything interesting—any real application you might want to create—you need a back-end.  </p>
+frameworks can only do so much, since they are designed to run on the client-side, in a browser.  This means that for
+any real applicaiton you might create, you need a back-end.</p>
 
-<p>Rails is a terrific back-end, however it wasn&#39;t designed with a JavaScript framework like AngularJS in mind.  This means that
-there isn&#39;t a clear “Rails Way” of managing the code needed to use it.</p>
+<p>Rails is a terrific back-end, however it wasn&#39;t designed with a JavaScript framework like AngularJS in mind.  Rails&#39; view of the world is serving up pages and HTML.  Rich Javascript-based single-page applications aren&#39;t something Rails encourages.  Angular, of course, wasn&#39;t designed with Rails in mind either, since it is entirely back-end agnostic. </p>
 
-<p>Angular, of course, wasn&#39;t designed with Rails in mind either, since it is entirely back-end agnostic. Because of this,
-there is no clear path to using Angular in your Rails app.  Further, because Rails wasn&#39;t designed around heavy use of
-JavaScript, there&#39;s no “Rails Way” for managing front-end assets and using them with the asset pipeline.</p>
+<p>The result is that there is no “Rails Way” for managing the front-end assets needed to create a rich JavaScript application using AngularJS.</p>
 
 <p>This mini-book is going to change that.  We&#39;re going to see step-by-step instructions for building a Rails app with Angular, and
 getting it deployed to production.  That means we&#39;ll properly configure the asset pipeline, provide a solution for managing
 front-end assets, and see how to integrate testing the front-end code into your app.</p>
 
-<p>This is not a Rails or Angular tutorial.  If you&#39;d like to learn Angular, I would suggest completing their <a href="http://docs.angularjs.org/tutorial/step_00">tutorial</a>.  Type out
-the code.  Run the code.  Tweak the code.  It only takes an hour or so, and you&#39;ll feel confident you can start using Angular.
-That&#39;s what I did, but I was left with a lot of unanswered questions:</p>
+<p>This is not a Rails or Angular tutorial.  If you&#39;d like to learn Angular, I would suggest completing their <a href="http://docs.angularjs.org/tutorial/step_00">tutorial</a>.  Don&#39;t just readit, type out the code.  Run the code.  Tweak the code.  It only takes an hour or so, and it&#39;ll give the confidence you  need to start using Angular (that&#39;s what I did).  </p>
+
+<p>Once you&#39;re familiar enough with Angular to start building an app, you&#39;ll find there are a lot of unanswered questions:</p>
 
 <ul>
 <li>How do I serve Angular assets via the Rails Asset Pipeline?</li>
@@ -73,17 +72,15 @@ That&#39;s what I did, but I was left with a lot of unanswered questions:</p>
 
 <p>I was able to find answers by piecing together information from Stack Overflow and various blog posts.  You shouldn&#39;t have to do
 that.</p>
-
+<a name='how-this-book-is-organized'></a><h3>How this book is organized</h3>
 <p>This mini-book is broken up into four major parts:</p>
 
 <ul>
-<li>What the app will do, along with a basic skeleton</li>
-<li>Step-by-step walkthrough of a simple search feature</li>
-<li>A very fast runthrough of CRUD operations</li>
-<li>A brief retrospective about what we&#39;ve learned and the way forward.</li>
+<li>Creating a basic skeleton to validate Angular is setup and configured</li>
+<li>A Step-by-step walkthrough of a simple search feature</li>
+<li>A more brisk walkthrough of using TDD to implement a feature</li>
+<li>A very fast runthrough of builing a few more features</li>
 </ul>
-
-<p>We&#39;ll work test first, and keep dependencies at a minimum.  Although we&#39;ll try to stick to the Rails “out of box” experience as much as we can, the point of this is that there is no good “out of box” experience when using AngularJS.</p>
 
 <p>The technologies we&#39;ll be using:</p>
 
@@ -93,16 +90,13 @@ that.</p>
 <li>Front-end tests use Jasmine</li>
 <li>Browser-based acceptance tests using RSpec and Capybara</li>
 <li>Front-end dependencies managed with Bower</li>
+<li>Twitter Bootstrap (not required, but simplifies this tutorial)</li>
+<li>Heroku (not required, but is a cheap way to validate deployment)</li>
 </ul>
-
-<p>We&#39;ll also be using Twitter Bootstrap for our front-end, and Heroku for deployment (neither of these are required or related, but
-we need <em>something</em> and both are free and easy to use).</p>
-
-<p>Finally, we&#39;ll be working test-first as much as possible.</p>
 
 <p>When we&#39;re done, you&#39;ll know exactly what you need to do to get Angular into your Rails app in a way that supports sustained
 development and deployment.  You&#39;ll be able to get to your code more quickly and confidently.</p>
-<a name='what-you&#39;ll-need'></a><h3>What You&#39;ll Need</h3>
+<a name='what-you&#39;ll-need'></a><h3>What you&#39;ll need</h3>
 <p>The code in this book is pulled from a <a href="http://github.com/davetron5000/receta">git repository</a> containing the Rails app
 we&#39;ll be building.  The console output we&#39;ll see is generated directly from
 that code, so you should be able to follow along easily.</p>
@@ -128,9 +122,6 @@ what those differences are.</p>
 <p>With that out of the way, let&#39;s get started!</p>
 <footer>
   <ol>
-    <li class="previous"><a href="about.html">&larr; 
-        About the Author
-    </a></li>
     <li class="next"><a href="app_overview.html">
         The Application We&#39;ll Build
         &rarr;</a></li>
@@ -144,5 +135,5 @@ what those differences are.</p>
 <script type="text/javascript">try{ clicky.init(100722319); }catch(e){}</script>
 <noscript><p><img alt="Clicky" width="1" height="1" src="//in.getclicky.com/100722319ns.gif" /></p></noscript>
 </footer>
-</body>
+</div></body>
 </html>

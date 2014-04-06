@@ -4,7 +4,7 @@
   <link href='styles.css' rel='stylesheet' type='text/css' media='all'>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
   <meta charset="utf-8">
-  <title>AngularJS with Ruby on Rails: From zero to deployment in less than 10,000 words</title>
+  <title>AngularJS with Ruby on Rails: Zero to deployment in less than 10,000 words</title>
   <script type="text/javascript" src="//use.typekit.net/hiq5jip.js"></script>
   <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
   <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -39,10 +39,12 @@
   <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.0/highlight.min.js"></script>
   <script>hljs.initHighlightingOnLoad();</script>
 </head>
-<body>
-  <h1><a href="index.html">AngularJS with Ruby on Rails</a></h1>
-      <p class="byline">by David Bryant Copeland</p>
-<a name='create,-update,-and-delete'></a><h2>Create, Update, and Delete</h2>
+<body><div class="page">
+  <header>
+    <h1><a href="index.html">AngularJS with Ruby on Rails</a></h1>
+        <p class="byline">by David Bryant Copeland</p>
+  </header>
+<a name='running-through-remaining-features'></a><h2>Running Through Remaining Features</h2>
 <p>In the last section, we worked “inside out”, starting with <code>RecipeController</code>
 and integrating everything at the end, driven by a browser-based test.</p>
 
@@ -114,7 +116,7 @@ Randomized with seed 32393
 <li>add functionatliy to our Angular controllers</li>
 <li>create views</li>
 </ul>
-<a name='implement-back-end-controller'></a><h3>Implement back-end controller</h3>
+<a name='rails-controller'></a><h3>Rails controller</h3>
 <p>First, we&#39;ll add some tests for our controller to get started:</p>
 <article class='code-listing'><pre><code class="language-diff">diff --git a/spec/controllers/recipes_controller_spec.rb b/spec/controllers/recipes_controller_spec.rb
 index 20e3ad0..a3394b5 100644
@@ -217,7 +219,7 @@ Finished in 0.69951 seconds
 Randomized with seed 26028
 </code></pre></article>
 <p>With the back-end working, let&#39;s turn our attention to the front end, which will call this code.</p>
-<a name='implement-front-end-controllers'></a><h3>Implement front-end controllers</h3>
+<a name='angular-controllers'></a><h3>Angular controllers</h3>
 <p>We&#39;ll have <code>RecipeController</code> handle these operations.  It has the <code>Recipe</code> resource we created using Angular&#39;s <code>$resource</code>
 service, so it should be pretty straightforward to add new functions.</p>
 
@@ -407,7 +409,7 @@ Finished in 0.03100 seconds
 8 examples, 0 failures
 </code></pre></article>
 <p>So far, so good.  The only thing left is to create and wire up the views.</p>
-<a name='hooking-up-the-views'></a><h3>Hooking up the Views</h3>
+<a name='views'></a><h3>Views</h3>
 <p>As you could see from our test, we&#39;re going to create two new routes: <code>/recipes/new</code> and <code>/recipes/:recipeId/edit</code>, both handled
 by <code>RecipeController</code> and a new view, <code>form.html</code>.</p>
 
@@ -543,7 +545,7 @@ where we could go from here.</p>
 <footer>
   <ol>
     <li class="previous"><a href="view_recipe.html">&larr; 
-        Viewing a Recipe
+        Test-Driving the Next Feature
     </a></li>
     <li class="next"><a href="back.html">
         In Conclusion
@@ -558,5 +560,5 @@ where we could go from here.</p>
 <script type="text/javascript">try{ clicky.init(100722319); }catch(e){}</script>
 <noscript><p><img alt="Clicky" width="1" height="1" src="//in.getclicky.com/100722319ns.gif" /></p></noscript>
 </footer>
-</body>
+</div></body>
 </html>

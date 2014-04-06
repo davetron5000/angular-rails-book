@@ -4,7 +4,7 @@
   <link href='styles.css' rel='stylesheet' type='text/css' media='all'>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
   <meta charset="utf-8">
-  <title>AngularJS with Ruby on Rails: From zero to deployment in less than 10,000 words</title>
+  <title>AngularJS with Ruby on Rails: Zero to deployment in less than 10,000 words</title>
   <script type="text/javascript" src="//use.typekit.net/hiq5jip.js"></script>
   <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
   <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -39,10 +39,12 @@
   <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.0/highlight.min.js"></script>
   <script>hljs.initHighlightingOnLoad();</script>
 </head>
-<body>
-  <h1><a href="index.html">AngularJS with Ruby on Rails</a></h1>
-      <p class="byline">by David Bryant Copeland</p>
-<a name='finding-recipes'></a><h2>Finding Recipes</h2>
+<body><div class="page">
+  <header>
+    <h1><a href="index.html">AngularJS with Ruby on Rails</a></h1>
+        <p class="byline">by David Bryant Copeland</p>
+  </header>
+<a name='building-the-first-feature'></a><h2>Building the First Feature</h2>
 <p>Now that our application is set up with Angular and we have a way to manage
 assets, we can start building an actual feature.  As mentioned earlier, we&#39;re
 going to use tests to drive our work, but since this is the first feature
@@ -68,7 +70,7 @@ our application work.</p>
 <li>Set up our JavaScript testing environment</li>
 <li>Connect the back-end</li>
 </ol>
-<a name='create-a-basic-search-ui'></a><h3>Create a basic search UI</h3>
+<a name='basic-ui'></a><h3>Basic UI</h3>
 <p>Since our application&#39;s views are not generally going to be served by Rails, the majority of our markup will live outside of a
 Rails view.  With Angular, we&#39;ll map routes to views and controllers, like so:</p>
 <article class='code-listing'><pre><code class="language-coffeescript">app.config([ &#39;$routeProvider&#39;,
@@ -261,7 +263,7 @@ will initially just have static markup that demonstrates our UI.</p>
 <p><img src='images/SearchUI.png' alt='Search UI' title=''></p>
 
 <p>Now, let&#39;s get the front-end working.</p>
-<a name='write-code-to-make-it-work'></a><h3>Write code to make it work</h3>
+<a name='code-to-make-it-work'></a><h3>Code to make it work</h3>
 <p>Normally, we&#39;d start by writing a test, but since this is our very first feature, let&#39;s write the production code first so we
 don&#39;t have to be distracted by setting up the testing framework and its requisite configuration.</p>
 
@@ -412,7 +414,7 @@ when the asset pipeline is in production mode.</p>
 
 <p>Before we write too much more code, we need to get some tests in place.  First, we&#39;ll create a browser-based acceptance test to verify that
 the search feature works.  That test won&#39;t be coupled to how the app is implemented, so we can use it to validate that we&#39;ve hooked up the backend correctly.  We&#39;ll use unit tests of our Angular controller to drive that development.</p>
-<a name='set-up-testing'></a><h3>Set up testing</h3>
+<a name='tests'></a><h3>Tests</h3>
 <p>To conduct our browser-based tests, we&#39;ll use Capybara and Selenium.  First, we&#39;ll need to create <code>spec/spec_helper.rb</code> to setup
 and configure our back-end and browser-based tests.</p>
 <article class='code-listing'><pre><code class="language-ruby"># This file is copied to spec/ when you run &#39;rails generate rspec:install&#39;
@@ -487,7 +489,7 @@ Randomized with seed 13155
 </code></pre></article>
 <p>With this in place, we can now connect our front-end to the back-end, set up the same canned data from within our feature spec, and
 expect the exact same results.</p>
-<a name='connect-the-back-end'></a><h3>Connect the back-end</h3>
+<a name='back-end'></a><h3>Back-end</h3>
 <p>We have three main steps to connect our Angular controller to our backend:</p>
 
 <ol>
@@ -611,7 +613,7 @@ Finished in 0.41174 seconds
 Randomized with seed 52820
 </code></pre></article>
 <p>Now that we have our back-end implemented, let&#39;s hook it up by having our Angular controller call it.</p>
-<a name='have-angular-controller-call-the-back-end'></a><h4>Have Angular Controller Call the Back-End</h4>
+<a name='have-angular-controller-call-the-back-end'></a><h4>Have angular controller call the back-end</h4>
 <p>Since this is the first real code we&#39;re writing in Angular, this is where we&#39;ll set up our unit testing.  We&#39;re going to use
 <code>teaspoon</code>, which is a test runner for JavaScript that uses the asset pipeline, Jasmine, and PhantomJS.  We&#39;ll add teaspoon and
 PhantomJS to our <code>Gemfile</code>:</p>
@@ -991,7 +993,7 @@ Randomized with seed 40348
         Creating a Skeleton App
     </a></li>
     <li class="next"><a href="view_recipe.html">
-        Viewing a Recipe
+        Test-Driving the Next Feature
         &rarr;</a></li>
   </ol>
   <div class="clearfix"></div>
@@ -1003,5 +1005,5 @@ Randomized with seed 40348
 <script type="text/javascript">try{ clicky.init(100722319); }catch(e){}</script>
 <noscript><p><img alt="Clicky" width="1" height="1" src="//in.getclicky.com/100722319ns.gif" /></p></noscript>
 </footer>
-</body>
+</div></body>
 </html>

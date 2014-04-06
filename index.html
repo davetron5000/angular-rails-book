@@ -4,7 +4,7 @@
   <link href='styles.css' rel='stylesheet' type='text/css' media='all'>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
   <meta charset="utf-8">
-  <title>AngularJS with Ruby on Rails: From zero to deployment in less than 10,000 words</title>
+  <title>AngularJS with Ruby on Rails: Zero to deployment in less than 10,000 words</title>
   <script type="text/javascript" src="//use.typekit.net/hiq5jip.js"></script>
   <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
   <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -39,80 +39,71 @@
   <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.0/highlight.min.js"></script>
   <script>hljs.initHighlightingOnLoad();</script>
 </head>
-<body>
-  <h1><a href="index.html">AngularJS with Ruby on Rails</a></h1>
-      <p class="byline">by David Bryant Copeland</p>
-<h2 class="subtitle">From zero to deployment in less than 10,000 words</h2>
-<ol class="front-matter">
-    <li class='chapter'><a href="about.html">About the Author</a></li>
-    <li class='chapter'><a href="front.html">Intro: Angular and Rails in Production</a></li>
-</ol>
-<ol class="main-matter">
-    <li class='chapter'>
-      <a href="app_overview.html">The Application We&#39;ll Build</a>
-      <ol>
-      </ol>
-    </li class='chapter'>
-    <li class='chapter'>
-      <a href="bootstrap.html">Creating a Skeleton App</a>
-      <ol>
-      <li class='section'><a href="bootstrap.html#create-an-empty-rails-app">Create an empty Rails app</a></li>
-      <li class='section'><a href="bootstrap.html#adding-basic-gems">Adding Basic Gems</a></li>
-      <li class='section'><a href="bootstrap.html#set-up-bower-to-manage-front-end-dependenciies">Set up Bower to Manage Front-End Dependenciies</a></li>
-      <li class='section'><a href="bootstrap.html#write-code-to-verify-configuration">Write Code to Verify Configuration</a></li>
-      <li class='section'><a href="bootstrap.html#deploy">Deploy</a></li>
-      <li class='section'><a href="bootstrap.html#create-an-empty-rails-app">Create an empty Rails app</a></li>
-      <li class='section'><a href="bootstrap.html#adding-basic-gems">Adding Basic Gems</a></li>
-      <li class='section'><a href="bootstrap.html#set-up-bower-to-manage-front-end-dependenciies">Set up Bower to Manage Front-End Dependenciies</a></li>
-      <li class='section'><a href="bootstrap.html#write-code-to-verify-configuration">Write Code to Verify Configuration</a></li>
-      <li class='section'><a href="bootstrap.html#deploy">Deploy</a></li>
-      </ol>
-    </li class='chapter'>
-    <li class='chapter'>
-      <a href="find_and_browse.html">Finding Recipes</a>
-      <ol>
-      <li class='section'><a href="find_and_browse.html#create-a-basic-search-ui">Create a basic search UI</a></li>
-      <li class='section'><a href="find_and_browse.html#write-code-to-make-it-work">Write code to make it work</a></li>
-      <li class='section'><a href="find_and_browse.html#set-up-testing">Set up testing</a></li>
-      <li class='section'><a href="find_and_browse.html#connect-the-back-end">Connect the back-end</a></li>
-      <li class='section'><a href="find_and_browse.html#create-a-basic-search-ui">Create a basic search UI</a></li>
-      <li class='section'><a href="find_and_browse.html#write-code-to-make-it-work">Write code to make it work</a></li>
-      <li class='section'><a href="find_and_browse.html#set-up-testing">Set up testing</a></li>
-      <li class='section'><a href="find_and_browse.html#connect-the-back-end">Connect the back-end</a></li>
-      </ol>
-    </li class='chapter'>
-    <li class='chapter'>
-      <a href="view_recipe.html">Viewing a Recipe</a>
-      <ol>
-      <li class='section'><a href="view_recipe.html#create-our-angular-controller">Create our Angular Controller</a></li>
-      <li class='section'><a href="view_recipe.html#create-our-rails-controller">Create our Rails Controller</a></li>
-      <li class='section'><a href="view_recipe.html#create-a-browser-based-test">Create a Browser-Based Test</a></li>
-      <li class='section'><a href="view_recipe.html#integrate-flash-message">Integrate Flash Message</a></li>
-      <li class='section'><a href="view_recipe.html#create-our-angular-controller">Create our Angular Controller</a></li>
-      <li class='section'><a href="view_recipe.html#create-our-rails-controller">Create our Rails Controller</a></li>
-      <li class='section'><a href="view_recipe.html#create-a-browser-based-test">Create a Browser-Based Test</a></li>
-      <li class='section'><a href="view_recipe.html#integrate-flash-message">Integrate Flash Message</a></li>
-      </ol>
-    </li class='chapter'>
-    <li class='chapter'>
-      <a href="crud_recipe.html">Create, Update, and Delete</a>
-      <ol>
-      <li class='section'><a href="crud_recipe.html#implement-back-end-controller">Implement back-end controller</a></li>
-      <li class='section'><a href="crud_recipe.html#implement-front-end-controllers">Implement front-end controllers</a></li>
-      <li class='section'><a href="crud_recipe.html#hooking-up-the-views">Hooking up the Views</a></li>
-      <li class='section'><a href="crud_recipe.html#wrapping-up">Wrapping Up</a></li>
-      <li class='section'><a href="crud_recipe.html#implement-back-end-controller">Implement back-end controller</a></li>
-      <li class='section'><a href="crud_recipe.html#implement-front-end-controllers">Implement front-end controllers</a></li>
-      <li class='section'><a href="crud_recipe.html#hooking-up-the-views">Hooking up the Views</a></li>
-      <li class='section'><a href="crud_recipe.html#wrapping-up">Wrapping Up</a></li>
-      </ol>
-    </li class='chapter'>
-</ol>
-<ol class="back-matter">
-    <li class='chapter'><a href="back.html">In Conclusion</a></li>
-    <li class='chapter'><a href="contributing.html">Contributing</a></li>
-    <li class='chapter'><a href="colophon.html">Colophon</a></li>
-</ol>
+<body><div class="page">
+  <header>
+    <h1><a href="index.html">AngularJS with Ruby on Rails</a></h1>
+        <p class="byline">by David Bryant Copeland</p>
+  </header>
+<h2 class="subtitle">Zero to deployment in less than 10,000 words</h2>
+<nav class="toc">
+  <ol class="front-matter">
+      <li class='chapter'><a href="front.html">AngularJS, Rails, and Production</a>
+        <ol>
+        <li class='section'><a href="front.html#how-this-book-is-organized">How this book is organized</a></li>
+        <li class='section'><a href="front.html#what-you&amp;#39;ll-need">What you&#39;ll need</a></li>
+        </ol>
+      </li>
+      <li class='chapter'><a href="app_overview.html">The Application We&#39;ll Build</a>
+        <ol>
+        </ol>
+      </li>
+  </ol>
+  <ol class="main-matter">
+      <li class='chapter'>
+        <a href="bootstrap.html">Creating a Skeleton App</a>
+        <ol>
+        <li class='section'><a href="bootstrap.html#an-empty-rails-app">An empty Rails app</a></li>
+        <li class='section'><a href="bootstrap.html#basic-gems">Basic gems</a></li>
+        <li class='section'><a href="bootstrap.html#front-end-dependency-management-with-bower">Front-end dependency management with Bower</a></li>
+        <li class='section'><a href="bootstrap.html#tiniest-angular-app-ever">Tiniest Angular app ever</a></li>
+        <li class='section'><a href="bootstrap.html#production-deployment">Production deployment</a></li>
+        </ol>
+      </li>
+      <li class='chapter'>
+        <a href="find_and_browse.html">Building the First Feature</a>
+        <ol>
+        <li class='section'><a href="find_and_browse.html#basic-ui">Basic UI</a></li>
+        <li class='section'><a href="find_and_browse.html#code-to-make-it-work">Code to make it work</a></li>
+        <li class='section'><a href="find_and_browse.html#tests">Tests</a></li>
+        <li class='section'><a href="find_and_browse.html#back-end">Back-end</a></li>
+        </ol>
+      </li>
+      <li class='chapter'>
+        <a href="view_recipe.html">Test-Driving the Next Feature</a>
+        <ol>
+        <li class='section'><a href="view_recipe.html#angular-controller">Angular controller</a></li>
+        <li class='section'><a href="view_recipe.html#rails-controller">Rails controller</a></li>
+        <li class='section'><a href="view_recipe.html#browser-based-test">Browser-based test</a></li>
+        <li class='section'><a href="view_recipe.html#flash-message">Flash message</a></li>
+        </ol>
+      </li>
+      <li class='chapter'>
+        <a href="crud_recipe.html">Running Through Remaining Features</a>
+        <ol>
+        <li class='section'><a href="crud_recipe.html#rails-controller">Rails controller</a></li>
+        <li class='section'><a href="crud_recipe.html#angular-controllers">Angular controllers</a></li>
+        <li class='section'><a href="crud_recipe.html#views">Views</a></li>
+        <li class='section'><a href="crud_recipe.html#wrapping-up">Wrapping Up</a></li>
+        </ol>
+      </li>
+  </ol>
+  <ol class="back-matter">
+      <li class='chapter'><a href="back.html">In Conclusion</a></li>
+      <li class='chapter'><a href="about.html">About the Author</a></li>
+      <li class='chapter'><a href="contributing.html">Contributing</a></li>
+      <li class='chapter'><a href="colophon.html">Colophon</a></li>
+  </ol>
+</nav>
 <footer>
   <p class="copyright">
     <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">AngularJS with Ruby on Rails</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="http://angular-rails.com" property="cc:attributionName" rel="cc:attributionURL">David Bryant Copeland</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License
@@ -122,5 +113,5 @@
 <script type="text/javascript">try{ clicky.init(100722319); }catch(e){}</script>
 <noscript><p><img alt="Clicky" width="1" height="1" src="//in.getclicky.com/100722319ns.gif" /></p></noscript>
 </footer>
-</body>
+</div></body>
 </html>
