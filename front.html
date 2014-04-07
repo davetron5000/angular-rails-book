@@ -49,7 +49,10 @@
 frameworks can only do so much, since they are designed to run on the client-side, in a browser.  This means that for
 any real applicaiton you might create, you need a back-end.</p>
 
-<p>Rails is a terrific back-end, however it wasn&#39;t designed with a JavaScript framework like AngularJS in mind.  Rails&#39; view of the world is serving up pages and HTML.  Rich Javascript-based single-page applications aren&#39;t something Rails encourages.  Angular, of course, wasn&#39;t designed with Rails in mind either, since it is entirely back-end agnostic. </p>
+<p>Rails is a terrific back-end, however it wasn&#39;t designed with a JavaScript framework like AngularJS in mind.  Rails&#39; view of the world is serving up pages and HTML.  Rich Javascript-based single-page applications aren&#39;t something Rails encourages.  </p>
+
+<p><a href="http://angularjs.org">AngularJS</a> is a terrific front-end.  It supports testability, clean code organization, and has a simple object model.  It&#39;s supremely powerful but, of
+course, wasn&#39;t designed with Rails in mind—it&#39;s back-end agnostic.</p>
 
 <p>The result is that there is no “Rails Way” for managing the front-end assets needed to create a rich JavaScript application using AngularJS.</p>
 
@@ -57,7 +60,7 @@ any real applicaiton you might create, you need a back-end.</p>
 getting it deployed to production.  That means we&#39;ll properly configure the asset pipeline, provide a solution for managing
 front-end assets, and see how to integrate testing the front-end code into your app.</p>
 
-<p>This is not a Rails or Angular tutorial.  If you&#39;d like to learn Angular, I would suggest completing their <a href="http://docs.angularjs.org/tutorial/step_00">tutorial</a>.  Don&#39;t just readit, type out the code.  Run the code.  Tweak the code.  It only takes an hour or so, and it&#39;ll give the confidence you  need to start using Angular (that&#39;s what I did).  </p>
+<p>This is not a Rails or Angular tutorial.  If you&#39;d like to learn Angular, I would suggest completing their <a href="http://docs.angularjs.org/tutorial/step_00">tutorial</a>.  Don&#39;t just read it, type out the code.  Run the code.  Tweak the code.  It only takes an hour or so, and it&#39;ll give the confidence you  need to start using Angular (that&#39;s what I did).  </p>
 
 <p>Once you&#39;re familiar enough with Angular to start building an app, you&#39;ll find there are a lot of unanswered questions:</p>
 
@@ -70,14 +73,13 @@ front-end assets, and see how to integrate testing the front-end code into your 
 <li>What challenges will there be in the production environment not present in the development environment?</li>
 </ul>
 
-<p>I was able to find answers by piecing together information from Stack Overflow and various blog posts.  You shouldn&#39;t have to do
-that.</p>
+<p>I was able to find answers by piecing together information from Stack Overflow and various blog posts.  You shouldn&#39;t have to do that.</p>
 <a name='how-this-book-is-organized'></a><h3>How this book is organized</h3>
 <p>This mini-book is broken up into four major parts:</p>
 
 <ul>
 <li>Creating a basic skeleton to validate Angular is setup and configured</li>
-<li>A Step-by-step walkthrough of a simple search feature</li>
+<li>A step-by-step walkthrough of a simple feature</li>
 <li>A more brisk walkthrough of using TDD to implement a feature</li>
 <li>A very fast runthrough of builing a few more features</li>
 </ul>
@@ -86,12 +88,12 @@ that.</p>
 
 <ul>
 <li>CoffeeScript</li>
-<li>Back-end tests use RSpec</li>
-<li>Front-end tests use Jasmine</li>
-<li>Browser-based acceptance tests using RSpec and Capybara</li>
-<li>Front-end dependencies managed with Bower</li>
-<li>Twitter Bootstrap (not required, but simplifies this tutorial)</li>
-<li>Heroku (not required, but is a cheap way to validate deployment)</li>
+<li>RSpec (for back-end tests)</li>
+<li>Jasmine (for front-end tests)</li>
+<li>Capybara &amp; Selenium (for browser-based acceptance tests)</li>
+<li>Bower (to manage front-end dependencies)</li>
+<li>Twitter Bootstrap (for styling–not required, but simplifies this tutorial)</li>
+<li>Heroku (for deployment–not required, but is an easy way to validate production behavior)</li>
 </ul>
 
 <p>When we&#39;re done, you&#39;ll know exactly what you need to do to get Angular into your Rails app in a way that supports sustained
@@ -101,12 +103,11 @@ development and deployment.  You&#39;ll be able to get to your code more quickly
 we&#39;ll be building.  The console output we&#39;ll see is generated directly from
 that code, so you should be able to follow along easily.</p>
 
-<p>That being said, it might be better to create the app from scratch and
-actually make the changes in question.  It will get your fingers used to
-typing the commands and get you familiar with the files you&#39;ll need to edit as
-you work.</p>
+<p>I&#39;d still recommend you follow along at your terminal and editor.  Even though you will
+just be typing in what you see, it&#39;ll get your fingers used to the workflow
+and code involved in a a Rails-powered Angular app.</p>
 
-<p>Other than that, you&#39;ll need:</p>
+<p>All you&#39;ll need:</p>
 
 <ul>
 <li>Ruby 2 or later</li>
@@ -115,7 +116,7 @@ you work.</p>
 <li>An account on <a href="http://heroku.com">Heroku</a>, where we&#39;ll deploy the app</li>
 </ul>
 
-<p>This book and the app we&#39;ll see were developed on OS X, so some terminal
+<p>The app we&#39;ll see in this book was originally developed on OS X, so some terminal
 commands might be different if you are on Windows.  Please <a href="http://github.com/davetron5000">let me know</a>
 what those differences are.</p>
 

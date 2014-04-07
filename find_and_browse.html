@@ -77,11 +77,11 @@ Rails view.  With Angular, we&#39;ll map routes to views and controllers, like s
   ($routeProvider)-&gt;
     $routeProvider
       .when(&#39;/&#39;,
-        templateUrl: “index.html”
+        templateUrl: &quot;index.html&quot;
         controller: &#39;SomeController&#39;
       )
       .when(&#39;/recipes/new&#39;,
-        templateUrl: “new.html”
+        templateUrl: &quot;new.html&quot;
         controller: &#39;SomeOtherController&#39;
       )
 ])
@@ -105,11 +105,11 @@ app.config([ &#39;$routeProvider&#39;,
   ($routeProvider)-&gt;
     $routeProvider
       .when(&#39;/&#39;,
-        templateUrl: “&lt;%= asset_path(&#39;index.html&#39;) %&gt;”
+        templateUrl: &quot;&lt;%= asset_path(&#39;index.html&#39;) %&gt;&quot;
         controller: &#39;SomeController&#39;
       )
       .when(&#39;/recipes/new&#39;,
-        templateUrl: “&lt;%= asset_path(&#39;new.html&#39;) %&gt;”
+        templateUrl: &quot;&lt;%= asset_path(&#39;new.html&#39;) %&gt;&quot;
         controller: &#39;SomeOtherController&#39;
       )
 ])
