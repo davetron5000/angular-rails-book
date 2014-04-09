@@ -43,7 +43,7 @@ database, and make sure we have a clean base from which to work.
 ## Basic gems
 
 We're going to use RSpec and Capybara here, as well as the Selenium driver for
-browser-based testing, so let's add those gems to our `Gemfile`.  
+browser-based testing, so let's add those gems to our `Gemfile`.
 
     git://receta.git/Gemfile#rails-new..initial-gems
 
@@ -57,7 +57,7 @@ RSpec is not the default testing framework with Rails, although it *is* popular.
 It's not required for Angular development, but I'm recommending it here because
 its API is similar to that of Jasmine, which we'll be using for testing our front-end code.
 
-This means the “shape” of your front-end tests will mirror those of your back-end tests, which will decrease your mental load as
+This means the “shape” of your front-end tests will mirror those of your back-end tests, which will decrease your mental load as you
 switch back and forth.  If you are philosophically opposed to RSpec, you are free to use MiniTest or whatever you want.
 
 We're also removing Turbolinks, since it's designed for a different type of
@@ -92,7 +92,7 @@ almost every imaginable library—including the Angular modules we'll be using�
 [bower]: http://bower.io
 
 The same cannot be said for RubyGems.  While it's nice that it's at least _possibile_ to use
-RubyGems to manage front-end assets, doing so has two problems.  
+RubyGems to manage front-end assets, doing so has two problems.
 
 First, it creates an abstraction between our `Gemfile` and our
 assets that creates confusion.  What version of JQuery is bundled with Rails?  In the Rails 4.0.3 app we just created, I see
@@ -153,7 +153,7 @@ Now, we can install our dependencies via the `bower:install` Rake task:
     bootstrap-sass-official#3.1.1 bower_components/bootstrap-sass-official
 
     angular#1.2.14 bower_components/angular
- 
+
 Bower installs dependencies in `vendor/assets/bower_components`, which you
 should check into your repository.
 
@@ -163,7 +163,7 @@ should check into your repository.
 This location may seem strange, but it allows you to separate Bower-managed
 third-party libraries from non-Bower-managed ones, if you should find the need
 for a library that isn't available via Bower (although that would be highly
-unusual).  
+unusual).
 
 Since `vendor/assets/bower_components` *isn't* Rails standard, you'll need to
 add it to the asset path so these files get picked up.  We'll do this in `config/application.rb`, like so:
@@ -179,9 +179,9 @@ while we're here).
 The reason these `require` lines are so long is due to an “impedence mismatch”
 between Bower and the Rails asset pipeline.  Bower isn't much more than a
 simple way to download a Git repository, and there isn't much standardization
-across various front-end components.  
+across various front-end components.
 
-So, even though everything's installed in `vendor/assets/bower_components/ASSET_NAME`, 
+So, even though everything's installed in `vendor/assets/bower_components/ASSET_NAME`,
 what's underneath could be anything.
 To bring those into our app so they are served by the asset pipeline, we
 have to specify the exact file or files within the package.  This often
