@@ -13,7 +13,7 @@ to diagnose problems - did we mess up our testing configuration, or are there
 deeper problems with the application code under test?
 
 Instead of wrestling with these issues, we'll take a few baby steps, starting
-with our UI and just a bit of application code.  We can verify this is working manually so that when we set up 
+with our UI and just a bit of application code.  We can verify this is working manually so that when we set up
 our testing environment, we can focus on getting that working without *also* focusing on making
 our application work.
 
@@ -92,7 +92,7 @@ One solution to **that** problem is to configure Cross Origin
 Resource-Sharing (CORS), but this can be tricky to set up (or impossible, depending on your CDN).  It is also very difficult to
 debug if it's not working properly.
 
-What we'd like to do is skip all of this entirely.  Angular caches templates after it requests them the first, so we really just
+What we'd like to do is skip all of this entirely.  Angular caches templates after it requests them the first time, so we really just
 need to pre-populate that cache.  This way, Angular won't need to request *any* assets, thus eliminating both the asset pipeline
 problem as well as the same-origin security policy.
 
@@ -188,7 +188,7 @@ search, which we must trigger from the “Search” button.  We also will remove
 result, wrapped in an `ng-repeat` directive.
 
     git://receta.git/app/assets/javascripts/templates/index.html#..front-end-canned-search
-  
+
 Note that we're also using `ng-if` to hide the results section entirely if there aren't any results.
 
 Now when we reload the page, our search works!
@@ -290,11 +290,11 @@ example, Angular code tends to favor camel-case, whereas Ruby tends to favor sna
 
 [JBuilder]: https://github.com/rails/jbuilder
 
-First, we'll create `app/views/index.json.jbuilder`:
+First, we'll create `app/views/recipes/index.json.jbuilder`:
 
     git://receta.git/app/views/recipes/index.json.jbuilder#recipes-index
 
-All this does is defer each recipe to a partial, which is in `app/views/_recipe.json.jbuidler` and looks like so:
+All this does is defer each recipe to a partial, which is in `app/views/recipes/_recipe.json.jbuilder` and looks like so:
 
     git://receta.git/app/views/recipes/_recipe.json.jbuilder#recipes-index
 
@@ -340,9 +340,9 @@ test is somewhat substantial compared to a Rails controller test.  This is a fun
 way Angular is designed.
 
 Since all Angular modules are functions that are given their dependencies, when we test those modules, we'll want to intercept
-those dependencies so we can use them in our tests.  Although we could create mocks for many of our controllers dependencies, 
+those dependencies so we can use them in our tests.  Although we could create mocks for many of our controller dependencies,
 Angular provides mock implementationsn for us, and will pass those, by
-default, to our controller.  
+default, to our controller.
 
 If we need to examine them in a test (for example to assert that our
 controller set the location to a particular path) we'll need to get a
@@ -428,7 +428,7 @@ initialization”, we have two tests.  The first is the one we already have:
 describe 'controller initialization', ->
   describe 'when no keywords present', ->
     beforeEach(setupController())
-    
+
     it 'defaults to no recipes', ->
       expect(scope.recipes).toEqualData([])
 ```
@@ -508,12 +508,12 @@ Now, if everything's working, our test should still pass.
 
     git://receta.git/#backend-integrated!rspec spec/features/search_spec.rb
 
-It's passing!  We've now successfully test-driven our first feature with Angular!  
+It's passing!  We've now successfully test-driven our first feature with Angular!
 
 But, the TDD cycle isn't complete.  We've gone from a failing test (red) to a passing one (green), but we haven't refactored, yet.
 
 The code we've written is minimal, however the implementation of `RecipesController` doesn't belong in `app.coffee`.  We'd like
-our front-end code to be organized like our back-end code, with different modules in different files.  
+our front-end code to be organized like our back-end code, with different modules in different files.
 
 Let's extract the implementation of `RecipesController` out of
 `app.coffee` and into `app/assets/javascripts/controllers/RecipesController.coffee`.  If we do that, and our test passes, it's a
