@@ -58,7 +58,7 @@ to diagnose problems - did we mess up our testing configuration, or are there
 deeper problems with the application code under test?</p>
 
 <p>Instead of wrestling with these issues, we&#39;ll take a few baby steps, starting
-with our UI and just a bit of application code.  We can verify this is working manually so that when we set up 
+with our UI and just a bit of application code.  We can verify this is working manually so that when we set up
 our testing environment, we can focus on getting that working without <em>also</em> focusing on making
 our application work.</p>
 
@@ -131,7 +131,7 @@ assets.</p>
 Resource-Sharing (CORS), but this can be tricky to set up (or impossible, depending on your CDN).  It is also very difficult to
 debug if it&#39;s not working properly.</p>
 
-<p>What we&#39;d like to do is skip all of this entirely.  Angular caches templates after it requests them the first, so we really just
+<p>What we&#39;d like to do is skip all of this entirely.  Angular caches templates after it requests them the first time, so we really just
 need to pre-populate that cache.  This way, Angular won&#39;t need to request <em>any</em> assets, thus eliminating both the asset pipeline
 problem as well as the same-origin security policy.</p>
 
@@ -592,10 +592,10 @@ convert the <code>Recipe</code> to JSON using its built-in serializers, I find u
 front-end and back-end.  This gives us flexibility to write idiomatic code on both sides, even when those idioms diverge (for
 example, Angular code tends to favor camel-case, whereas Ruby tends to favor snake-case).</p>
 
-<p>First, we&#39;ll create <code>app/views/index.json.jbuilder</code>:</p>
+<p>First, we&#39;ll create <code>app/views/recipes/index.json.jbuilder</code>:</p>
 <article class='code-listing'><pre><code class="language-">json.array! @recipes, partial: &#39;recipe&#39;, as: :recipe
 </code></pre><footer><h1>app/views/recipes/index.json.jbuilder</h1></footer></article>
-<p>All this does is defer each recipe to a partial, which is in <code>app/views/_recipe.json.jbuidler</code> and looks like so:</p>
+<p>All this does is defer each recipe to a partial, which is in <code>app/views/recipes/_recipe.json.jbuilder</code> and looks like so:</p>
 <article class='code-listing'><pre><code class="language-">json.(recipe, :id, :name, :instructions)
 </code></pre><footer><h1>app/views/recipes/_recipe.json.jbuilder</h1></footer></article>
 <p>With all this in place, our test passes:</p>
@@ -670,9 +670,9 @@ test is somewhat substantial compared to a Rails controller test.  This is a fun
 way Angular is designed.</p>
 
 <p>Since all Angular modules are functions that are given their dependencies, when we test those modules, we&#39;ll want to intercept
-those dependencies so we can use them in our tests.  Although we could create mocks for many of our controllers dependencies, 
+those dependencies so we can use them in our tests.  Although we could create mocks for many of our controller dependencies,
 Angular provides mock implementationsn for us, and will pass those, by
-default, to our controller.  </p>
+default, to our controller.</p>
 
 <p>If we need to examine them in a test (for example to assert that our
 controller set the location to a particular path) we&#39;ll need to get a
@@ -915,12 +915,12 @@ Finished in 3.22 seconds
 
 Randomized with seed 40348
 </code></pre></article>
-<p>It&#39;s passing!  We&#39;ve now successfully test-driven our first feature with Angular!  </p>
+<p>It&#39;s passing!  We&#39;ve now successfully test-driven our first feature with Angular!</p>
 
 <p>But, the TDD cycle isn&#39;t complete.  We&#39;ve gone from a failing test (red) to a passing one (green), but we haven&#39;t refactored, yet.</p>
 
 <p>The code we&#39;ve written is minimal, however the implementation of <code>RecipesController</code> doesn&#39;t belong in <code>app.coffee</code>.  We&#39;d like
-our front-end code to be organized like our back-end code, with different modules in different files.  </p>
+our front-end code to be organized like our back-end code, with different modules in different files.</p>
 
 <p>Let&#39;s extract the implementation of <code>RecipesController</code> out of
 <code>app.coffee</code> and into <code>app/assets/javascripts/controllers/RecipesController.coffee</code>.  If we do that, and our test passes, it&#39;s a
