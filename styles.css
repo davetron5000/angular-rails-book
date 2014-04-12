@@ -48,7 +48,8 @@ header {
   margin-left: -34.6108px;
   margin-right: -34.6108px;
   margin-top: -34.6108px;
-  margin-bottom: 34.6108px; }
+  margin-bottom: 34.6108px;
+  text-align: center; }
   header h1 {
     margin-top: 0;
     margin-bottom: 0;
@@ -57,7 +58,6 @@ header {
     header h1 a, header h1 a:visited {
       text-decoration: none; }
   header .byline {
-    text-align: left;
     font-size: 18px;
     margin-top: 0;
     padding-top: 0; }
@@ -82,6 +82,8 @@ header {
     font-size: 9.443px; }
 
   header h1 {
+    font-size: 18px; }
+  header .byline {
     font-size: 15.279px; } }
 h2.subtitle {
   border-bottom: none;

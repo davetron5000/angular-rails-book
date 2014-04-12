@@ -34,11 +34,11 @@ app.config([ '$routeProvider',
   ($routeProvider)->
     $routeProvider
       .when('/',
-        templateUrl: “index.html”
+        templateUrl: "index.html"
         controller: 'SomeController'
       )
       .when('/recipes/new',
-        templateUrl: “new.html”
+        templateUrl: "new.html"
         controller: 'SomeOtherController'
       )
 ])
@@ -65,11 +65,11 @@ app.config([ '$routeProvider',
   ($routeProvider)->
     $routeProvider
       .when('/',
-        templateUrl: “<%= asset_path('index.html') %>”
+        templateUrl: "<%= asset_path('index.html') %>"
         controller: 'SomeController'
       )
       .when('/recipes/new',
-        templateUrl: “<%= asset_path('new.html') %>”
+        templateUrl: "<%= asset_path('new.html') %>"
         controller: 'SomeOtherController'
       )
 ])

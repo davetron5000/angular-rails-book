@@ -1,12 +1,12 @@
 # Contributing
 
 This book is licensed under a Creative Commons Attribute-NonCommerical-ShareAlike license, and the source for the book can be found
-in [its repo][repo].  Feel free to submit pull requests to correct any mistakes you find.
+in [its repo][repo].  Feel free to submit pull requests to correct any mistakes you find, with these caveats:
 
-A few notes:
+* **Typos/grammar-fixes/being wrong** - I love these and I'm sorry I didn't find them before you did.
+* **Alternate ways to do it** - interested but less likely to replace the main text.  Could be interesting sidebars.
+* **Changes to the source code** - currently, this is tricky.  I want to fix code errors, but contact me before doing a ton of work, as the code is generated from a tagged git repository.  
 
-* Fixes for typos, bad grammar, and outright incorrect statements are all awesome.
-* Alternatives to what's presented are unlikely to replace the main text, but I'm open to including them as sidebars or in an appendix.
-* Changes to the source code are currently a bit tricky, given how this site is generated.  Don't submit a PR with massive changes to the code w/out checking with me first.
+When in doubt, open a PR with a question and we can start from there.
 
 [repo]: https://github.com/davetron5000/angular-rails-book/tree/master
