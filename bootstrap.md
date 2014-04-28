@@ -109,7 +109,7 @@ Bower can do all of this for us, and the `bower-rails` gem even provides a clean
 
 First, let's add `bower-rails` to our `Gemfile`:
 
-    git://receta.git/Gemfile#add-bower..add-bower^1
+    git://receta.git/Gemfile#add-bower^1..add-bower
 
 Now, let's install it.
 
@@ -122,7 +122,8 @@ handy tasks:
 
     sh://receta#rake -T bower
 
-Our dependencies go in a file called `Bowerfile` that looks very much like a
+Our dependencies go in a file called `Bowerfile`, located in the root directory of your project,
+that looks very much like a
 `Gemfile`.  The dependencies we want to bring in first will be Angular and
 Twitter Bootstrap.  Bootstrap isn't required, but we're going to use it here
 to keep the CSS we have to write to a minimum while still resulting in a
@@ -222,6 +223,22 @@ Now, when we run our app and visit the root URL, we should see our basic
 Angular app working.
 
     > rails s
+
+If you the Rails error page with a message like so:
+
+    couldn't find file 'bootstrap/glyphicons-halflings-regular.eot'
+
+This is because later versions of the bootstrap package include sprockets directives that bake in an assumption about how you've
+installed Bootstrap.  Namely, the directives tell Rails to find the glyphicons fonts in `boostrap/`, which doesn't exist in any of the asset paths we have configured. So, we must add it.
+
+Open `config/application.rb` and add this line:
+
+```ruby
+config.assets.paths << Rails.root.join("vendor","assets","bower_components","bootstrap-sass-official","vendor","assets","fonts")
+```
+
+This may seem like more annoying configuration, but this is a one-time only activity that enables better project management for
+the life our application.  It's a tradeoff, but a worthwhile one.
 
 Before we get too far into development, we need to deploy this to production.  Since
 we've been making heavier-than-normal changes to asset-related aspects of our
