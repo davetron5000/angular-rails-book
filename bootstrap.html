@@ -163,15 +163,15 @@ and some in another system, we lose that ability.</p>
 
 <p>First, let&#39;s add <code>bower-rails</code> to our <code>Gemfile</code>:</p>
 <article class='code-listing'><pre><code class="language-diff">diff --git a/Gemfile b/Gemfile
-index e052e96..75cb4c5 100644
+index 75cb4c5..e052e96 100644
 --- a/Gemfile
 +++ b/Gemfile
-@@ -24,8 +24,6 @@ gem &#39;jquery-rails&#39;
+@@ -24,6 +24,8 @@ gem &#39;jquery-rails&#39;
  # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
  gem &#39;jbuilder&#39;, &#39;~&gt; 1.2&#39;
  
--gem &#39;bower-rails&#39;
--
++gem &#39;bower-rails&#39;
++
  group :test, :development do
    gem &quot;rspec&quot;
    gem &quot;rspec-rails&quot;, &quot;~&gt; 2.0&quot;
@@ -189,7 +189,8 @@ rake bower:resolve        # Resolve assets paths in bower components
 rake bower:update         # Update bower components
 rake bower:update:prune   # Update existing components and uninstalls extraneous components
 </code></pre></article>
-<p>Our dependencies go in a file called <code>Bowerfile</code> that looks very much like a
+<p>Our dependencies go in a file called <code>Bowerfile</code>, located in the root directory of your project,
+that looks very much like a
 <code>Gemfile</code>.  The dependencies we want to bring in first will be Angular and
 Twitter Bootstrap.  Bootstrap isn&#39;t required, but we&#39;re going to use it here
 to keep the CSS we have to write to a minimum while still resulting in a
@@ -338,6 +339,18 @@ text field that, as we type, will update the heading of our panel.</p>
 Angular app working.</p>
 <article class='code-listing'><pre><code class="">&gt; rails s
 </code></pre></article>
+<p>If you the Rails error page with a message like so:</p>
+<article class='code-listing'><pre><code class="">couldn&#39;t find file &#39;bootstrap/glyphicons-halflings-regular.eot&#39;
+</code></pre></article>
+<p>This is because later versions of the bootstrap package include sprockets directives that bake in an assumption about how you&#39;ve
+installed Bootstrap.  Namely, the directives tell Rails to find the glyphicons fonts in <code>boostrap/</code>, which doesn&#39;t exist in any of the asset paths we have configured. So, we must add it.</p>
+
+<p>Open <code>config/application.rb</code> and add this line:</p>
+<article class='code-listing'><pre><code class="language-ruby">config.assets.paths &lt;&lt; Rails.root.join(&quot;vendor&quot;,&quot;assets&quot;,&quot;bower_components&quot;,&quot;bootstrap-sass-official&quot;,&quot;vendor&quot;,&quot;assets&quot;,&quot;fonts&quot;)
+</code></pre></article>
+<p>This may seem like more annoying configuration, but this is a one-time only activity that enables better project management for
+the life our application.  It&#39;s a tradeoff, but a worthwhile one.</p>
+
 <p>Before we get too far into development, we need to deploy this to production.  Since
 we&#39;ve been making heavier-than-normal changes to asset-related aspects of our
 app, we should verify now that everything works in production mode.  This way,
