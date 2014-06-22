@@ -165,8 +165,7 @@ index 5a05c1f..e540c13 100644
  asset &#39;bootstrap-sass-official&#39;
  # vim: ft=ruby
 </code></pre><footer><h1>Bowerfile</h1></footer></article>
-<p>Once we run <code>rake bower:install</code> to download <code>angular-route</code>, we&#39;ll need to reference it from our <code>application.js</code> file so it&#39;s
-available to the app:</p>
+<p>Once we run <code>rake bower:install</code> to download <code>angular-route</code> and <code>angular-rails-tempaltes</code>, we&#39;ll need to reference them in our <code>application.js</code> file so they&#39;re available to the app (note that older version of <code>angular-rails-templates</code> did not require referencing in the <code>application.js</code> file, so be sure you are on the latest version):</p>
 <article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/application.js b/app/assets/javascripts/application.js
 index 29f41b7..0c9339a 100644
 --- a/app/assets/javascripts/application.js
@@ -176,8 +175,9 @@ index 29f41b7..0c9339a 100644
  //= require jquery_ujs
  //= require angular/angular
 +//= require angular-route/angular-route
++//= require angular-rails-templates
  //= require_tree .
-</code></pre><footer><h1>app/assets/javascripts/application.js</h1></footer></article>
+</code></pre></article>
 <p>Now, let&#39;s write just enough Angular code to serve up a template, so we can work out the UI.  The first thing to do is to replace
 <code>app/views/home/index.html.erb</code> with the markup needed to “boot” Angular when the view is rendered by Rails:</p>
 <article class='code-listing'><pre><code class="language-">&lt;div ng-app=&quot;receta&quot;&gt;
