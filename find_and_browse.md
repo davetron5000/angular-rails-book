@@ -109,10 +109,21 @@ it to our `Bowerfile` first:
 
     git://receta.git/Bowerfile#..add-angular-route
 
-Once we run `rake bower:install` to download `angular-route`, we'll need to reference it from our `application.js` file so it's
-available to the app:
+Once we run `rake bower:install` to download `angular-route` and `angular-rails-tempaltes`, we'll need to reference them in our `application.js` file so they're available to the app (note that older version of `angular-rails-templates` did not require referencing in the `application.js` file, so be sure you are on the latest version):
 
-    git://receta.git/app/assets/javascripts/application.js#..add-angular-route
+```diff
+diff --git a/app/assets/javascripts/application.js b/app/assets/javascripts/application.js
+index 29f41b7..0c9339a 100644
+--- a/app/assets/javascripts/application.js
++++ b/app/assets/javascripts/application.js
+@@ -13,4 +13,5 @@
+ //= require jquery
+ //= require jquery_ujs
+ //= require angular/angular
++//= require angular-route/angular-route
++//= require angular-rails-templates
+ //= require_tree .
+```
 
 Now, let's write just enough Angular code to serve up a template, so we can work out the UI.  The first thing to do is to replace
 `app/views/home/index.html.erb` with the markup needed to “boot” Angular when the view is rendered by Rails:
