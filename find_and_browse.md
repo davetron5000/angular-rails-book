@@ -109,7 +109,7 @@ it to our `Bowerfile` first:
 
     git://receta.git/Bowerfile#..add-angular-route
 
-Once we run `rake bower:install` to download `angular-route` and `angular-rails-tempaltes`, we'll need to reference them in our `application.js` file so they're available to the app (note that older version of `angular-rails-templates` did not require referencing in the `application.js` file, so be sure you are on the latest version):
+Once we run `rake bower:install` to download `angular-route` and `angular-rails-templates`, we'll need to reference them in our `application.js` file so they're available to the app (note that older version of `angular-rails-templates` did not require referencing in the `application.js` file, so be sure you are on the latest version):
 
 ```diff
 diff --git a/app/assets/javascripts/application.js b/app/assets/javascripts/application.js
