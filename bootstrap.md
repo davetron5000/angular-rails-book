@@ -234,7 +234,7 @@ installed Bootstrap.  Namely, the directives tell Rails to find the glyphicons f
 Open `config/application.rb` and add this line:
 
 ```ruby
-config.assets.paths << Rails.root.join("vendor","assets","bower_components","bootstrap-sass-official","vendor","assets","fonts")
+config.assets.paths << Rails.root.join("assets","bower_components","bootstrap-sass-official","assets","fonts")
 ```
 
 This may seem like more annoying configuration, but this is a one-time only activity that enables better project management for
