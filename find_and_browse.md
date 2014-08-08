@@ -329,7 +329,25 @@ Once we run `bundle install`, we need to bootstrap teaspoon, which can be done w
 > rails generate teaspoon:install --coffee
 ```
 
-We're also going to need two more Angular modules. We need `angular-mocks` to help with testing and `angular-resource` to
+This gets us most of the way there, however we may experience issues running our JavaScript tests later, especially if you are on Rails 4.1.  In Rails
+4.1, the asset pipeline became a lot fussier about missing assets.  This is generally a good thing because it gives us better confidence that our assets
+will work in production.  The problem is that teaspoon—even in command-line mode—runs JavaScript and CSS through PhantomJS, which is acting as a web
+browser, and the asset pipeline may produce an error that it can't find `teaspoon.css`.
+
+At the time of this writing, there is no good solution other than to simply add those files to `config/initializers/assets.rb`:
+
+```ruby
+Rails.application.config.assets.precompile += %w( 
+  teaspoon.css
+  teaspoon-teaspoon.js
+  teaspoon-jasmine.js
+)
+```
+
+Note that depending on the point release of Rails, Sprockets, and Teaspoon, you may either not see this error, or may see different errors.  As of now,
+the best thing to do is keep adding files to `config/initializers/assets.rb` until the errors stop.  I'm sorry.
+
+Back to the task at hand, we're also going to need two more Angular modules. We need `angular-mocks` to help with testing and `angular-resource` to
 implement the AJAX calls.  First, we add them to `Bowerfile`:
 
     git://receta.git/Bowerfile#setup-teaspoon^1..setup-teaspoon
@@ -337,6 +355,11 @@ implement the AJAX calls.  First, we add them to `Bowerfile`:
 Once we run `rake bower:install` to download them, we need to add `angular-resource` to `application.js`:
 
     git://receta.git/app/assets/javascripts/application.js#setup-teaspoon^1..setup-teaspoon
+
+Finally, we'll need to include `ngResource`—the module provided by `angular-resource`—in our `app.coffee`.  While we're there, we'll inject
+`$resource`—the function bundled in the `ngResource` module—into our controller:
+
+    git://receta.git/app/assets/javascripts/app.coffee#setup-teaspoon^1..setup-teaspoon
 
 Since `angular-mocks` is only needed for tests, we *won't* put it in `application.js`.  Teaspoon allows Sprockets directives in
 our test files, and it generated `spec/javascripts/spec_helper.coffee` for us, which is included in all tests.  We'll add this

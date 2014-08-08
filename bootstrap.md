@@ -107,7 +107,27 @@ and some in another system, we lose that ability.
 
 Bower can do all of this for us, and the `bower-rails` gem even provides a clean `Gemfile`-like way to declare our dependencies.
 
-First, let's add `bower-rails` to our `Gemfile`:
+First, we have to install Bower, which is a JavaScript command-line application, that you must install using `npm`, the "Node Package Manager".  I am not
+making this up.  
+
+Installing Node and NPM depends on your operating system.  For Mac OS X, using [homebrew], it looks like this:
+
+```shell
+> brew install node
+```
+
+If you aren't using homebrew, or aren't using OS X, you'll  need to consult the [Node installation instructions][node-install].
+
+[homebrew]: http://brew.sh/
+[node-install]: http://nodejs.org/download/
+
+Once you have NPM, install Bower as follows:
+
+```shell
+> npm install bower
+```
+
+Now that you have Bower installed, we'll install the `bower-rails` gem, which will bridge our Rails application with Bower.  Add `bower-rails` to our `Gemfile`:
 
     git://receta.git/Gemfile#add-bower^1..add-bower
 
@@ -189,6 +209,13 @@ have to specify the exact file or files within the package.  This often
 requires hunting around for what was downloaded to find the right path.
 Hopefully, a future version of Rails will provide some help here, but until
 then, Bower is a fairly clean solution.
+
+There is an alternative solution called [Rails Assets](https://rails-assets.org/), which 
+converts any Bower package to a Rubygem on the fly, and integrates with your `Gemfile`.  The
+reason we're not using that for this book is that Rails Assets does not handle assets packaged in a private repository,
+whereas Bower (and thus `bower-rails`) does.  While our demo app doesn't use private
+assets, we want to present a complete solution that can handle any needs you're likely to have.  At the time of this writing, Bower
+and `bower-rails` is it.
 
 Now that we have our initial set of front-end dependencies downloaded, let's
 write *just* enough code to use them, so we can be sure all the moving parts
