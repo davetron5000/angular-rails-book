@@ -165,7 +165,7 @@ index 5a05c1f..e540c13 100644
  asset &#39;bootstrap-sass-official&#39;
  # vim: ft=ruby
 </code></pre><footer><h1>Bowerfile</h1></footer></article>
-<p>Once we run <code>rake bower:install</code> to download <code>angular-route</code> and <code>angular-rails-tempaltes</code>, we&#39;ll need to reference them in our <code>application.js</code> file so they&#39;re available to the app (note that older version of <code>angular-rails-templates</code> did not require referencing in the <code>application.js</code> file, so be sure you are on the latest version):</p>
+<p>Once we run <code>rake bower:install</code> to download <code>angular-route</code> and <code>angular-rails-templates</code>, we&#39;ll need to reference them in our <code>application.js</code> file so they&#39;re available to the app (note that older version of <code>angular-rails-templates</code> did not require referencing in the <code>application.js</code> file, so be sure you are on the latest version):</p>
 <article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/application.js b/app/assets/javascripts/application.js
 index 29f41b7..0c9339a 100644
 --- a/app/assets/javascripts/application.js
@@ -634,7 +634,22 @@ index b0b283e..5c52ef1 100644
 <p>Once we run <code>bundle install</code>, we need to bootstrap teaspoon, which can be done with the Rails generator it includes:</p>
 <article class='code-listing'><pre><code class="language-shell">&gt; rails generate teaspoon:install --coffee
 </code></pre></article>
-<p>We&#39;re also going to need two more Angular modules. We need <code>angular-mocks</code> to help with testing and <code>angular-resource</code> to
+<p>This gets us most of the way there, however we may experience issues running our JavaScript tests later, especially if you are on Rails 4.1.  In Rails
+4.1, the asset pipeline became a lot fussier about missing assets.  This is generally a good thing because it gives us better confidence that our assets
+will work in production.  The problem is that teaspoon—even in command-line mode—runs JavaScript and CSS through PhantomJS, which is acting as a web
+browser, and the asset pipeline may produce an error that it can&#39;t find <code>teaspoon.css</code>.</p>
+
+<p>At the time of this writing, there is no good solution other than to simply add those files to <code>config/initializers/assets.rb</code>:</p>
+<article class='code-listing'><pre><code class="language-ruby">Rails.application.config.assets.precompile += %w( 
+  teaspoon.css
+  teaspoon-teaspoon.js
+  teaspoon-jasmine.js
+)
+</code></pre></article>
+<p>Note that depending on the point release of Rails, Sprockets, and Teaspoon, you may either not see this error, or may see different errors.  As of now,
+the best thing to do is keep adding files to <code>config/initializers/assets.rb</code> until the errors stop.  I&#39;m sorry.</p>
+
+<p>Back to the task at hand, we&#39;re also going to need two more Angular modules. We need <code>angular-mocks</code> to help with testing and <code>angular-resource</code> to
 implement the AJAX calls.  First, we add them to <code>Bowerfile</code>:</p>
 <article class='code-listing'><pre><code class="language-diff">diff --git a/Bowerfile b/Bowerfile
 index e540c13..1795c30 100644
@@ -660,6 +675,32 @@ index 0c9339a..ea7e7dd 100644
 +//= require angular-resource/angular-resource
  //= require_tree .
 </code></pre><footer><h1>app/assets/javascripts/application.js</h1></footer></article>
+<p>Finally, we&#39;ll need to include <code>ngResource</code>—the module provided by <code>angular-resource</code>—in our <code>app.coffee</code>.  While we&#39;re there, we&#39;ll inject
+<code>$resource</code>—the function bundled in the <code>ngResource</code> module—into our controller:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/app.coffee b/app/assets/javascripts/app.coffee
+index 2331dba..a40251d 100644
+--- a/app/assets/javascripts/app.coffee
++++ b/app/assets/javascripts/app.coffee
+@@ -1,6 +1,7 @@
+ receta = angular.module(&#39;receta&#39;,[
+   &#39;templates&#39;,
+   &#39;ngRoute&#39;,
++  &#39;ngResource&#39;,
+   &#39;controllers&#39;,
+ ])
+ 
+@@ -32,8 +33,8 @@ recipes = [
+   },
+ ]
+ controllers = angular.module(&#39;controllers&#39;,[])
+-controllers.controller(&quot;RecipesController&quot;, [ &#39;$scope&#39;, &#39;$routeParams&#39;, &#39;$location&#39;,
+-  ($scope,$routeParams,$location)-&gt;
++controllers.controller(&quot;RecipesController&quot;, [ &#39;$scope&#39;, &#39;$routeParams&#39;, &#39;$location&#39;, &#39;$resource&#39;,
++  ($scope,$routeParams,$location,$resource)-&gt;
+     $scope.search = (keywords)-&gt;  $location.path(&quot;/&quot;).search(&#39;keywords&#39;,keywords)
+ 
+     if $routeParams.keywords
+</code></pre><footer><h1>app/assets/javascripts/app.coffee</h1></footer></article>
 <p>Since <code>angular-mocks</code> is only needed for tests, we <em>won&#39;t</em> put it in <code>application.js</code>.  Teaspoon allows Sprockets directives in
 our test files, and it generated <code>spec/javascripts/spec_helper.coffee</code> for us, which is included in all tests.  We&#39;ll add this
 line to the file:</p>

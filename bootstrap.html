@@ -161,7 +161,18 @@ and some in another system, we lose that ability.</p>
 
 <p>Bower can do all of this for us, and the <code>bower-rails</code> gem even provides a clean <code>Gemfile</code>-like way to declare our dependencies.</p>
 
-<p>First, let&#39;s add <code>bower-rails</code> to our <code>Gemfile</code>:</p>
+<p>First, we have to install Bower, which is a JavaScript command-line application, that you must install using <code>npm</code>, the &quot;Node Package Manager&quot;.  I am not
+making this up.  </p>
+
+<p>Installing Node and NPM depends on your operating system.  For Mac OS X, using <a href="http://brew.sh/">homebrew</a>, it looks like this:</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; brew install node
+</code></pre></article>
+<p>If you aren&#39;t using homebrew, or aren&#39;t using OS X, you&#39;ll  need to consult the <a href="http://nodejs.org/download/">Node installation instructions</a>.</p>
+
+<p>Once you have NPM, install Bower as follows:</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; npm install bower
+</code></pre></article>
+<p>Now that you have Bower installed, we&#39;ll install the <code>bower-rails</code> gem, which will bridge our Rails application with Bower.  Add <code>bower-rails</code> to our <code>Gemfile</code>:</p>
 <article class='code-listing'><pre><code class="language-diff">diff --git a/Gemfile b/Gemfile
 index 75cb4c5..e052e96 100644
 --- a/Gemfile
@@ -284,6 +295,13 @@ have to specify the exact file or files within the package.  This often
 requires hunting around for what was downloaded to find the right path.
 Hopefully, a future version of Rails will provide some help here, but until
 then, Bower is a fairly clean solution.</p>
+
+<p>There is an alternative solution called <a href="https://rails-assets.org/">Rails Assets</a>, which 
+converts any Bower package to a Rubygem on the fly, and integrates with your <code>Gemfile</code>.  The
+reason we&#39;re not using that for this book is that Rails Assets does not handle assets packaged in a private repository,
+whereas Bower (and thus <code>bower-rails</code>) does.  While our demo app doesn&#39;t use private
+assets, we want to present a complete solution that can handle any needs you&#39;re likely to have.  At the time of this writing, Bower
+and <code>bower-rails</code> is it.</p>
 
 <p>Now that we have our initial set of front-end dependencies downloaded, let&#39;s
 write <em>just</em> enough code to use them, so we can be sure all the moving parts
