@@ -279,10 +279,10 @@ index 3192ec8..2cac3ad 100644
   * compiled file, but it&#39;s generally better to create a new file per style scope.
   *
   *= require_self
-+ *= require bootstrap-sass-official/vendor/assets/stylesheets/bootstrap.css
++ *= require bootstrap-sass-official/assets/stylesheets/bootstrap.css
   *= require_tree .
   */
-</code></pre><footer><h1>.</h1></footer></article>
+</code></pre></article>
 <p>The reason these <code>require</code> lines are so long is due to an “impedence mismatch”
 between Bower and the Rails asset pipeline.  Bower isn&#39;t much more than a
 simple way to download a Git repository, and there isn&#39;t much standardization
@@ -364,7 +364,7 @@ Angular app working.</p>
 installed Bootstrap.  Namely, the directives tell Rails to find the glyphicons fonts in <code>boostrap/</code>, which doesn&#39;t exist in any of the asset paths we have configured. So, we must add it.</p>
 
 <p>Open <code>config/application.rb</code> and add this line:</p>
-<article class='code-listing'><pre><code class="language-ruby">config.assets.paths &lt;&lt; Rails.root.join(&quot;vendor&quot;,&quot;assets&quot;,&quot;bower_components&quot;,&quot;bootstrap-sass-official&quot;,&quot;vendor&quot;,&quot;assets&quot;,&quot;fonts&quot;)
+<article class='code-listing'><pre><code class="language-ruby">config.assets.paths &lt;&lt; Rails.root.join(&quot;vendor&quot;,&quot;assets&quot;,&quot;bower_components&quot;,&quot;bootstrap-sass-official&quot;,&quot;assets&quot;,&quot;fonts&quot;)
 </code></pre></article>
 <p>This may seem like more annoying configuration, but this is a one-time only activity that enables better project management for
 the life our application.  It&#39;s a tradeoff, but a worthwhile one.</p>

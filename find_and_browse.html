@@ -795,23 +795,35 @@ can use that mock instance to mock a real back-end response.</p>
 
 <p>Because the initialization of our controller will make this call, we&#39;ll need to set up our mock expectations inside
 <code>setupController()</code>.  We&#39;ll add a second parameter—<code>results</code>—and arrange for <code>$httpBackend</code> to return it when the right AJAX request is made.</p>
-<article class='code-listing'><pre><code class="language-coffeescript">setupController = (keywords,results)-&gt;
-  inject(($location, $routeParams, $rootScope, $resource, $httpBackend, $controller)-&gt;
-    scope       = $rootScope.$new()
-    location    = $location
-    resource    = $resource
-    httpBackend = $httpBackend
-    routeParams = $routeParams
-    routeParams.keywords = keywords
+<article class='code-listing'><pre><code class="language-coffeescript">describe &quot;RecipesController&quot;, -&gt;
+  scope        = null
+  ctrl         = null
+  location     = null
+  routeParams  = null
+  resource     = null
 
-    if results
-      request = new RegExp(&#39;\/recipes.*keywords=#{keywords}&#39;)
-      httpBackend.expectGET(request).respond(results)
+  # access injected service later
+  httpBackend  = null
 
-    ctrl        = $controller(&#39;RecipesController&#39;,
-                              $scope: scope
-                              $location: location)
-  )
+  setupController = (keywords,results)-&gt;
+    inject(($location, $routeParams, $rootScope, $resource, $httpBackend, $controller)-&gt;
+      scope       = $rootScope.$new()
+      location    = $location
+      resource    = $resource
+      routeParams = $routeParams
+      routeParams.keywords = keywords
+
+      # capture the injected service
+      httpBackend = $httpBackend 
+
+      if results
+        request = new RegExp(&quot;\/recipes.*keywords=#{keywords}&quot;)
+        httpBackend.expectGET(request).respond(results)
+
+      ctrl = $controller(&#39;RecipesController&#39;,
+                         $scope: scope
+                         $location: location)
+    )
 </code></pre></article>
 <p>We also need to tell <code>httpBackend</code> to verify that there are no unmet expectations nor are there unexpected requests:</p>
 <article class='code-listing'><pre><code class="language-coffeescript">  afterEach -&gt;
