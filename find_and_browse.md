@@ -449,12 +449,12 @@ describe "RecipesController", ->
       httpBackend = $httpBackend 
 
       if results
-        request = new RegExp('\/recipes.*keywords=#{keywords}')
+        request = new RegExp("\/recipes.*keywords=#{keywords}")
         httpBackend.expectGET(request).respond(results)
 
-      ctrl        = $controller('RecipesController',
-                                $scope: scope
-                                $location: location)
+      ctrl = $controller('RecipesController',
+                         $scope: scope
+                         $location: location)
     )
 ```
 
