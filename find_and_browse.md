@@ -427,23 +427,35 @@ Because the initialization of our controller will make this call, we'll need to 
 `setupController()`.  We'll add a second parameter—`results`—and arrange for `$httpBackend` to return it when the right AJAX request is made.
 
 ```coffeescript
-setupController = (keywords,results)->
-  inject(($location, $routeParams, $rootScope, $resource, $httpBackend, $controller)->
-    scope       = $rootScope.$new()
-    location    = $location
-    resource    = $resource
-    httpBackend = $httpBackend
-    routeParams = $routeParams
-    routeParams.keywords = keywords
+describe "RecipesController", ->
+  scope        = null
+  ctrl         = null
+  location     = null
+  routeParams  = null
+  resource     = null
 
-    if results
-      request = new RegExp('\/recipes.*keywords=#{keywords}')
-      httpBackend.expectGET(request).respond(results)
+  # access injected service later
+  httpBackend  = null
 
-    ctrl        = $controller('RecipesController',
-                              $scope: scope
-                              $location: location)
-  )
+  setupController = (keywords,results)->
+    inject(($location, $routeParams, $rootScope, $resource, $httpBackend, $controller)->
+      scope       = $rootScope.$new()
+      location    = $location
+      resource    = $resource
+      routeParams = $routeParams
+      routeParams.keywords = keywords
+
+      # capture the injected service
+      httpBackend = $httpBackend 
+
+      if results
+        request = new RegExp('\/recipes.*keywords=#{keywords}')
+        httpBackend.expectGET(request).respond(results)
+
+      ctrl        = $controller('RecipesController',
+                                $scope: scope
+                                $location: location)
+    )
 ```
 
 We also need to tell `httpBackend` to verify that there are no unmet expectations nor are there unexpected requests:
