@@ -195,7 +195,30 @@ Lastly, you'll need to reference these files in `application.js` and
 `application.css`, respectively (we'll also remove the reference to Turbolinks
 while we're here).
 
-    git://receta.git/#add-bower_components-to-assets..angular-and-bootstrap-assets
+```diff
+diff --git a/app/assets/javascripts/application.js b/app/assets/javascripts/application.js
+index d6925fa..29f41b7 100644
+--- a/app/assets/javascripts/application.js
++++ b/app/assets/javascripts/application.js
+@@ -12,5 +12,5 @@
+ //
+ //= require jquery
+ //= require jquery_ujs
+-//= require turbolinks
++//= require angular/angular
+ //= require_tree .
+diff --git a/app/assets/stylesheets/application.css b/app/assets/stylesheets/application.css
+index 3192ec8..2cac3ad 100644
+--- a/app/assets/stylesheets/application.css
++++ b/app/assets/stylesheets/application.css
+@@ -9,5 +9,6 @@
+  * compiled file, but it's generally better to create a new file per style scope.
+  *
+  *= require_self
++ *= require bootstrap-sass-official/assets/stylesheets/bootstrap.css
+  *= require_tree .
+  */
+```
 
 The reason these `require` lines are so long is due to an “impedence mismatch”
 between Bower and the Rails asset pipeline.  Bower isn't much more than a
@@ -261,7 +284,7 @@ installed Bootstrap.  Namely, the directives tell Rails to find the glyphicons f
 Open `config/application.rb` and add this line:
 
 ```ruby
-config.assets.paths << Rails.root.join("vendor","assets","bower_components","bootstrap-sass-official","vendor","assets","fonts")
+config.assets.paths << Rails.root.join("vendor","assets","bower_components","bootstrap-sass-official","assets","fonts")
 ```
 
 This may seem like more annoying configuration, but this is a one-time only activity that enables better project management for
