@@ -704,7 +704,7 @@ index 2331dba..a40251d 100644
 <p>Since <code>angular-mocks</code> is only needed for tests, we <em>won&#39;t</em> put it in <code>application.js</code>.  Teaspoon allows Sprockets directives in
 our test files, and it generated <code>spec/javascripts/spec_helper.coffee</code> for us, which is included in all tests.  We&#39;ll add this
 line to the file:</p>
-<article class='code-listing'><pre><code class="language-coffeescript">#= angular-mocks/angular-mocks
+<article class='code-listing'><pre><code class="language-coffeescript">#= require angular-mocks/angular-mocks
 </code></pre></article>
 <p>The last step in setting up our front-end testing is to write a basic spec that uses our controller.  The boilerplate for this
 test is somewhat substantial compared to a Rails controller test.  This is a function both of JavaScript as a language and the
