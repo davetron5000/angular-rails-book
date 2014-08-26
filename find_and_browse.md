@@ -366,7 +366,7 @@ our test files, and it generated `spec/javascripts/spec_helper.coffee` for us, w
 line to the file:
 
 ```coffeescript
-#= angular-mocks/angular-mocks
+#= require angular-mocks/angular-mocks
 ```
 
 The last step in setting up our front-end testing is to write a basic spec that uses our controller.  The boilerplate for this
