@@ -209,6 +209,19 @@ this is a one-time use token.  If we make more than one HTTP POST to our
 app we&#39;ll need a new token each time.  There currently isn&#39;t a good way
 to generate one, so we have to skip the check for this.</p>
 
+<p>Don&#39;t forget to add the routes for the new actions:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/config/routes.rb b/config/routes.rb
+index 612e169..eeb8bd2 100644
+--- a/config/routes.rb
++++ b/config/routes.rb
+@@ -1,5 +1,5 @@
+ Receta::Application.routes.draw do
+   root &#39;home#index&#39;
+ 
+-  resources :recipes, only: [:index, :show]
++  resources :recipes, only: [:index, :show, :create, :update, :destroy]
+ end
+</code></pre><footer><h1>config/routes.rb</h1></footer></article>
 <p>Back to our test, everything seems to be working:</p>
 <article class='code-listing'><pre><code class="language-shell">&gt; rspec spec/controllers/recipes_controller_spec.rb
 ..................
