@@ -36,6 +36,10 @@ this is a one-time use token.  If we make more than one HTTP POST to our
 app we'll need a new token each time.  There currently isn't a good way
 to generate one, so we have to skip the check for this.
 
+Don't forget to add the routes for the new actions:
+
+    git://receta.git/config/routes.rb#..back-end-crud
+
 Back to our test, everything seems to be working:
 
     git://receta.git/#back-end-crud!rspec spec/controllers/recipes_controller_spec.rb
