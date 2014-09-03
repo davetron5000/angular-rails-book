@@ -30,7 +30,7 @@ workflow I've found effective:
 3. Implement the back-end.
 4. Implement the view in a basic way to get your browser-based test to pass.
 5. Add whatever bells-and-whistles or other UI stuff you want, using your
-   browser-based test to make sure you've broken something.
+   browser-based test to make sure you've haven't broken anything.
 
 With that, go forth and make awesomely rich applications, powered by the best
 web framework around!
