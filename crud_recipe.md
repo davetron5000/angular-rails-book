@@ -101,14 +101,17 @@ First, let's set up the routes in `app.coffee`:
 
     git://receta.git/app/assets/javascripts/app.coffee#..crud-views
 
-
 Next, we'll create `form.html`:
 
     git://receta.git/app/assets/javascripts/templates/form.html#crud-views
 
-Now, we'll need to add a link to create a recipe to `index.html`:
+Now, we'll need to add a link to create a recipe as well as one to edit in `index.html`:
 
     git://receta.git/app/assets/javascripts/templates/index.html#..crud-views
+
+These links require new functions called `newRecipe()` and `edit()`, which we'll add to `RecipesController.coffee`:
+
+    git://receta.git/app/assets/javascripts/controllers/RecipesController.coffee#..b788ed96
 
 And lastly, we'll need links to edit and delete a recipe in `show.html`:
 
