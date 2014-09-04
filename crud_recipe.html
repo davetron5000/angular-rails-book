@@ -486,7 +486,7 @@ index 00b5df2..00eb6bb 100644
   &lt;/div&gt;
 &lt;/section&gt;
 </code></pre><footer><h1>app/assets/javascripts/templates/form.html</h1></footer></article>
-<p>Now, we&#39;ll need to add a link to create a recipe to <code>index.html</code>:</p>
+<p>Now, we&#39;ll need to add a link to create a recipe as well as one to edit in <code>index.html</code>:</p>
 <article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/templates/index.html b/app/assets/javascripts/templates/index.html
 index d830331..36ec3a8 100644
 --- a/app/assets/javascripts/templates/index.html
@@ -510,6 +510,20 @@ index d830331..36ec3a8 100644
        &lt;/section&gt;
      &lt;/li&gt;
 </code></pre><footer><h1>app/assets/javascripts/templates/index.html</h1></footer></article>
+<p>These links require new functions called <code>newRecipe()</code> and <code>edit()</code>, which we&#39;ll add to <code>RecipesController.coffee</code>:</p>
+<article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/controllers/RecipesController.coffee b/app/assets/javascripts/controllers/RecipesController.coffee
+index bfff8fd..6ab7a33 100644
+--- a/app/assets/javascripts/controllers/RecipesController.coffee
++++ b/app/assets/javascripts/controllers/RecipesController.coffee
+@@ -10,4 +10,7 @@ controllers.controller(&quot;RecipesController&quot;, [ &#39;$scope&#39;, &#39;$routeParams&#39;, &#39;$locati
+       $scope.recipes = []
+ 
+     $scope.view = (recipeId)-&gt; $location.path(&quot;/recipes/#{recipeId}&quot;)
++
++    $scope.newRecipe = -&gt; $location.path(&quot;/recipes/new&quot;)
++    $scope.edit      = (recipeId)-&gt; $location.path(&quot;/recipes/#{recipeId}/edit&quot;)
+ ])
+</code></pre><footer><h1>app/assets/javascripts/controllers/RecipesController.coffee</h1></footer></article>
 <p>And lastly, we&#39;ll need links to edit and delete a recipe in <code>show.html</code>:</p>
 <article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/templates/show.html b/app/assets/javascripts/templates/show.html
 index df041fb..9522b52 100644
