@@ -32,7 +32,8 @@ h6 {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: "p22-underground", sans-serif;
-  margin-top: 0; }
+  margin-top: 0;
+  text-rendering: optimizeLegibility; }
 
 h1, h2, h3 {
   margin-bottom: 17.3054px; }
@@ -95,7 +96,8 @@ h2.subtitle {
 body, p, li, td {
   font-family: "cronos-pro";
   font-size: 24.722px;
-  line-height: 1.4; }
+  line-height: 1.4;
+  text-rendering: optimizeLegibility; }
 
 body {
   width: 741.66px;
