@@ -215,10 +215,13 @@ index 3192ec8..2cac3ad 100644
   * compiled file, but it's generally better to create a new file per style scope.
   *
   *= require_self
-+ *= require bootstrap-sass-official/assets/stylesheets/bootstrap.css
++ *= require bootstrap-sass-official/assets/stylesheets/_bootstrap.css
   *= require_tree .
   */
 ```
+
+*(Note that previous version of `bootstra-sass-official` would've required you to required `bootstrap.css` and not
+ `_bootstrap.css`.  Seems that the maintainers are flip-flopping on their naming conventions).*
 
 The reason these `require` lines are so long is due to an “impedence mismatch”
 between Bower and the Rails asset pipeline.  Bower isn't much more than a
