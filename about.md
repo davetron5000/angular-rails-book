@@ -9,7 +9,7 @@ everything you need to know as a developer other than the coding part :).
 [clibook]: http://pragprog.com/book/dccar2/build-awesome-command-line-applications-in-ruby-2
 [swengbook]: http://theseniorsoftwareengineer.com/
 
-I currently live in Washington, DC and am a Lead Engineer for retail innovator [Stitch
+I currently live in Washington, DC and am a Director of Engineering for retail innovator [Stitch
 Fix][stitchfixblog], working with a small team building software (mostly Rails
 apps) to support our business.  Two of those applications are Angular apps.
 
