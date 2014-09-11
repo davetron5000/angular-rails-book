@@ -14,8 +14,8 @@ The test, of course, fails:
 
 To make it work, we'll need to:
 
-* add functionatliy to our back-end controller
-* add functionatliy to our Angular controllers
+* add functionality to our back-end controller
+* add functionality to our Angular controllers
 * create views
 
 ## Rails controller
