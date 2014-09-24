@@ -79,7 +79,9 @@ unless you really want to.</p>
 database, and make sure we have a clean base from which to work.</p>
 <a name='basic-gems'></a><h3>Basic gems</h3>
 <p>We&#39;re going to use RSpec and Capybara here, as well as the Selenium driver for
-browser-based testing, so let&#39;s add those gems to our <code>Gemfile</code>.</p>
+browser-based testing, so let&#39;s add those gems to our <code>Gemfile</code>.  Note that we&#39;re also
+pinning version 3.2.19 of the <code>sass</code> gem. Currently, a bug in sprockets and/or SASS prevents
+everything from working as designed, so we need to stay on this version for now.</p>
 <article class='code-listing'><pre><code class="language-diff">diff --git a/Gemfile b/Gemfile
 index 90bd53a..75cb4c5 100644
 --- a/Gemfile
@@ -87,13 +89,13 @@ index 90bd53a..75cb4c5 100644
 @@ -21,12 +21,18 @@ gem &#39;coffee-rails&#39;, &#39;~&gt; 4.0.0&#39;
  # Use jquery as the JavaScript library
  gem &#39;jquery-rails&#39;
- 
+
 -# Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks
 -gem &#39;turbolinks&#39;
 -
  # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
  gem &#39;jbuilder&#39;, &#39;~&gt; 1.2&#39;
- 
++gem &#39;sass&#39;, &#39;3.2.19&#39; 
 +group :test, :development do
 +  gem &quot;rspec&quot;
 +  gem &quot;rspec-rails&quot;, &quot;~&gt; 2.0&quot;
@@ -106,7 +108,7 @@ index 90bd53a..75cb4c5 100644
  group :doc do
    # bundle exec rake doc:rails generates the API under doc/api.
    gem &#39;sdoc&#39;, require: false
-</code></pre><footer><h1>Gemfile</h1></footer></article>
+</code></pre></article>
 <p>Capybara and
 Selenium should be unsurprising choices, as these are common means of doing
 integration/acceptance/browser tests.  When creating a rich client
@@ -244,22 +246,30 @@ for a library that isn&#39;t available via Bower (although that would be highly
 unusual).</p>
 
 <p>Since <code>vendor/assets/bower_components</code> <em>isn&#39;t</em> Rails standard, you&#39;ll need to
-add it to the asset path so these files get picked up.  We&#39;ll do this in <code>config/application.rb</code>, like so:</p>
+add it to the asset path so these files get picked up.   While we&#39;re here, we&#39;ll also
+add a few lines of configuration to get the glyphicons working while we&#39;re at it.</p>
+
+<p>We&#39;ll do this in <code>config/application.rb</code>, like so:</p>
 <article class='code-listing'><pre><code class="language-diff">diff --git a/config/application.rb b/config/application.rb
-index 5f1ac4a..2388009 100644
+index 5f1ac4a..1bec650 100644
 --- a/config/application.rb
 +++ b/config/application.rb
-@@ -19,5 +19,6 @@ module Receta
+@@ -19,5 +19,9 @@ module Receta
      # The default locale is :en and all translations from config/locales/*.rb,yml are auto loaded.
      # config.i18n.load_path += Dir[Rails.root.join(&#39;my&#39;, &#39;locales&#39;, &#39;*.{rb,yml}&#39;).to_s]
      # config.i18n.default_locale = :de
 +    config.assets.paths &lt;&lt; Rails.root.join(&quot;vendor&quot;,&quot;assets&quot;,&quot;bower_components&quot;)
++    config.assets.paths &lt;&lt; Rails.root.join(&quot;vendor&quot;,&quot;assets&quot;,&quot;bower_components&quot;,&quot;bootstrap-sass-official&quot;,&quot;assets&quot;,&quot;fonts&quot;)
++
++    config.assets.precompile &lt;&lt; %r(.*.(?:eot|svg|ttf|woff)$)
    end
  end
 </code></pre><footer><h1>config/application.rb</h1></footer></article>
 <p>Lastly, you&#39;ll need to reference these files in <code>application.js</code> and
-<code>application.css</code>, respectively (we&#39;ll also remove the reference to Turbolinks
-while we&#39;re here).</p>
+<code>application.css.scss</code>, respectively (we&#39;ll also remove the reference to Turbolinks
+while we&#39;re here).  First, rename <code>application.css</code> to <code>application.css.scss</code>, because we&#39;ll need to use SASS directives to get
+everything to work for Bootstrap&#39;s latest version (note that they frequently break things on minor versions, so please let me
+know if this no longer works).</p>
 <article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/application.js b/app/assets/javascripts/application.js
 index d6925fa..29f41b7 100644
 --- a/app/assets/javascripts/application.js
@@ -273,19 +283,19 @@ index d6925fa..29f41b7 100644
  //= require_tree .
 diff --git a/app/assets/stylesheets/application.css b/app/assets/stylesheets/application.css
 index 3192ec8..2cac3ad 100644
---- a/app/assets/stylesheets/application.css
-+++ b/app/assets/stylesheets/application.css
+--- a/app/assets/stylesheets/application.css.scss
++++ b/app/assets/stylesheets/application.css.scss
 @@ -9,5 +9,6 @@
   * compiled file, but it&#39;s generally better to create a new file per style scope.
   *
   *= require_self
-+ *= require bootstrap-sass-official/assets/stylesheets/_bootstrap.css
   *= require_tree .
   */
-</code></pre></article>
-<p><em>(Note that previous version of <code>bootstra-sass-official</code> would&#39;ve required you to required <code>bootstrap.css</code> and not
- <code>_bootstrap.css</code>.  Seems that the maintainers are flip-flopping on their naming conventions).</em></p>
++
++@import &quot;bootstrap-sass-official/assets/stylesheets/bootstrap-sprockets&quot;;
++@import &quot;bootstrap-sass-official/assets/stylesheets/bootstrap&quot;;
 
+</code></pre></article>
 <p>The reason these <code>require</code> lines are so long is due to an “impedence mismatch”
 between Bower and the Rails asset pipeline.  Bower isn&#39;t much more than a
 simple way to download a Git repository, and there isn&#39;t much standardization
