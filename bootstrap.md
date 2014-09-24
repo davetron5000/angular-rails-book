@@ -43,9 +43,38 @@ database, and make sure we have a clean base from which to work.
 ## Basic gems
 
 We're going to use RSpec and Capybara here, as well as the Selenium driver for
-browser-based testing, so let's add those gems to our `Gemfile`.
+browser-based testing, so let's add those gems to our `Gemfile`.  Note that we're also
+pinning version 3.2.19 of the `sass` gem. Currently, a bug in sprockets and/or SASS prevents
+everything from working as designed, so we need to stay on this version for now.
 
-    git://receta.git/Gemfile#rails-new..initial-gems
+```diff
+diff --git a/Gemfile b/Gemfile
+index 90bd53a..75cb4c5 100644
+--- a/Gemfile
++++ b/Gemfile
+@@ -21,12 +21,18 @@ gem 'coffee-rails', '~> 4.0.0'
+ # Use jquery as the JavaScript library
+ gem 'jquery-rails'
+ 
+-# Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks
+-gem 'turbolinks'
+-
+ # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
+ gem 'jbuilder', '~> 1.2'
++gem 'sass', '3.2.19' 
++group :test, :development do
++  gem "rspec"
++  gem "rspec-rails", "~> 2.0"
++  gem "factory_girl_rails", "~> 4.0"
++  gem "capybara"
++  gem "database_cleaner"
++  gem "selenium-webdriver"
++end
++
+ group :doc do
+   # bundle exec rake doc:rails generates the API under doc/api.
+   gem 'sdoc', require: false
+```
 
 Capybara and
 Selenium should be unsurprising choices, as these are common means of doing
@@ -187,13 +216,18 @@ for a library that isn't available via Bower (although that would be highly
 unusual).
 
 Since `vendor/assets/bower_components` *isn't* Rails standard, you'll need to
-add it to the asset path so these files get picked up.  We'll do this in `config/application.rb`, like so:
+add it to the asset path so these files get picked up.   While we're here, we'll also
+add a few lines of configuration to get the glyphicons working while we're at it.
 
-    git://receta.git/config/application.rb#angular-and-bootstrap..add-bower_components-to-assets
+We'll do this in `config/application.rb`, like so:
+
+    git://receta.git/config/application.rb#angular-and-bootstrap..deal-with-glyphicons
 
 Lastly, you'll need to reference these files in `application.js` and
-`application.css`, respectively (we'll also remove the reference to Turbolinks
-while we're here).
+`application.css.scss`, respectively (we'll also remove the reference to Turbolinks
+while we're here).  First, rename `application.css` to `application.css.scss`, because we'll need to use SASS directives to get
+everything to work for Bootstrap's latest version (note that they frequently break things on minor versions, so please let me
+know if this no longer works).
 
 ```diff
 diff --git a/app/assets/javascripts/application.js b/app/assets/javascripts/application.js
@@ -209,19 +243,19 @@ index d6925fa..29f41b7 100644
  //= require_tree .
 diff --git a/app/assets/stylesheets/application.css b/app/assets/stylesheets/application.css
 index 3192ec8..2cac3ad 100644
---- a/app/assets/stylesheets/application.css
-+++ b/app/assets/stylesheets/application.css
+--- a/app/assets/stylesheets/application.css.scss
++++ b/app/assets/stylesheets/application.css.scss
 @@ -9,5 +9,6 @@
   * compiled file, but it's generally better to create a new file per style scope.
   *
   *= require_self
-+ *= require bootstrap-sass-official/assets/stylesheets/_bootstrap.css
   *= require_tree .
   */
-```
++
++@import "bootstrap-sass-official/assets/stylesheets/bootstrap-sprockets";
++@import "bootstrap-sass-official/assets/stylesheets/bootstrap";
 
-*(Note that previous version of `bootstra-sass-official` would've required you to required `bootstrap.css` and not
- `_bootstrap.css`.  Seems that the maintainers are flip-flopping on their naming conventions).*
+```
 
 The reason these `require` lines are so long is due to an “impedence mismatch”
 between Bower and the Rails asset pipeline.  Bower isn't much more than a
