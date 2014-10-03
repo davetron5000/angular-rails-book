@@ -2,7 +2,7 @@
 
 The latest wave of JavaScript frameworks present an interesting problem to experienced Rails developers.  On their own, these
 frameworks can only do so much, since they are designed to run on the client-side, in a browser.  This means that for
-any real applicaiton you might create, you need a back-end.
+any real application you might create, you need a back-end.
 
 Rails is a terrific back-end, however it wasn't designed with a JavaScript framework like AngularJS in mind.  Rails' view of the world is serving up pages and HTML.  Rich Javascript-based single-page applications aren't something Rails encourages.  
 
