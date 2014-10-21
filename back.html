@@ -51,7 +51,7 @@ crank out features quickly and easily—the hard work has been done.</p>
 
 <p>With that said, I want to leave you with a few design tips, and a basic workflow I&#39;ve found useful when building Angular apps with Rails.</p>
 <a name='design-tips'></a><h3>Design Tips</h3>
-<p>Because we are “off the Rails”, we have to make more design decisions that we might normally.</p>
+<p>Because we are “off the Rails”, we have to make more design decisions than we might normally.</p>
 
 <ul>
 <li>Complexity in JavaScript is far more painful than in Ruby, so if you can make your Angular code simpler by doing a bit more work in Rails, do it (for example, using JBuilder to produce JSON with camel-cased keys).</li>
@@ -68,7 +68,7 @@ workflow I&#39;ve found effective:</p>
 <ol>
 <li>Create a browser-based test to exercise the expected paths of the UI.  This
 is largely the “happy path”, but might also include validations and other
-exceptional flows that the user will likely experience. </li>
+exceptional flows that the user will likely experience.</li>
 <li>Write your Angular controller (test-first, of course), which will lead you to fleshing out
 what the back-end needs to look like.</li>
 <li>Implement the back-end.</li>
