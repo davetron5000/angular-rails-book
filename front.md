@@ -39,7 +39,7 @@ This mini-book is broken up into four major parts:
 * Creating a basic skeleton to validate Angular is setup and configured
 * A step-by-step walkthrough of a simple feature
 * A more brisk walkthrough of using TDD to implement a feature
-* A very fast runthrough of builing a few more features
+* A very fast runthrough of building a few more features
 
 The technologies we'll be using:
 
