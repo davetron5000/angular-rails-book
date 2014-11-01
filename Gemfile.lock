@@ -1,16 +1,19 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    bookingit (0.4.0)
+    bookingit (0.4.1)
       gli
       mustache
-      redcarpet
-    gli (2.11.0)
-    mustache (0.99.5)
-    redcarpet (3.1.2)
+      redcarpet (= 3.1.1)
+    gli (2.12.2)
+    mustache (0.99.7)
+    redcarpet (3.1.1)
+    sass (3.4.7)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   bookingit
+  redcarpet (= 3.1.1)
+  sass
