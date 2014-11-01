@@ -129,7 +129,7 @@ version 3.1.0 of the `jquery-rails` gem.  According to the GitHub page for that 
 unnecessarily confusing.  Further, some gems don't even advertise the version of the asset they bundle.  I've even seen one that
 bundles an off-release version of a JavaScript library.
 
-The second reason is actually more important, and that's that not every front-end asset is availbale as a RubyGem.  This means
+The second reason is actually more important, and that's that not every front-end asset is available as a RubyGem.  This means
 that we will need a second system to manage *those*.  And because we'll be using a lot more libraries and assets than in a
 “normal” Rails app, we need to keep an eye on the dependencies between these libraries.  With some libraries managed as RubyGems
 and some in another system, we lose that ability.
@@ -257,6 +257,9 @@ index 3192ec8..2cac3ad 100644
 
 ```
 
+*(Note that previous version of `bootstrap-sass-official` would've required you to required `bootstrap.css` and not
+ `_bootstrap.css`.  Seems that the maintainers are flip-flopping on their naming conventions).*
+
 The reason these `require` lines are so long is due to an “impedence mismatch”
 between Bower and the Rails asset pipeline.  Bower isn't much more than a
 simple way to download a Git repository, and there isn't much standardization
@@ -316,7 +319,7 @@ If you the Rails error page with a message like so:
     couldn't find file 'bootstrap/glyphicons-halflings-regular.eot'
 
 This is because later versions of the bootstrap package include sprockets directives that bake in an assumption about how you've
-installed Bootstrap.  Namely, the directives tell Rails to find the glyphicons fonts in `boostrap/`, which doesn't exist in any of the asset paths we have configured. So, we must add it.
+installed Bootstrap.  Namely, the directives tell Rails to find the glyphicons fonts in `bootstrap/`, which doesn't exist in any of the asset paths we have configured. So, we must add it.
 
 Open `config/application.rb` and add this line:
 

@@ -375,7 +375,7 @@ way Angular is designed.
 
 Since all Angular modules are functions that are given their dependencies, when we test those modules, we'll want to intercept
 those dependencies so we can use them in our tests.  Although we could create mocks for many of our controller dependencies,
-Angular provides mock implementationsn for us, and will pass those, by
+Angular provides mock implementations for us, and will pass those, by
 default, to our controller.
 
 If we need to examine them in a test (for example to assert that our

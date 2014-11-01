@@ -2,7 +2,7 @@
 
 The latest wave of JavaScript frameworks present an interesting problem to experienced Rails developers.  On their own, these
 frameworks can only do so much, since they are designed to run on the client-side, in a browser.  This means that for
-any real applicaiton you might create, you need a back-end.
+any real application you might create, you need a back-end.
 
 Rails is a terrific back-end, however it wasn't designed with a JavaScript framework like AngularJS in mind.  Rails' view of the world is serving up pages and HTML.  Rich Javascript-based single-page applications aren't something Rails encourages.  
 
@@ -39,7 +39,7 @@ This mini-book is broken up into four major parts:
 * Creating a basic skeleton to validate Angular is setup and configured
 * A step-by-step walkthrough of a simple feature
 * A more brisk walkthrough of using TDD to implement a feature
-* A very fast runthrough of builing a few more features
+* A very fast runthrough of building a few more features
 
 The technologies we'll be using:
 
