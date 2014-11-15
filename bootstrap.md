@@ -43,7 +43,7 @@ database, and make sure we have a clean base from which to work.
 ## Basic gems
 
 We're going to use RSpec and Capybara here, as well as the Selenium driver for
-browser-based testing, so let's add those gems to our `Gemfile`.  Note that we're also
+browser-based testing, so let's add those gems to our `Gemfile`.  RSpec comes in via the `rspec-rails` gem, which also makes using RSpec in Rails a bit simpler.  Note that we're also
 pinning version 3.2.19 of the `sass` gem. Currently, a bug in sprockets and/or SASS prevents
 everything from working as designed, so we need to stay on this version for now.
 
