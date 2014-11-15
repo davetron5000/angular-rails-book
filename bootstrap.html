@@ -79,7 +79,7 @@ unless you really want to.</p>
 database, and make sure we have a clean base from which to work.</p>
 <a name='basic-gems'></a><h3>Basic gems</h3>
 <p>We&#39;re going to use RSpec and Capybara here, as well as the Selenium driver for
-browser-based testing, so let&#39;s add those gems to our <code>Gemfile</code>.  Note that we&#39;re also
+browser-based testing, so let&#39;s add those gems to our <code>Gemfile</code>.  RSpec comes in via the <code>rspec-rails</code> gem, which also makes using RSpec in Rails a bit simpler.  Note that we&#39;re also
 pinning version 3.2.19 of the <code>sass</code> gem. Currently, a bug in sprockets and/or SASS prevents
 everything from working as designed, so we need to stay on this version for now.</p>
 <article class='code-listing'><pre><code class="language-diff">diff --git a/Gemfile b/Gemfile
@@ -97,7 +97,6 @@ index 90bd53a..75cb4c5 100644
  gem &#39;jbuilder&#39;, &#39;~&gt; 1.2&#39;
 +gem &#39;sass&#39;, &#39;3.2.19&#39; 
 +group :test, :development do
-+  gem &quot;rspec&quot;
 +  gem &quot;rspec-rails&quot;, &quot;~&gt; 2.0&quot;
 +  gem &quot;factory_girl_rails&quot;, &quot;~&gt; 4.0&quot;
 +  gem &quot;capybara&quot;
