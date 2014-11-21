@@ -408,6 +408,10 @@ is a matcher we've created in `spec_helper.coffee`:
 This does a “value” match, which will make our lives much easier when
 asserting equality between objects.
 
+Finally, we need to add the following line to initializers/assets.rb, and then restart the server: 
+```ruby
+Rails.application.config.assets.precompile += %w( jasmine/1.3.1.js )
+```
 Let's run our JavaScript tests to validate our setup.
 
     git://receta.git/#setup-teaspoon!rake teaspoon
