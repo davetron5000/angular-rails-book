@@ -55,7 +55,7 @@ function `setupController()` that handles mocking out the HTTP calls.  It
 takes a single parameter—`recipeExists`—to allow us to control whether or not
 the backend sends a 404 or a real recipe.
 
-Since none of this is implented yet, our test should fail.  Let's try it:
+Since none of this is implemented yet, our test should fail.  Let's try it:
 
     git://receta.git/#recipe-controller-test!rake teaspoon!nonzero
 
@@ -225,7 +225,7 @@ what we get with Angular and what we get with Rails, with respect to view and
 controller implementation.
 
 We've already seen that Angular's router requires more explicit configuration
-than Rails'.  We can also now see that we don't get convienient methods like
+than Rails'.  We can also now see that we don't get convenient methods like
 `recipes_path` or `recipe_path(recipe)` to generate routes for us.  There
 doesn't seem to be a canonical way to do this at this time.
 
