@@ -76,7 +76,7 @@ Let's do it:
     git://receta.git/app/assets/javascripts/controllers/RecipeController.coffee#front-end-crud
 
 You'll notice we made a `create()` method when setting up our `Recipe` resource.  By default, Angular allows both
-`recipe.$save()` and `Recipe.save(recipe)`, the later being what we'd use to create a new recipe.  Since Rails wants a `POST` for
+`recipe.$save()` and `Recipe.save(recipe)`, the latter being what we'd use to create a new recipe.  Since Rails wants a `POST` for
 create and a `PUT` for update, we have to change the defaults.
 
 You'll also notice that we added a few functions for navigation.  `edit()` takes the user to the edit form, and `cancel()` takes
@@ -128,7 +128,7 @@ Voila! It works!
 We went quite quickly through this part of the app, mostly to just see what an entire “CRUD” app would look like as well as some
 differences between what Rails gives us and what Angular doesn't.
 
-It may seem like we've written a lot of extra code and tests to do something that would far simpler in Rails.  In a sense, this
+It may seem like we've written a lot of extra code and tests to do something that would be far simpler in Rails.  In a sense, this
 is true, but what Angular lacks in creating CRUD applications, it more than
 makes up for when creating a richer user experience.
 

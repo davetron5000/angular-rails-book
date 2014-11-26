@@ -119,7 +119,7 @@ almost every imaginable library—including the Angular modules we'll be using�
 
 [bower]: http://bower.io
 
-The same cannot be said for RubyGems.  While it's nice that it's at least _possibile_ to use
+The same cannot be said for RubyGems.  While it's nice that it's at least _possible_ to use
 RubyGems to manage front-end assets, doing so has two problems.
 
 First, it creates an abstraction between our `Gemfile` and our
@@ -259,7 +259,7 @@ index 3192ec8..2cac3ad 100644
 *(Note that previous version of `bootstrap-sass-official` would've required you to required `bootstrap.css` and not
  `_bootstrap.css`.  Seems that the maintainers are flip-flopping on their naming conventions).*
 
-The reason these `require` lines are so long is due to an “impedence mismatch”
+The reason these `require` lines are so long is due to an “impedance mismatch”
 between Bower and the Rails asset pipeline.  Bower isn't much more than a
 simple way to download a Git repository, and there isn't much standardization
 across various front-end components.

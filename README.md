@@ -1,13 +1,13 @@
 # Getting Started with Angular on Ruby on Rails
 
-This is the source of http://angular-rails.com.  To build it, you'll need to do a few things:
+This is the source of http://angular-rails.com.  To build it, you'll need to you'll need to do a few things:
 
-* `bundle install` or install the `bookingit` gem
-* Create the file `git_repos`
-* In `git_repos`, check out https://github.com/davetron5000/receta  This contains all the source files needed to build the book.
+1. `bundle install` or `gem install bookingit` to install the bookingit gem
+1. `mkdir git_repos`
+1. `git clone https://github.com/davetron5000/receta git_repos/receta` to clone the repository containing the source code examples in the book
+1. `bookingit build` to generate the HTML and CSS for the book 
 
-Once this is done, type `bookingit build`, then open `book/index.html` in your browser.  Whenever you change something, re-run that
-command.
+Once this is done, open `book/index.html` in your browser.  Whenever you change something, re-run `bookingit build`.
 
 ## Changes to the source
 

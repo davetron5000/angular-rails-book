@@ -503,7 +503,7 @@ recipes to return from the back-end:
       expect(scope.recipes).toEqualData(recipes)
 ```
 
-The call to `httpBackend.flush()` resolves all aysnchronous promises.  We'll expect this to set the controller's `recipes` to the
+The call to `httpBackend.flush()` resolves all asynchronous promises.  We'll expect this to set the controller's `recipes` to the
 recipes we passed to `setupController()`.
 
 Finally, we test that `search()` sets the URL correctly:
