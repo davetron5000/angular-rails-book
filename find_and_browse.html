@@ -860,7 +860,7 @@ recipes to return from the back-end:</p>
     it &#39;calls the back-end&#39;, -&gt;
       expect(scope.recipes).toEqualData(recipes)
 </code></pre></article>
-<p>The call to <code>httpBackend.flush()</code> resolves all aysnchronous promises.  We&#39;ll expect this to set the controller&#39;s <code>recipes</code> to the
+<p>The call to <code>httpBackend.flush()</code> resolves all asynchronous promises.  We&#39;ll expect this to set the controller&#39;s <code>recipes</code> to the
 recipes we passed to <code>setupController()</code>.</p>
 
 <p>Finally, we test that <code>search()</code> sets the URL correctly:</p>

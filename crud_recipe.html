@@ -402,7 +402,7 @@ controllers.controller(&quot;RecipeController&quot;, [ &#39;$scope&#39;, &#39;$r
 ])
 </code></pre><footer><h1>app/assets/javascripts/controllers/RecipeController.coffee</h1></footer></article>
 <p>You&#39;ll notice we made a <code>create()</code> method when setting up our <code>Recipe</code> resource.  By default, Angular allows both
-<code>recipe.$save()</code> and <code>Recipe.save(recipe)</code>, the later being what we&#39;d use to create a new recipe.  Since Rails wants a <code>POST</code> for
+<code>recipe.$save()</code> and <code>Recipe.save(recipe)</code>, the latter being what we&#39;d use to create a new recipe.  Since Rails wants a <code>POST</code> for
 create and a <code>PUT</code> for update, we have to change the defaults.</p>
 
 <p>You&#39;ll also notice that we added a few functions for navigation.  <code>edit()</code> takes the user to the edit form, and <code>cancel()</code> takes
@@ -563,7 +563,7 @@ Randomized with seed 28171
 <p>We went quite quickly through this part of the app, mostly to just see what an entire “CRUD” app would look like as well as some
 differences between what Rails gives us and what Angular doesn&#39;t.</p>
 
-<p>It may seem like we&#39;ve written a lot of extra code and tests to do something that would far simpler in Rails.  In a sense, this
+<p>It may seem like we&#39;ve written a lot of extra code and tests to do something that would be far simpler in Rails.  In a sense, this
 is true, but what Angular lacks in creating CRUD applications, it more than
 makes up for when creating a richer user experience.</p>
 
