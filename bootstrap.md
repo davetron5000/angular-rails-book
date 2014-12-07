@@ -75,6 +75,8 @@ index 90bd53a..75cb4c5 100644
    gem 'sdoc', require: false
 ```
 
+Also note that for Capybara and Selenium to work, you must [install Firefox](https://www.mozilla.org/en-US/firefox/new/), as it's required for the browser-based testing to work.
+
 Capybara and
 Selenium should be unsurprising choices, as these are common means of doing
 integration/acceptance/browser tests.  When creating a rich client
