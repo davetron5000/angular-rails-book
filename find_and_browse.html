@@ -482,10 +482,10 @@ end
 /Users/davec/.rvm/rubies/ruby-2.1.0/bin/ruby -S rspec ./spec/features/search_spec.rb
 .
 
-Finished in 5.74 seconds
+Finished in 3.74 seconds
 1 example, 0 failures
 
-Randomized with seed 13155
+Randomized with seed 58761
 </code></pre></article>
 <p>With this in place, we can now connect our front-end to the back-end, set up the same canned data from within our feature spec, and
 expect the exact same results.</p>
@@ -602,15 +602,15 @@ example, Angular code tends to favor camel-case, whereas Ruby tends to favor sna
 <article class='code-listing'><pre><code class="language-shell">&gt; rake db:migrate RAILS_ENV=test ; rspec spec/controllers/recipes_controller_spec.rb
 ==  CreateRecipes: migrating ==================================================
 -- create_table(:recipes)
-   -&gt; 0.0045s
-==  CreateRecipes: migrated (0.0046s) =========================================
+   -&gt; 0.0134s
+==  CreateRecipes: migrated (0.0135s) =========================================
 
 .....
 
-Finished in 0.41174 seconds
+Finished in 0.4472 seconds
 5 examples, 0 failures
 
-Randomized with seed 52820
+Randomized with seed 3236
 </code></pre></article>
 <p>Now that we have our back-end implemented, let&#39;s hook it up by having our Angular controller call it.</p>
 <a name='have-angular-controller-call-the-back-end'></a><h4>Have angular controller call the back-end</h4>
@@ -774,10 +774,10 @@ asserting equality between objects.</p>
 <p>Let&#39;s run our JavaScript tests to validate our setup.</p>
 <article class='code-listing'><pre><code class="language-shell">&gt; rake teaspoon
 Starting the Teaspoon server...
-Teaspoon running default suite at http://127.0.0.1:58328/teaspoon/default
+Teaspoon running default suite at http://127.0.0.1:58112/teaspoon/default
 .
 
-Finished in 0.01100 seconds
+Finished in 0.01000 seconds
 1 example, 0 failures
 </code></pre></article>
 <p>Everything works!  Now, we just need a test that our controller calls the backend.</p>
@@ -879,21 +879,21 @@ recipes we passed to <code>setupController()</code>.</p>
 <p>Let&#39;s run the test and watch it fail:</p>
 <article class='code-listing'><pre><code class="language-shell">&gt; rake teaspoon
 Starting the Teaspoon server...
-Teaspoon running default suite at http://127.0.0.1:58414/teaspoon/default
+Teaspoon running default suite at http://127.0.0.1:58122/teaspoon/default
 .FFF.
 
 Failures:
 
   1) RecipesController controller initialization with keywords calls the back-end
-     Failure/Error: Error: No pending request to flush ! in http://127.0.0.1:58414/assets/angular-mocks/angular-mocks.js?body=1 (line 1438)
+     Failure/Error: Error: No pending request to flush ! in http://127.0.0.1:58122/assets/angular-mocks/angular-mocks.js?body=1 (line 1438)
 
   2) RecipesController controller initialization with keywords calls the back-end
      Failure/Error: Expected [  ] to equal data [ { id : 2, name : &#39;Baked Potatoes&#39; }, { id : 4, name : &#39;Potatoes Au Gratin&#39; } ].
 
   3) RecipesController controller initialization with keywords calls the back-end
-     Failure/Error: Error: Unsatisfied requests: GET //recipes.*keywords=foo/ in http://127.0.0.1:58414/assets/angular-mocks/angular-mocks.js?body=1 (line 1471)
+     Failure/Error: Error: Unsatisfied requests: GET //recipes.*keywords=foo/ in http://127.0.0.1:58122/assets/angular-mocks/angular-mocks.js?body=1 (line 1471)
 
-Finished in 0.02200 seconds
+Finished in 0.01800 seconds
 5 examples, 3 failures
 
 Failed examples:
@@ -927,10 +927,10 @@ index a40251d..406abde 100644
 <p>Now, let&#39;s re-run our tests:</p>
 <article class='code-listing'><pre><code class="language-shell">&gt; rake teaspoon
 Starting the Teaspoon server...
-Teaspoon running default suite at http://127.0.0.1:58441/teaspoon/default
+Teaspoon running default suite at http://127.0.0.1:58131/teaspoon/default
 ...
 
-Finished in 0.02000 seconds
+Finished in 0.12100 seconds
 3 examples, 0 failures
 </code></pre></article>
 <p>Everything&#39;s passing!  At this point, our front-end will call through to our
@@ -963,10 +963,10 @@ index 777ad4b..be68162 100644
 <article class='code-listing'><pre><code class="language-shell">&gt; rspec spec/features/search_spec.rb
 .
 
-Finished in 3.22 seconds
+Finished in 4.29 seconds
 1 example, 0 failures
 
-Randomized with seed 40348
+Randomized with seed 23742
 </code></pre></article>
 <p>It&#39;s passing!  We&#39;ve now successfully test-driven our first feature with Angular!</p>
 
@@ -1022,20 +1022,20 @@ the same name (which, incidentally, generates a runtime error).</p>
 <p>If all went well, our tests should still be passing.  First, we run our unit tests:</p>
 <article class='code-listing'><pre><code class="language-shell">&gt; rake teaspoon
 Starting the Teaspoon server...
-Teaspoon running default suite at http://127.0.0.1:58520/teaspoon/default
+Teaspoon running default suite at http://127.0.0.1:58179/teaspoon/default
 ...
 
-Finished in 0.02400 seconds
+Finished in 0.01800 seconds
 3 examples, 0 failures
 </code></pre></article>
 <p>Now, run our feature test:</p>
 <article class='code-listing'><pre><code class="language-shell">&gt; rspec spec/features/search_spec.rb
 .
 
-Finished in 3.22 seconds
+Finished in 4.29 seconds
 1 example, 0 failures
 
-Randomized with seed 40348
+Randomized with seed 23742
 </code></pre></article>
 <p>Wonderful!  We now have a repeatable process for test-driving our Angular-and-Rails-powered web application.</p>
 

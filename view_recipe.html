@@ -181,24 +181,24 @@ the backend sends a 404 or a real recipe.</p>
 <p>Since none of this is implemented yet, our test should fail.  Let&#39;s try it:</p>
 <article class='code-listing'><pre><code class="language-shell">&gt; rake teaspoon
 Starting the Teaspoon server...
-Teaspoon running default suite at http://127.0.0.1:58538/teaspoon/default
+Teaspoon running default suite at http://127.0.0.1:58203/teaspoon/default
 FFFF...
 
 Failures:
 
   1) RecipeController controller initialization recipe is found loads the given recipe
-     Failure/Error: Error: No pending request to flush ! in http://127.0.0.1:58538/assets/angular-mocks/angular-mocks.js?body=1 (line 1438)
+     Failure/Error: Error: No pending request to flush ! in http://127.0.0.1:58203/assets/angular-mocks/angular-mocks.js?body=1 (line 1438)
 
   2) RecipeController controller initialization recipe is found loads the given recipe
-     Failure/Error: Error: Unsatisfied requests: GET //recipes/42/ in http://127.0.0.1:58538/assets/angular-mocks/angular-mocks.js?body=1 (line 1471)
+     Failure/Error: Error: Unsatisfied requests: GET //recipes/42/ in http://127.0.0.1:58203/assets/angular-mocks/angular-mocks.js?body=1 (line 1471)
 
   3) RecipeController controller initialization recipe is not found loads the given recipe
-     Failure/Error: Error: No pending request to flush ! in http://127.0.0.1:58538/assets/angular-mocks/angular-mocks.js?body=1 (line 1438)
+     Failure/Error: Error: No pending request to flush ! in http://127.0.0.1:58203/assets/angular-mocks/angular-mocks.js?body=1 (line 1438)
 
   4) RecipeController controller initialization recipe is not found loads the given recipe
-     Failure/Error: Error: Unsatisfied requests: GET //recipes/42/ in http://127.0.0.1:58538/assets/angular-mocks/angular-mocks.js?body=1 (line 1471)
+     Failure/Error: Error: Unsatisfied requests: GET //recipes/42/ in http://127.0.0.1:58203/assets/angular-mocks/angular-mocks.js?body=1 (line 1471)
 
-Finished in 0.02800 seconds
+Finished in 0.02200 seconds
 7 examples, 4 failures
 
 Failed examples:
@@ -233,10 +233,10 @@ index 8ca9da2..6c55485 100644
 <p>Now, we see if this makes our tests pass:</p>
 <article class='code-listing'><pre><code class="language-shell">&gt; rake teaspoon
 Starting the Teaspoon server...
-Teaspoon running default suite at http://127.0.0.1:58556/teaspoon/default
+Teaspoon running default suite at http://127.0.0.1:58212/teaspoon/default
 .....
 
-Finished in 0.03000 seconds
+Finished in 0.02200 seconds
 5 examples, 0 failures
 </code></pre></article>
 <p>It does!  </p>
@@ -348,7 +348,7 @@ that the name of the object that “escapes” the closure can be named <code>fl
 <p>Now, when we run the test, we should see a simple expectation failure on the message.</p>
 <article class='code-listing'><pre><code class="language-shell">&gt; rake teaspoon
 Starting the Teaspoon server...
-Teaspoon running default suite at http://127.0.0.1:58572/teaspoon/default
+Teaspoon running default suite at http://127.0.0.1:58223/teaspoon/default
 .F...
 
 Failures:
@@ -356,7 +356,7 @@ Failures:
   1) RecipeController controller initialization recipe is not found loads the given recipe
      Failure/Error: Expected undefined to be &#39;There is no recipe with ID 42&#39;.
 
-Finished in 0.02800 seconds
+Finished in 0.03100 seconds
 5 examples, 1 failure
 
 Failed examples:
@@ -390,10 +390,10 @@ index 6c55485..3c79735 100644
 <p>We add <code>flash</code> to the list of injected dependencies, and then set the error message in our failure callback.  Sure enough, the test passes:</p>
 <article class='code-listing'><pre><code class="language-shell">&gt; rake teaspoon
 Starting the Teaspoon server...
-Teaspoon running default suite at http://127.0.0.1:58588/teaspoon/default
+Teaspoon running default suite at http://127.0.0.1:58233/teaspoon/default
 .....
 
-Finished in 0.02800 seconds
+Finished in 0.03300 seconds
 5 examples, 0 failures
 </code></pre></article>
 <p>Our Angular controller is done!  We still need a view, a browser-based test, and the backend.  Let&#39;s do the Rails backend next.</p>
@@ -475,54 +475,54 @@ Failures:
      Failure/Error: xhr :get, :show, format: :json, id: recipe_id
      ActionView::MissingTemplate:
        Missing template recipes/show, application/show with {:locale=&gt;[:en], :formats=&gt;[:json], :handlers=&gt;[:erb, :builder, :raw, :ruby, :jbuilder, :coffee]}. Searched in:
-         * &quot;/Users/davec/Projects/angular-rails-production/git_repos/receta/app/views&quot;
-         * &quot;/Users/davec/.rvm/gems/ruby-2.1.0@angular-rails-production/gems/teaspoon-0.7.9/app/views&quot;
+         * &quot;/Users/davec/Projects/angular-rails-book/git_repos/receta/app/views&quot;
+         * &quot;/Users/davec/.rvm/gems/ruby-2.1.0@angular-rails-book/gems/teaspoon-0.7.9/app/views&quot;
      # ./spec/controllers/recipes_controller_spec.rb:48:in `block (3 levels) in &lt;top (required)&gt;&#39;
 
   2) RecipesController show when the recipe exists 
      Failure/Error: xhr :get, :show, format: :json, id: recipe_id
      ActionView::MissingTemplate:
        Missing template recipes/show, application/show with {:locale=&gt;[:en], :formats=&gt;[:json], :handlers=&gt;[:erb, :builder, :raw, :ruby, :jbuilder, :coffee]}. Searched in:
-         * &quot;/Users/davec/Projects/angular-rails-production/git_repos/receta/app/views&quot;
-         * &quot;/Users/davec/.rvm/gems/ruby-2.1.0@angular-rails-production/gems/teaspoon-0.7.9/app/views&quot;
+         * &quot;/Users/davec/Projects/angular-rails-book/git_repos/receta/app/views&quot;
+         * &quot;/Users/davec/.rvm/gems/ruby-2.1.0@angular-rails-book/gems/teaspoon-0.7.9/app/views&quot;
      # ./spec/controllers/recipes_controller_spec.rb:48:in `block (3 levels) in &lt;top (required)&gt;&#39;
 
   3) RecipesController show when the recipe exists 
      Failure/Error: xhr :get, :show, format: :json, id: recipe_id
      ActionView::MissingTemplate:
        Missing template recipes/show, application/show with {:locale=&gt;[:en], :formats=&gt;[:json], :handlers=&gt;[:erb, :builder, :raw, :ruby, :jbuilder, :coffee]}. Searched in:
-         * &quot;/Users/davec/Projects/angular-rails-production/git_repos/receta/app/views&quot;
-         * &quot;/Users/davec/.rvm/gems/ruby-2.1.0@angular-rails-production/gems/teaspoon-0.7.9/app/views&quot;
+         * &quot;/Users/davec/Projects/angular-rails-book/git_repos/receta/app/views&quot;
+         * &quot;/Users/davec/.rvm/gems/ruby-2.1.0@angular-rails-book/gems/teaspoon-0.7.9/app/views&quot;
      # ./spec/controllers/recipes_controller_spec.rb:48:in `block (3 levels) in &lt;top (required)&gt;&#39;
 
   4) RecipesController show when the recipe exists 
      Failure/Error: xhr :get, :show, format: :json, id: recipe_id
      ActionView::MissingTemplate:
        Missing template recipes/show, application/show with {:locale=&gt;[:en], :formats=&gt;[:json], :handlers=&gt;[:erb, :builder, :raw, :ruby, :jbuilder, :coffee]}. Searched in:
-         * &quot;/Users/davec/Projects/angular-rails-production/git_repos/receta/app/views&quot;
-         * &quot;/Users/davec/.rvm/gems/ruby-2.1.0@angular-rails-production/gems/teaspoon-0.7.9/app/views&quot;
+         * &quot;/Users/davec/Projects/angular-rails-book/git_repos/receta/app/views&quot;
+         * &quot;/Users/davec/.rvm/gems/ruby-2.1.0@angular-rails-book/gems/teaspoon-0.7.9/app/views&quot;
      # ./spec/controllers/recipes_controller_spec.rb:48:in `block (3 levels) in &lt;top (required)&gt;&#39;
 
   5) RecipesController show when the recipe doesn&#39;t exit 
      Failure/Error: xhr :get, :show, format: :json, id: recipe_id
      ActionView::MissingTemplate:
        Missing template recipes/show, application/show with {:locale=&gt;[:en], :formats=&gt;[:json], :handlers=&gt;[:erb, :builder, :raw, :ruby, :jbuilder, :coffee]}. Searched in:
-         * &quot;/Users/davec/Projects/angular-rails-production/git_repos/receta/app/views&quot;
-         * &quot;/Users/davec/.rvm/gems/ruby-2.1.0@angular-rails-production/gems/teaspoon-0.7.9/app/views&quot;
+         * &quot;/Users/davec/Projects/angular-rails-book/git_repos/receta/app/views&quot;
+         * &quot;/Users/davec/.rvm/gems/ruby-2.1.0@angular-rails-book/gems/teaspoon-0.7.9/app/views&quot;
      # ./spec/controllers/recipes_controller_spec.rb:48:in `block (3 levels) in &lt;top (required)&gt;&#39;
 
-Finished in 0.70005 seconds
+Finished in 0.54523 seconds
 10 examples, 5 failures
 
 Failed examples:
 
-rspec ./spec/controllers/recipes_controller_spec.rb:62 # RecipesController show when the recipe exists 
 rspec ./spec/controllers/recipes_controller_spec.rb:60 # RecipesController show when the recipe exists 
-rspec ./spec/controllers/recipes_controller_spec.rb:61 # RecipesController show when the recipe exists 
 rspec ./spec/controllers/recipes_controller_spec.rb:63 # RecipesController show when the recipe exists 
+rspec ./spec/controllers/recipes_controller_spec.rb:62 # RecipesController show when the recipe exists 
+rspec ./spec/controllers/recipes_controller_spec.rb:61 # RecipesController show when the recipe exists 
 rspec ./spec/controllers/recipes_controller_spec.rb:68 # RecipesController show when the recipe doesn&#39;t exit 
 
-Randomized with seed 21931
+Randomized with seed 45406
 </code></pre></article>
 <p>To make this pass, we&#39;ll fetch the recipe:</p>
 <article class='code-listing'><pre><code class="language-diff">diff --git a/app/controllers/recipes_controller.rb b/app/controllers/recipes_controller.rb
@@ -564,10 +564,10 @@ index d83690e..4b24b0c 100644
 <article class='code-listing'><pre><code class="language-shell">&gt; rspec spec/controllers/recipes_controller_spec.rb
 ..........
 
-Finished in 0.54056 seconds
+Finished in 0.47687 seconds
 10 examples, 0 failures
 
-Randomized with seed 34659
+Randomized with seed 7268
 </code></pre></article>
 <p>Let&#39;s bring it all together with a browser-based test.</p>
 <a name='browser-based-test'></a><h3>Browser-based test</h3>
@@ -613,14 +613,14 @@ Failures:
        expected to find text &quot;Baked Brussel Sprouts&quot; in &quot;Find Recipes Keywords Search&quot;
      # ./spec/features/view_spec.rb:18:in `block (2 levels) in &lt;top (required)&gt;&#39;
 
-Finished in 6.16 seconds
+Finished in 6.45 seconds
 1 example, 1 failure
 
 Failed examples:
 
 rspec ./spec/features/view_spec.rb:11 # Viewing a recipe view one recipe
 
-Randomized with seed 40717
+Randomized with seed 54433
 </code></pre></article>
 <p>If you recall, we just used an <code>href</code> of <code>#</code> around the recipe name in the
 search results.  Clicking that essentially clears the search and starts over.  </p>
@@ -698,10 +698,10 @@ index 3c79735..daba393 100644
 <article class='code-listing'><pre><code class="language-shell">&gt; rspec spec/features/view_spec.rb
 .
 
-Finished in 4.92 seconds
+Finished in 5.11 seconds
 1 example, 0 failures
 
-Randomized with seed 61364
+Randomized with seed 28477
 </code></pre></article>
 <p>We added the back button and function specifically to call out a gap between
 what we get with Angular and what we get with Rails, with respect to view and

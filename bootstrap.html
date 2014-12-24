@@ -196,12 +196,16 @@ index 75cb4c5..e052e96 100644
 <p>Bower works similarly to Bundler, and the Gem we just installed gives us a few
 handy tasks:</p>
 <article class='code-listing'><pre><code class="language-shell">&gt; rake -T bower
-rake bower:install        # Install components from bower
-rake bower:install:force  # Install components with -F option
-rake bower:list           # List bower components
-rake bower:resolve        # Resolve assets paths in bower components
-rake bower:update         # Update bower components
-rake bower:update:prune   # Update existing components and uninstalls extraneous components
+rake bower:cache:clean                   # Clear the bower cache (&#39;bower cache clean&#39;)
+rake bower:clean                         # Attempt to keep only files listed in &#39;main&#39; of each component&#39;s bower.json
+rake bower:install[options]              # Install components from bower
+rake bower:install:deployment[options]   # Install components from bower using previously generated bower.json
+rake bower:install:development[options]  # Install both dependencies and devDependencies from bower
+rake bower:install:production[options]   # Install only dependencies, excluding devDependencies from bower
+rake bower:list                          # List bower components
+rake bower:resolve                       # Resolve assets paths in bower components
+rake bower:update[options]               # Update bower components
+rake bower:update:prune[options]         # Update existing components and uninstalls extraneous components
 </code></pre></article>
 <p>Our dependencies go in a file called <code>Bowerfile</code>, located in the root directory of your project,
 that looks very much like a

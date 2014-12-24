@@ -100,14 +100,14 @@ Failures:
        Unable to find link or button &quot;New Recipe…&quot;
      # ./spec/features/edit_spec.rb:6:in `block (2 levels) in &lt;top (required)&gt;&#39;
 
-Finished in 5.47 seconds
+Finished in 5.37 seconds
 1 example, 1 failure
 
 Failed examples:
 
 rspec ./spec/features/edit_spec.rb:4 # Creating, editing, and deleting a recipe CRUD a recipe
 
-Randomized with seed 32393
+Randomized with seed 2416
 </code></pre></article>
 <p>To make it work, we&#39;ll need to:</p>
 
@@ -226,10 +226,10 @@ index 612e169..eeb8bd2 100644
 <article class='code-listing'><pre><code class="language-shell">&gt; rspec spec/controllers/recipes_controller_spec.rb
 ..................
 
-Finished in 0.69951 seconds
+Finished in 0.65982 seconds
 18 examples, 0 failures
 
-Randomized with seed 26028
+Randomized with seed 54619
 </code></pre></article>
 <p>With the back-end working, let&#39;s turn our attention to the front end, which will call this code.</p>
 <a name='angular-controllers'></a><h3>Angular controllers</h3>
@@ -415,10 +415,10 @@ the inputs and figure it out for ourselves.</p>
 <p>Now, let&#39;s see if our tests pass:</p>
 <article class='code-listing'><pre><code class="language-shell">&gt; rake teaspoon
 Starting the Teaspoon server...
-Teaspoon running default suite at http://127.0.0.1:59124/teaspoon/default
+Teaspoon running default suite at http://127.0.0.1:58544/teaspoon/default
 ........
 
-Finished in 0.03100 seconds
+Finished in 0.03300 seconds
 8 examples, 0 failures
 </code></pre></article>
 <p>So far, so good.  The only thing left is to create and wire up the views.</p>
@@ -553,10 +553,10 @@ index df041fb..9522b52 100644
 <article class='code-listing'><pre><code class="language-shell">&gt; rspec spec/features/edit_spec.rb
 .
 
-Finished in 6.05 seconds
+Finished in 6.62 seconds
 1 example, 0 failures
 
-Randomized with seed 28171
+Randomized with seed 37644
 </code></pre></article>
 <p>Voila! It works!</p>
 <a name='wrapping-up'></a><h3>Wrapping Up</h3>
