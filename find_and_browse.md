@@ -329,7 +329,7 @@ Once we run `bundle install`, we need to bootstrap teaspoon, which can be done w
 > rails generate teaspoon:install --coffee
 ```
 
-This gets us most of the way there, however we may experience issues running our JavaScript tests later, especially if you are on Rails 4.1.  In Rails
+This gets us most of the way there, however we may experience issues running our JavaScript tests later, especially if you are on Rails 4.1 or later.  In Rails
 4.1, the asset pipeline became a lot fussier about missing assets.  This is generally a good thing because it gives us better confidence that our assets
 will work in production.  The problem is that teaspoon—even in command-line mode—runs JavaScript and CSS through PhantomJS, which is acting as a web
 browser, and the asset pipeline may produce an error that it can't find `teaspoon.css`.
