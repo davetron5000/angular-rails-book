@@ -46,13 +46,26 @@
   </header>
 <a name='contributing'></a><h2>Contributing</h2>
 <p>This book is licensed under a Creative Commons Attribute-NonCommerical-ShareAlike license, and the source for the book can be found
-in <a href="https://github.com/davetron5000/angular-rails-book/tree/master">its repo</a>.  Feel free to submit pull requests to correct any mistakes you find, with these caveats:</p>
+in <a href="https://github.com/davetron5000/angular-rails-book/tree/master">its repo</a>.  Feel free to submit pull requests to correct any mistakes you find.</p>
+<a name='changes-to-code'></a><h3>Changes to code</h3>
+<p><em>Most</em> of the code in this tutorial comes from the <a href="https://github.com/davetron5000/receta">receta Rails app</a>.  If you look at the Markdown source of this site, you&#39;ll see much of
+the code is pulled in like so:</p>
+<article class='code-listing'><pre><code class="">We&#39;ll do this in `config/application.rb`, like so:
 
-<ul>
-<li><strong>Typos/grammar-fixes/being wrong</strong> - I love these and I&#39;m sorry I didn&#39;t find them before you did.</li>
-<li><strong>Alternate ways to do it</strong> - interested but less likely to replace the main text.  Could be interesting sidebars.</li>
-<li><strong>Changes to the source code</strong> - currently, this is tricky.  I want to fix code errors, but contact me before doing a ton of work, as the code is generated from a tagged git repository.<br></li>
-</ul>
+    git: //receta.git/config/application.rb#angular-and-bootstrap..deal-with-glyphicons
+</code></pre></article>
+<p><a href="https://github.com/davetron5000/bookingit">bookingit</a> is a custom application I&#39;ve written that interprets this URL and produces diffs or shows code based on branches in the git
+repository.</p>
+
+<p>So, the best way to submit a PR for code changes is to do so against receta&#39;s repo, <strong>creating your PR from the branch in question</strong>.  So, if you wanted
+to change something about the above code, you would create your branch off of the <code>deal-with-glyphicons</code> branch.</p>
+
+<p>When in doubt, just ask, and if you submit a PR from master, that&#39;s OK, I can sort out merging it. I&#39;d rather get your contribution than require you to
+learn advanced Git jockeying.</p>
+<a name='changes-to-everything-else'></a><h3>Changes to everything else</h3>
+<p>I&#39;m so sorry for any typos and grammar issues—I&#39;ve tried to proof this, but if you find something, I&#39;m happy to accept your changes.</p>
+
+<p>I&#39;m <strong>not</strong> looking for alternate ways to do things, or large changes in the narrative (though the license allows you to do that on your own, if you like!)</p>
 
 <p>When in doubt, open a PR with a question and we can start from there.</p>
 <footer>
