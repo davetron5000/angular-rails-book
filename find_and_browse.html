@@ -430,6 +430,7 @@ ActiveRecord::Migration.check_pending! if defined?(ActiveRecord::Migration)
 
 RSpec.configure do |config|
   config.use_transactional_fixtures = true
+  config.infer_spec_type_from_file_location!
   
   config.expect_with :rspec do |c|
     c.syntax = :expect
@@ -634,7 +635,7 @@ index b0b283e..5c52ef1 100644
 <p>Once we run <code>bundle install</code>, we need to bootstrap teaspoon, which can be done with the Rails generator it includes:</p>
 <article class='code-listing'><pre><code class="language-shell">&gt; rails generate teaspoon:install --coffee
 </code></pre></article>
-<p>This gets us most of the way there, however we may experience issues running our JavaScript tests later, especially if you are on Rails 4.1.  In Rails
+<p>This gets us most of the way there, however we may experience issues running our JavaScript tests later, especially if you are on Rails 4.1 or later.  In Rails
 4.1, the asset pipeline became a lot fussier about missing assets.  This is generally a good thing because it gives us better confidence that our assets
 will work in production.  The problem is that teaspoon—even in command-line mode—runs JavaScript and CSS through PhantomJS, which is acting as a web
 browser, and the asset pipeline may produce an error that it can&#39;t find <code>teaspoon.css</code>.</p>
