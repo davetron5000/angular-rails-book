@@ -69,7 +69,7 @@ and code involved in a a Rails-powered Angular app.
 All you'll need:
 
 * Ruby 2 or later
-* Rails 4.0.x
+* Rails 4.2 (The code examples should work on Rails 4.0 and 4.1, but it's easier to keep this updated to the latest version of Rails)
 * Some sort of database installed (I'd recommend Postgres, but MySQL should work fine)
 * An account on [Heroku], where we'll deploy the app
 
