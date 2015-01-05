@@ -100,14 +100,14 @@ Fortunately, the gem `angular-rails-templates` exists to do just that.
 
 Let's add it to our `Gemfile`:
 
-    git://receta.git/Gemfile#..add-angular-templates
+    git://receta.git/Gemfile#..7ec4c7d
 
 Running `bundle install` will download the gem for us.
 
 In addition to this gem, we're also going to need the `angular-route` module, which enables the routing we saw above.  We'll add
 it to our `Bowerfile` first:
 
-    git://receta.git/Bowerfile#..add-angular-route
+    git://receta.git/Bowerfile#..9220c75
 
 Once we run `rake bower:install` to download `angular-route` and `angular-rails-templates`, we'll need to reference them in our `application.js` file so they're available to the app (note that older version of `angular-rails-templates` did not require referencing in the `application.js` file, so be sure you are on the latest version):
 
@@ -198,7 +198,7 @@ Now, let's look at our view.  We need to bind the value of the search field to a
 search, which we must trigger from the “Search” button.  We also will remove our duplicated markup in favor of markup for one
 result, wrapped in an `ng-repeat` directive.
 
-    git://receta.git/app/assets/javascripts/templates/index.html#..front-end-canned-search
+    git://receta.git/app/assets/javascripts/templates/index.html#..c1e478a
 
 Note that we're also using `ng-if` to hide the results section entirely if there aren't any results.
 
@@ -321,7 +321,7 @@ Since this is the first real code we're writing in Angular, this is where we'll 
 `teaspoon`, which is a test runner for JavaScript that uses the asset pipeline, Jasmine, and PhantomJS.  We'll add teaspoon and
 PhantomJS to our `Gemfile`:
 
-    git://receta.git/Gemfile#setup-teaspoon^1..setup-teaspoon
+    git://receta.git/Gemfile#cbdc80a^1..cbdc80a
 
 Once we run `bundle install`, we need to bootstrap teaspoon, which can be done with the Rails generator it includes:
 
@@ -350,16 +350,16 @@ the best thing to do is keep adding files to `config/initializers/assets.rb` unt
 Back to the task at hand, we're also going to need two more Angular modules. We need `angular-mocks` to help with testing and `angular-resource` to
 implement the AJAX calls.  First, we add them to `Bowerfile`:
 
-    git://receta.git/Bowerfile#setup-teaspoon^1..setup-teaspoon
+    git://receta.git/Bowerfile#cbdc80a^1..cbdc80a
 
 Once we run `rake bower:install` to download them, we need to add `angular-resource` to `application.js`:
 
-    git://receta.git/app/assets/javascripts/application.js#setup-teaspoon^1..setup-teaspoon
+    git://receta.git/app/assets/javascripts/application.js#cbdc80a^1..cbdc80a
 
 Finally, we'll need to include `ngResource`—the module provided by `angular-resource`—in our `app.coffee`.  While we're there, we'll inject
 `$resource`—the function bundled in the `ngResource` module—into our controller:
 
-    git://receta.git/app/assets/javascripts/app.coffee#setup-teaspoon^1..setup-teaspoon
+    git://receta.git/app/assets/javascripts/app.coffee#cbdc80a^1..cbdc80a
 
 Since `angular-mocks` is only needed for tests, we *won't* put it in `application.js`.  Teaspoon allows Sprockets directives in
 our test files, and it generated `spec/javascripts/spec_helper.coffee` for us, which is included in all tests.  We'll add this
@@ -531,7 +531,7 @@ The test is failing just how we'd expect: there are no HTTP requests to flush, `
 The `angular-resource` module makes this very simple.  We create a resource for our recipes, and then call the `query()` method
 (generated for us by Angular).
 
-    git://receta.git/app/assets/javascripts/app.coffee#angular-controller-test-pass^1..angular-controller-test-pass
+    git://receta.git/app/assets/javascripts/app.coffee#863c5fb^1..863c5fb
 
 Now, let's re-run our tests:
 
@@ -548,7 +548,7 @@ We can now remove `recipes` from `app.coffee` since we're talking to the real ba
 is relying on that data being there to verify the feature is working. All we have to do is populate the database with the same
 data.  We'll create it in a `before` block.
 
-    git://receta.git/spec/features/search_spec.rb#backend-integrated^1..backend-integrated
+    git://receta.git/spec/features/search_spec.rb#66140a9^1..66140a9
 
 Now, if everything's working, our test should still pass.
 
@@ -567,7 +567,7 @@ good refactor.
 
 First, we'll remove the controller from `app.coffee`, but notice that we leave in the module declaration:
 
-    git://receta.git/app/assets/javascripts/app.coffee#extract-controller-to-file^1..extract-controller-to-file
+    git://receta.git/app/assets/javascripts/app.coffee#83688a3^1..83688a3
 
 We'll place the controller code in `app/assets/javascripts/controllers/RecipesController.coffee`, and notice that we have _repeated_ the module declaration (or so it seems):
 

@@ -22,13 +22,13 @@ To make it work, we'll need to:
 
 First, we'll add some tests for our controller to get started:
 
-    git://receta.git/spec/controllers/recipes_controller_spec.rb#..back-end-crud
+    git://receta.git/spec/controllers/recipes_controller_spec.rb#..8e3a799
 
 This is nothing but the happy path, mostly to speed us along here.
 
 Now, let's make these tests pass:
 
-    git://receta.git/app/controllers/recipes_controller.rb#..back-end-crud
+    git://receta.git/app/controllers/recipes_controller.rb#..8e3a799
 
 You'll notice that we are skipping the authenticity token verification.  While
 there is a way to insert the one that Rails generates into all HTTP requests,
@@ -38,7 +38,7 @@ to generate one, so we have to skip the check for this.
 
 Don't forget to add the routes for the new actions:
 
-    git://receta.git/config/routes.rb#..back-end-crud
+    git://receta.git/config/routes.rb#..8e3a799
 
 Back to our test, everything seems to be working:
 
@@ -58,7 +58,7 @@ need to setup the controller so that there's no `recipeId` in the URL, and no ex
 Once we've changed `setupController()` accordingly, all we need to do is setup expectations of the HTTP calls to our backend, and
 then call the functions on `scope` that we'll need.
 
-    git://receta.git/spec/javascripts/controllers/RecipeController_spec.coffee#..front-end-crud
+    git://receta.git/spec/javascripts/controllers/RecipeController_spec.coffee#..b788ed9
 
 You'll notice that `save()` is handling both creating a new recipe and updating an existing one.  This will make it easier to
 re-use our view for both purposes, since the “Save” button we'll create can just call `save()`, allowing the controller to work
@@ -73,7 +73,7 @@ To make this test pass, we'll need to:
 
 Let's do it:
 
-    git://receta.git/app/assets/javascripts/controllers/RecipeController.coffee#front-end-crud
+    git://receta.git/app/assets/javascripts/controllers/RecipeController.coffee#..b788ed9
 
 You'll notice we made a `create()` method when setting up our `Recipe` resource.  By default, Angular allows both
 `recipe.$save()` and `Recipe.save(recipe)`, the latter being what we'd use to create a new recipe.  Since Rails wants a `POST` for
@@ -99,7 +99,7 @@ by `RecipeController` and a new view, `form.html`.
 
 First, let's set up the routes in `app.coffee`:
 
-    git://receta.git/app/assets/javascripts/app.coffee#..crud-views
+    git://receta.git/app/assets/javascripts/app.coffee#..efdc8fe
 
 Next, we'll create `form.html`:
 
@@ -107,7 +107,7 @@ Next, we'll create `form.html`:
 
 Now, we'll need to add a link to create a recipe as well as one to edit in `index.html`:
 
-    git://receta.git/app/assets/javascripts/templates/index.html#..crud-views
+    git://receta.git/app/assets/javascripts/templates/index.html#..efdc8fe
 
 These links require new functions called `newRecipe()` and `edit()`, which we'll add to `RecipesController.coffee`:
 
@@ -115,7 +115,7 @@ These links require new functions called `newRecipe()` and `edit()`, which we'll
 
 And lastly, we'll need links to edit and delete a recipe in `show.html`:
 
-    git://receta.git/app/assets/javascripts/templates/show.html#..crud-views
+    git://receta.git/app/assets/javascripts/templates/show.html#..efdc8fe
 
 Whew!  Let's see if it all works by re-running our browser-based test:
 
