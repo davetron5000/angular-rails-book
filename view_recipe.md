@@ -45,7 +45,7 @@ What `RecipeController` needs to do is:
 * Load the recipe identified by `:recipeId` in the URL and set it to some variable in `$scope`
 * If the recipe doesn't exist, handle that error somehow
 
-Lets get the happy path working first:
+Let's get the happy path working first:
 
     git://receta.git/spec/javascripts/controllers/RecipeController_spec.coffee#..recipe-controller-test
 
@@ -81,7 +81,7 @@ that things went wrong.  In Rails, we'd use the flash as a way to provide such
 information.
 
 In Angular, we can certainly create our own flash by just assigning 
-`{ error: “Recipe not found”}` to `$scope.flash`.  Instead, lets use a
+`{ error: “Recipe not found”}` to `$scope.flash`.  Instead, let's use a
 pre-made module that will handle flash messages, but also allow us to display
 them in our views.  `angular-flash` is that component, so let's install it.
 
@@ -115,7 +115,7 @@ recipe couldn't be found.
 Notice that we're taking advantage of Angular's
 alternate dependency injection naming convention.  We want our test to use an object called
 `flash` to make assertions, but since this component isn't provided by
-Angular, it's name—for dependency injection purposes—is also `flash`, meaning we'd
+Angular, its name—for dependency injection purposes—is also `flash`, meaning we'd
 need to use a different name for the flash in our tests.  Angular allows us to
 name the _parameter_ with leading and trailing underscores, e.g. `_flash_`.
 When we do this, Angular understands that the object `flash` should be injected. This means
