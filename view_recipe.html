@@ -135,7 +135,7 @@ controllers.controller(&quot;RecipeController&quot;, [ &#39;$scope&#39;, &#39;$r
 <li>If the recipe doesn&#39;t exist, handle that error somehow</li>
 </ul>
 
-<p>Lets get the happy path working first:</p>
+<p>Let&#39;s get the happy path working first:</p>
 <article class='code-listing'><pre><code class="language-diff">diff --git a/spec/javascripts/controllers/RecipeController_spec.coffee b/spec/javascripts/controllers/RecipeController_spec.coffee
 index 8028be2..3444a97 100644
 --- a/spec/javascripts/controllers/RecipeController_spec.coffee
@@ -247,7 +247,7 @@ that things went wrong.  In Rails, we&#39;d use the flash as a way to provide su
 information.</p>
 
 <p>In Angular, we can certainly create our own flash by just assigning 
-<code>{ error: “Recipe not found”}</code> to <code>$scope.flash</code>.  Instead, lets use a
+<code>{ error: “Recipe not found”}</code> to <code>$scope.flash</code>.  Instead, let&#39;s use a
 pre-made module that will handle flash messages, but also allow us to display
 them in our views.  <code>angular-flash</code> is that component, so let&#39;s install it.</p>
 
@@ -339,7 +339,7 @@ index 3444a97..3455f0d 100644
 <p>Notice that we&#39;re taking advantage of Angular&#39;s
 alternate dependency injection naming convention.  We want our test to use an object called
 <code>flash</code> to make assertions, but since this component isn&#39;t provided by
-Angular, it&#39;s name—for dependency injection purposes—is also <code>flash</code>, meaning we&#39;d
+Angular, its name—for dependency injection purposes—is also <code>flash</code>, meaning we&#39;d
 need to use a different name for the flash in our tests.  Angular allows us to
 name the <em>parameter</em> with leading and trailing underscores, e.g. <code>_flash_</code>.
 When we do this, Angular understands that the object <code>flash</code> should be injected. This means
