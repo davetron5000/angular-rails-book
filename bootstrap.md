@@ -154,10 +154,10 @@ If you aren't using homebrew, or aren't using OS X, you'll  need to consult the 
 Once you have NPM, install Bower as follows:
 
 ```shell
-> npm install bower
+> sudo npm install bower -g
 ```
 
-Now that you have Bower installed, we'll install the `bower-rails` gem, which will bridge our Rails application with Bower.  Add `bower-rails` to our `Gemfile`:
+The -g option causes bower to be installed for all users, which is needed avoid errors in subsequent steps. Now that you have Bower installed, we'll install the `bower-rails` gem, which will bridge our Rails application with Bower.  Add `bower-rails` to our `Gemfile`:
 
     git://receta.git/Gemfile#add-bower^1..add-bower
 
