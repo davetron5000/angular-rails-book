@@ -151,7 +151,8 @@ index 7f82d36..58c9a73 100644
  gem &quot;foreman&quot;
  group :production, :staging do
 </code></pre><footer><h1>Gemfile</h1></footer></article>
-<p>Running <code>bundle install</code> will download the gem for us.</p>
+<p>Running <code>bundle install</code> will download the gem for us.  <strong>Note</strong> there is currently an incompatibility
+between Sprockets 3.0 and angular-rails-templates. (see <a href="https://github.com/pitr/angular-rails-templates/issues/93">this GitHub issue</a> for details).  If you are on 0.14 or earlier, you should update your angular-rails-templates, which has a dependency on Sprockets 2.x.  Or, you can downgrade Sprockets to 2.x manually in the Gemfile.</p>
 
 <p>In addition to this gem, we&#39;re also going to need the <code>angular-route</code> module, which enables the routing we saw above.  We&#39;ll add
 it to our <code>Bowerfile</code> first:</p>
