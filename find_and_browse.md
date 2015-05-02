@@ -102,7 +102,8 @@ Let's add it to our `Gemfile`:
 
     git://receta.git/Gemfile#..add-angular-templates
 
-Running `bundle install` will download the gem for us.
+Running `bundle install` will download the gem for us.  **Note** there is currently an incompatibility
+between Sprockets 3.0 and angular-rails-templates. (see [this GitHub issue](https://github.com/pitr/angular-rails-templates/issues/93) for details).  If you are on 0.14 or earlier, you should update your angular-rails-templates, which has a dependency on Sprockets 2.x.  Or, you can downgrade Sprockets to 2.x manually in the Gemfile.
 
 In addition to this gem, we're also going to need the `angular-route` module, which enables the routing we saw above.  We'll add
 it to our `Bowerfile` first:
