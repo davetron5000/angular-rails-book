@@ -89,6 +89,10 @@ First, we add it to `Bowerfile`:
 
     git://receta.git/Bowerfile#..install-angular-flash
 
+Then, install it:
+
+    > rake bower:install
+
 To make sure the asset pipeline picks up this new dependency, we'll need to
 add it to `application.js` as well:
 
