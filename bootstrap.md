@@ -100,7 +100,7 @@ Now, we can install our gems:
 Once this is done, let's set up our database so we can run the app.
 
     > vim config/database.yml # set the user/password for your local database
-    > rake db:setup
+    > bin/rake db:create
     > rails s
 
 Visit http://localhost:3000 to make sure your app is running, then quit the
