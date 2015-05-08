@@ -151,10 +151,10 @@ If you aren't using homebrew, or aren't using OS X, you'll  need to consult the 
 [homebrew]: http://brew.sh/
 [node-install]: http://nodejs.org/download/
 
-Once you have NPM, install Bower as follows:
+Once you have NPM, install Bower as follows (might need sudo):
 
 ```shell
-> npm install bower
+> npm install -g bower
 ```
 
 Now that you have Bower installed, we'll install the `bower-rails` gem, which will bridge our Rails application with Bower.  Add `bower-rails` to our `Gemfile`:
