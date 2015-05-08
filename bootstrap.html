@@ -131,7 +131,7 @@ application than that one you&#39;d make with Angular.</p>
 </code></pre></article>
 <p>Once this is done, let&#39;s set up our database so we can run the app.</p>
 <article class='code-listing'><pre><code class="">&gt; vim config/database.yml # set the user/password for your local database
-&gt; rake db:setup
+&gt; bin/rake db:create
 &gt; rails s
 </code></pre></article>
 <p>Visit <a href="http://localhost:3000">http://localhost:3000</a> to make sure your app is running, then quit the
