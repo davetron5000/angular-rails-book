@@ -351,8 +351,17 @@ from the command line.
 [heroku]: http://heroku.com
 [heroku-cli]: https://toolbelt.heroku.com/
 
-Once you're signed up and logged in, create a new application and follow the instructions to add the
-Heroku remote Git repository to your local git configuration.
+After signing up for Heroku, log in using the Tool Belt:
+
+```shell
+heroku login
+```
+
+Once you're signed up and logged in, create a new application:
+
+```shell
+heroku create
+```
 
 Before deploying, however, we need to add a few more gems to our `Gemfile`.
 These are mostly Heroku-specific, although they aren't hurting anything if you
