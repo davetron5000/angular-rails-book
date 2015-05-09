@@ -172,8 +172,8 @@ making this up.  </p>
 </code></pre></article>
 <p>If you aren&#39;t using homebrew, or aren&#39;t using OS X, you&#39;ll  need to consult the <a href="http://nodejs.org/download/">Node installation instructions</a>.</p>
 
-<p>Once you have NPM, install Bower as follows:</p>
-<article class='code-listing'><pre><code class="language-shell">&gt; npm install bower
+<p>Once you have NPM, install Bower as follows (might need sudo):</p>
+<article class='code-listing'><pre><code class="language-shell">&gt; npm install -g bower
 </code></pre></article>
 <p>Now that you have Bower installed, we&#39;ll install the <code>bower-rails</code> gem, which will bridge our Rails application with Bower.  Add <code>bower-rails</code> to our <code>Gemfile</code>:</p>
 <article class='code-listing'><pre><code class="language-diff">diff --git a/Gemfile b/Gemfile
@@ -405,9 +405,12 @@ fairly unforgiving.  If our application works on Heroku, it&#39;ll work anywhere
 the <a href="https://toolbelt.heroku.com/">Heroku Tool Belt</a>, which will allow management of your app
 from the command line.</p>
 
-<p>Once you&#39;re signed up and logged in, create a new application and follow the instructions to add the
-Heroku remote Git repository to your local git configuration.</p>
-
+<p>After signing up for Heroku, log in using the Tool Belt:</p>
+<article class='code-listing'><pre><code class="language-shell">heroku login
+</code></pre></article>
+<p>Once you&#39;re signed up and logged in, create a new application:</p>
+<article class='code-listing'><pre><code class="language-shell">heroku create
+</code></pre></article>
 <p>Before deploying, however, we need to add a few more gems to our <code>Gemfile</code>.
 These are mostly Heroku-specific, although they aren&#39;t hurting anything if you
 don&#39;t want to use Heroku.</p>
