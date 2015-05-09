@@ -151,10 +151,10 @@ If you aren't using homebrew, or aren't using OS X, you'll  need to consult the 
 [homebrew]: http://brew.sh/
 [node-install]: http://nodejs.org/download/
 
-Once you have NPM, install Bower as follows:
+Once you have NPM, install Bower as follows (might need sudo):
 
 ```shell
-> npm install bower
+> npm install -g bower
 ```
 
 Now that you have Bower installed, we'll install the `bower-rails` gem, which will bridge our Rails application with Bower.  Add `bower-rails` to our `Gemfile`:
@@ -351,8 +351,17 @@ from the command line.
 [heroku]: http://heroku.com
 [heroku-cli]: https://toolbelt.heroku.com/
 
-Once you're signed up and logged in, create a new application and follow the instructions to add the
-Heroku remote Git repository to your local git configuration.
+After signing up for Heroku, log in using the Tool Belt:
+
+```shell
+heroku login
+```
+
+Once you're signed up and logged in, create a new application:
+
+```shell
+heroku create
+```
 
 Before deploying, however, we need to add a few more gems to our `Gemfile`.
 These are mostly Heroku-specific, although they aren't hurting anything if you
