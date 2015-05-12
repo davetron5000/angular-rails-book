@@ -30,7 +30,7 @@ Generally, what we need to do here is:
 First, we'll update our Angular app config to route `/recipes/:recipeId` to
 the yet-to-be-created `RecipeController`:
 
-    git://receta.git/app/assets/javascripts/app.coffee#..add-recipe-controller
+    git://receta.git/app/assets/javascripts/app.coffee#..13ec847
 
 Now, let's create a bare-bones version of our controller:
 
@@ -47,7 +47,7 @@ What `RecipeController` needs to do is:
 
 Let's get the happy path working first:
 
-    git://receta.git/spec/javascripts/controllers/RecipeController_spec.coffee#..recipe-controller-test
+    git://receta.git/spec/javascripts/controllers/RecipeController_spec.coffee#..62feecc
 
 This is similar to what we had in `RecipesController_spec.coffee`.  Because
 the HTTP call to our backend happens on controller startup, we create a
@@ -67,7 +67,7 @@ Let's make it pass.  We'll use Angular's `$resource` service to create the
 same resource we did in `RecipesController`, but use the `get` method, which
 does what we want.
 
-    git://receta.git/app/assets/javascripts/controllers/RecipeController.coffee#..recipe-controller-test-passes
+    git://receta.git/app/assets/javascripts/controllers/RecipeController.coffee#..952c819
 
 Now, we see if this makes our tests pass:
 
@@ -87,7 +87,7 @@ them in our views.  `angular-flash` is that component, so let's install it.
 
 First, we add it to `Bowerfile`:
 
-    git://receta.git/Bowerfile#..install-angular-flash
+    git://receta.git/Bowerfile#..df5539b
 
 Then, install it:
 
@@ -105,7 +105,7 @@ Finally, we add it as a module dependency to our app.  `angular-flash` comes wit
 two modules, one for the flash data itself, and another for the view
 components.
 
-    git://receta.git/app/assets/javascripts/app.coffee#..install-angular-flash
+    git://receta.git/app/assets/javascripts/app.coffee#..df5539b
 
 We'll see how the view components work a bit later, but for now, our
 controller can depend on a component called `flash`.  `flash` allows us to set
@@ -114,7 +114,7 @@ errors, warnings, informational messages, and success messages.
 Back to our test, we want to assert that the flash receives an error message that the
 recipe couldn't be found.  
 
-    git://receta.git/spec/javascripts/controllers/RecipeController_spec.coffee#..test-recipe-controller-for-flash
+    git://receta.git/spec/javascripts/controllers/RecipeController_spec.coffee#..8aa6cf7
 
 Notice that we're taking advantage of Angular's
 alternate dependency injection naming convention.  We want our test to use an object called
@@ -131,7 +131,7 @@ Now, when we run the test, we should see a simple expectation failure on the mes
 
 With a clearly failing test, we just need to add the flash as a dependency, and use it.
 
-    git://receta.git/app/assets/javascripts/controllers/RecipeController.coffee#..test-for-flash-passes
+    git://receta.git/app/assets/javascripts/controllers/RecipeController.coffee#..b9ee91e
 
 We add `flash` to the list of injected dependencies, and then set the error message in our failure callback.  Sure enough, the test passes:
 
@@ -146,15 +146,15 @@ and `show`, so what we need to do here is implement `show`.
 
 First, let's add the new route to `config/routes.rb`:
 
-    git://receta.git/config/routes.rb#..failing-recipe-show
+    git://receta.git/config/routes.rb#..323798b
 
 We'll add an empty `show` method to the controller as well:
 
-    git://receta.git/app/controllers/recipes_controller.rb#..failing-recipe-show
+    git://receta.git/app/controllers/recipes_controller.rb#..323798b
 
 Finally, we'll write tests for when the recipe exists and for when it doesn't:
 
-    git://receta.git/spec/controllers/recipes_controller_spec.rb#..failing-recipe-show
+    git://receta.git/spec/controllers/recipes_controller_spec.rb#..323798b
 
 This should result in a failing test, which it does:
 
@@ -162,7 +162,7 @@ This should result in a failing test, which it does:
 
 To make this pass, we'll fetch the recipe:
 
-    git://receta.git/app/controllers/recipes_controller.rb#..recipe-show-passes
+    git://receta.git/app/controllers/recipes_controller.rb#..5764b6e
 
 
 and implement a JBuilder view that uses our existing `_recipe.json.jbuilder` partial:
@@ -174,7 +174,7 @@ To handle the case of a non-existent recipe, we'll let the
 `rescue_from` in `ApplicationController` to handle that.  This way, we never
 have to worry about translating this error into a 404 again.
 
-    git://receta.git/app/controllers/application_controller.rb#..recipe-show-passes
+    git://receta.git/app/controllers/application_controller.rb#..5764b6e
 
 Now, everything passes!
 
@@ -203,14 +203,14 @@ as actually build out the “show” view.
 
 First, we'll change the `a`:
 
-    git://receta.git/app/assets/javascripts/templates/index.html#..view-integrated
+    git://receta.git/app/assets/javascripts/templates/index.html#..62a1e1d
 
 Notice that we removed the argument to `href`, which will keep the browser
 from changing its location and reloading our view.  Instead, we used
 `ng-click` to trigger the `view()` method that we'll now add to
 `RecipesController`:
 
-    git://receta.git/app/assets/javascripts/controllers/RecipesController.coffee#..view-integrated
+    git://receta.git/app/assets/javascripts/controllers/RecipesController.coffee#..62a1e1d
 
 All that's left is to create the view in `show.html`:
 
@@ -218,7 +218,7 @@ All that's left is to create the view in `show.html`:
 
 We'll also add a method to make the “Back” button work:
 
-    git://receta.git/app/assets/javascripts/controllers/RecipeController.coffee#..add-back-button
+    git://receta.git/app/assets/javascripts/controllers/RecipeController.coffee#..480fcfa
 
 Now, everything works:
 
@@ -251,7 +251,7 @@ complex logic around the flash, and its message, a test would be more useful, bu
 
 First, we'll add the necessary markup to `show.html`:
 
-    git://receta.git/app/assets/javascripts/templates/show.html#..integrate-flash
+    git://receta.git/app/assets/javascripts/templates/show.html#..db53af6
 
 Our `article` tag has three special attributes, provided by `angular-flash`: 
 
@@ -262,7 +262,7 @@ Our `article` tag has three special attributes, provided by `angular-flash`:
 The second thing we need to do is to configure `angular-flash` so that it knows about the various alert classes that Bootstrap
 provides.  We do this in the app config in `app.coffee`:
 
-    git://receta.git/app/assets/javascripts/app.coffee#..integrate-flash
+    git://receta.git/app/assets/javascripts/app.coffee#..db53af6
 
 What this configuration means is that if there is, for example, a value in `flash.error`, `angular-flash` will add the class
 `alert-danger` to the flash element.  Since we also configured that element to add `alert` to *any* flash message, our markup

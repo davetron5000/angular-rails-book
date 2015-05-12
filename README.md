@@ -5,7 +5,7 @@ This is the source of http://angular-rails.com.  To build it, you'll need to do 
 1. `bundle install` or `gem install bookingit` to install the bookingit gem
 1. `git clone https://github.com/davetron5000/receta git_repos/receta` to clone the repository containing the source code examples in the book
 1. `createuser -d receta` to create a new PostgreSQL user as required by receta/config/database.yml
-1. `pushd git_repos/receta && bundle install && popd` to install all gems that are required for the `receta` project
+1. ``pushd git_repos/receta; bundle install; for remote in `git branch -r | grep -v "master" | grep -v "HEAD" | awk -F "/" '{print $2}'`; do git checkout $remote; done; git checkout master; popd`` to set up the sub-repository and install all gems that are required for the `receta` project
 1. `bookingit build` to generate the HTML and CSS for the book 
 
 Once this is done, open `book/index.html` in your browser.  Whenever you change something, re-run `bookingit build`.
