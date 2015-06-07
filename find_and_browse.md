@@ -320,9 +320,10 @@ Now that we have our back-end implemented, let's hook it up by having our Angula
 
 Since this is the first real code we're writing in Angular, this is where we'll set up our unit testing.  We're going to use
 `teaspoon`, which is a test runner for JavaScript that uses the asset pipeline, Jasmine, and PhantomJS.  We'll add teaspoon and
-PhantomJS to our `Gemfile`:
+PhantomJS to our `Gemfile` (we're also going to remove a bunch of silly comments and gems that we don't
+    need):
 
-    git://receta.git/Gemfile#setup-teaspoon^1..setup-teaspoon
+    git://receta.git/Gemfile#75552b7..setup-teaspoon
 
 Once we run `bundle install`, we need to bootstrap teaspoon, which can be done with the Rails generator it includes:
 
@@ -351,16 +352,16 @@ the best thing to do is keep adding files to `config/initializers/assets.rb` unt
 Back to the task at hand, we're also going to need two more Angular modules. We need `angular-mocks` to help with testing and `angular-resource` to
 implement the AJAX calls.  First, we add them to `Bowerfile`:
 
-    git://receta.git/Bowerfile#setup-teaspoon^1..setup-teaspoon
+    git://receta.git/Bowerfile#75552b7..setup-teaspoon
 
 Once we run `rake bower:install` to download them, we need to add `angular-resource` to `application.js`:
 
-    git://receta.git/app/assets/javascripts/application.js#setup-teaspoon^1..setup-teaspoon
+    git://receta.git/app/assets/javascripts/application.js#75552b7..setup-teaspoon
 
 Finally, we'll need to include `ngResource`—the module provided by `angular-resource`—in our `app.coffee`.  While we're there, we'll inject
 `$resource`—the function bundled in the `ngResource` module—into our controller:
 
-    git://receta.git/app/assets/javascripts/app.coffee#setup-teaspoon^1..setup-teaspoon
+    git://receta.git/app/assets/javascripts/app.coffee#75552b7..setup-teaspoon
 
 Since `angular-mocks` is only needed for tests, we *won't* put it in `application.js`.  Teaspoon allows Sprockets directives in
 our test files, and it generated `spec/javascripts/spec_helper.coffee` for us, which is included in all tests.  We'll add this
@@ -408,6 +409,9 @@ is a matcher we've created in `spec_helper.coffee`:
 
 This does a “value” match, which will make our lives much easier when
 asserting equality between objects.
+
+Note that this has changed since Teaspoon 1.x came out.  Teaspoon 1.x requires Jasmine 2.x, and the way
+custom matchers are defined in Jasmine 2.x is different from what was here previously.
 
 Let's run our JavaScript tests to validate our setup.
 
