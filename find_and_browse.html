@@ -620,18 +620,61 @@ Randomized with seed 3236
 <code>teaspoon</code>, which is a test runner for JavaScript that uses the asset pipeline, Jasmine, and PhantomJS.  We&#39;ll add teaspoon and
 PhantomJS to our <code>Gemfile</code>:</p>
 <article class='code-listing'><pre><code class="language-diff">diff --git a/Gemfile b/Gemfile
-index b0b283e..5c52ef1 100644
+index 58c9a73..5d662b6 100644
 --- a/Gemfile
 +++ b/Gemfile
-@@ -25,6 +25,8 @@ group :test, :development do
+@@ -1,27 +1,11 @@
+ source &#39;https://rubygems.org&#39;
+ 
+-# Bundle edge Rails instead: gem &#39;rails&#39;, github: &#39;rails/rails&#39;
+ gem &#39;rails&#39;, &#39;4.0.3&#39;
+-
+-# Use postgresql as the database for Active Record
+ gem &#39;pg&#39;
+-
+-# Use SCSS for stylesheets
+ gem &#39;sass-rails&#39;, &#39;~&gt; 4.0.0&#39;
+-
+-# Use Uglifier as compressor for JavaScript assets
+ gem &#39;uglifier&#39;, &#39;&gt;= 1.3.0&#39;
+-
+-# Use CoffeeScript for .js.coffee assets and views
+ gem &#39;coffee-rails&#39;, &#39;~&gt; 4.0.0&#39;
+-
+-# See https://github.com/sstephenson/execjs#readme for more supported runtimes
+-# gem &#39;therubyracer&#39;, platforms: :ruby
+-
+-# Use jquery as the JavaScript library
+ gem &#39;jquery-rails&#39;
+-
+-# Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
+ gem &#39;jbuilder&#39;, &#39;~&gt; 1.2&#39;
+ 
+ gem &#39;bower-rails&#39;
+@@ -41,21 +25,11 @@ group :test, :development do
    gem &quot;capybara&quot;
    gem &quot;database_cleaner&quot;
    gem &quot;selenium-webdriver&quot;
-+  gem &#39;teaspoon&#39;
++  gem &#39;teaspoon-jasmine&#39;
 +  gem &#39;phantomjs&#39;
  end
  
  group :doc do
+-  # bundle exec rake doc:rails generates the API under doc/api.
+   gem &#39;sdoc&#39;, require: false
+ end
+ 
+-# Use ActiveModel has_secure_password
+-# gem &#39;bcrypt-ruby&#39;, &#39;~&gt; 3.1.2&#39;
+-
+-# Use unicorn as the app server
+-# gem &#39;unicorn&#39;
+-
+-# Use Capistrano for deployment
+-# gem &#39;capistrano&#39;, group: :development
+-
+-# Use debugger
+-# gem &#39;debugger&#39;, group: [:development, :test]
 </code></pre><footer><h1>Gemfile</h1></footer></article>
 <p>Once we run <code>bundle install</code>, we need to bootstrap teaspoon, which can be done with the Rails generator it includes:</p>
 <article class='code-listing'><pre><code class="language-shell">&gt; rails generate teaspoon:install --coffee
@@ -667,14 +710,15 @@ index e540c13..1795c30 100644
 </code></pre><footer><h1>Bowerfile</h1></footer></article>
 <p>Once we run <code>rake bower:install</code> to download them, we need to add <code>angular-resource</code> to <code>application.js</code>:</p>
 <article class='code-listing'><pre><code class="language-diff">diff --git a/app/assets/javascripts/application.js b/app/assets/javascripts/application.js
-index 0c9339a..ea7e7dd 100644
+index 0c9339a..5122c72 100644
 --- a/app/assets/javascripts/application.js
 +++ b/app/assets/javascripts/application.js
-@@ -14,4 +14,5 @@
+@@ -14,4 +14,6 @@
  //= require jquery_ujs
  //= require angular/angular
  //= require angular-route/angular-route
 +//= require angular-resource/angular-resource
++//= require angular-rails-templates
  //= require_tree .
 </code></pre><footer><h1>app/assets/javascripts/application.js</h1></footer></article>
 <p>Finally, we&#39;ll need to include <code>ngResource</code>—the module provided by <code>angular-resource</code>—in our <code>app.coffee</code>.  While we&#39;re there, we&#39;ll inject
@@ -767,8 +811,13 @@ is a matcher we&#39;ve created in <code>spec_helper.coffee</code>:</p>
 #= require application
 #= require angular-mocks/angular-mocks
 beforeEach -&gt;
-  this.addMatchers
-    toEqualData: (expected)-&gt; return angular.equals(this.actual, expected)
+  jasmine.addMatchers toEqualData: (util, customEqualityTesters) -&gt;
+    {
+      compare: (actual, expected) -&gt;
+        result = {}
+        result.pass = angular.equals(actual, expected)
+        result
+    }
 </code></pre><footer><h1>spec/javascripts/spec_helper.coffee</h1></footer></article>
 <p>This does a “value” match, which will make our lives much easier when
 asserting equality between objects.</p>
@@ -776,11 +825,11 @@ asserting equality between objects.</p>
 <p>Let&#39;s run our JavaScript tests to validate our setup.</p>
 <article class='code-listing'><pre><code class="language-shell">&gt; rake teaspoon
 Starting the Teaspoon server...
-Teaspoon running default suite at http://127.0.0.1:58112/teaspoon/default
-.
+Teaspoon running default suite at http://127.0.0.1:58434/teaspoon/default
+[32m.[0m
 
-Finished in 0.01000 seconds
-1 example, 0 failures
+Finished in 0.02400 seconds
+[32m1 example, 0 failures[0m
 </code></pre></article>
 <p>Everything works!  Now, we just need a test that our controller calls the backend.</p>
 
