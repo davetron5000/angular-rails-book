@@ -53,7 +53,7 @@ hash for each asset and include that hash in the name.  That means that if Angul
 404, because the file's actual name will be something like `/assets/9834f200909a098a0a9a-index.html`.  More subtly,
 `/assets/index.html` would work in Rails 3, but no longer works in Rails 4.
 
-My initial search to solve this problem led me to a blog post that recommended using ERB, so that `app.coffee` could have access
+My initial search to solve this problem led me to a blog post (don’t actually do this) that recommended using ERB, so that `app.coffee` could have access
 to the `asset_path` helper, which accounts for the location and naming, like so:
 
 ```coffeescript
