@@ -95,7 +95,7 @@ hash for each asset and include that hash in the name.  That means that if Angul
 404, because the file&#39;s actual name will be something like <code>/assets/9834f200909a098a0a9a-index.html</code>.  More subtly,
 <code>/assets/index.html</code> would work in Rails 3, but no longer works in Rails 4.</p>
 
-<p>My initial search to solve this problem led me to a blog post that recommended using ERB, so that <code>app.coffee</code> could have access
+<p>My initial search to solve this problem led me to a blog post (don’t actually do this) that recommended using ERB, so that <code>app.coffee</code> could have access
 to the <code>asset_path</code> helper, which accounts for the location and naming, like so:</p>
 <article class='code-listing'><pre><code class="language-coffeescript"># This is app/assets/javascripts/app.coffee.erb
 
@@ -618,7 +618,8 @@ Randomized with seed 3236
 <a name='have-angular-controller-call-the-back-end'></a><h4>Have angular controller call the back-end</h4>
 <p>Since this is the first real code we&#39;re writing in Angular, this is where we&#39;ll set up our unit testing.  We&#39;re going to use
 <code>teaspoon</code>, which is a test runner for JavaScript that uses the asset pipeline, Jasmine, and PhantomJS.  We&#39;ll add teaspoon and
-PhantomJS to our <code>Gemfile</code>:</p>
+PhantomJS to our <code>Gemfile</code> (we&#39;re also going to remove a bunch of silly comments and gems that we don&#39;t
+    need):</p>
 <article class='code-listing'><pre><code class="language-diff">diff --git a/Gemfile b/Gemfile
 index 58c9a73..5d662b6 100644
 --- a/Gemfile
@@ -821,6 +822,9 @@ beforeEach -&gt;
 </code></pre><footer><h1>spec/javascripts/spec_helper.coffee</h1></footer></article>
 <p>This does a “value” match, which will make our lives much easier when
 asserting equality between objects.</p>
+
+<p>Note that this has changed since Teaspoon 1.x came out.  Teaspoon 1.x requires Jasmine 2.x, and the way
+custom matchers are defined in Jasmine 2.x is different from what was here previously.</p>
 
 <p>Let&#39;s run our JavaScript tests to validate our setup.</p>
 <article class='code-listing'><pre><code class="language-shell">&gt; rake teaspoon
