@@ -43,6 +43,12 @@
   <header>
     <h1><a href="index.html">AngularJS with Ruby on Rails</a></h1>
         <p class="byline">by David Bryant Copeland</p>
+      <div class="hype">
+        <a href="https://pragprog.com/book/dcbang/rails-angular-postgres-and-bootstrap">
+          <h2>Buy The Book</h2>
+          <h3>Learn more about Angular and Bootstrap, plus Postgres!</h3>
+        </a>
+      </div>
   </header>
 <a name='creating-a-skeleton-app'></a><h2>Creating a Skeleton App</h2>
 <p>Even the most basic Rails app requires additional configuration beyond simply
@@ -301,9 +307,6 @@ index 3192ec8..2cac3ad 100644
 +@import &quot;bootstrap-sass-official/assets/stylesheets/bootstrap&quot;;
 
 </code></pre></article>
-<p><em>(Note that previous version of <code>bootstrap-sass-official</code> would&#39;ve required you to required <code>bootstrap.css</code> and not
- <code>_bootstrap.css</code>.  Seems that the maintainers are flip-flopping on their naming conventions).</em></p>
-
 <p>The reason these <code>require</code> lines are so long is due to an “impedance mismatch”
 between Bower and the Rails asset pipeline.  Bower isn&#39;t much more than a
 simple way to download a Git repository, and there isn&#39;t much standardization
