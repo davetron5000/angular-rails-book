@@ -256,7 +256,7 @@ add a few lines of configuration to get the glyphicons working while we&#39;re a
 
 <p>We&#39;ll do this in <code>config/application.rb</code>, like so:</p>
 <article class='code-listing'><pre><code class="language-diff">diff --git a/config/application.rb b/config/application.rb
-index 5f1ac4a..1bec650 100644
+index 5f1ac4a..c0fb352 100644
 --- a/config/application.rb
 +++ b/config/application.rb
 @@ -19,5 +19,9 @@ module Receta
@@ -266,7 +266,7 @@ index 5f1ac4a..1bec650 100644
 +    config.assets.paths &lt;&lt; Rails.root.join(&quot;vendor&quot;,&quot;assets&quot;,&quot;bower_components&quot;)
 +    config.assets.paths &lt;&lt; Rails.root.join(&quot;vendor&quot;,&quot;assets&quot;,&quot;bower_components&quot;,&quot;bootstrap-sass-official&quot;,&quot;assets&quot;,&quot;fonts&quot;)
 +
-+    config.assets.precompile &lt;&lt; %r(.*.(?:eot|svg|ttf|woff)$)
++    config.assets.precompile &lt;&lt; %r(.*.(?:eot|svg|ttf|woff|woff2)$)
    end
  end
 </code></pre><footer><h1>config/application.rb</h1></footer></article>
