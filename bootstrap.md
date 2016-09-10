@@ -315,7 +315,7 @@ Angular app working.
 
     > rails s
 
-If you the Rails error page with a message like so:
+If you get the Rails error page with a message like so:
 
     couldn't find file 'bootstrap/glyphicons-halflings-regular.eot'
 
